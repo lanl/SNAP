@@ -1,0 +1,2 @@
+# Count lines of code, omitting blanks and comments
+echo $1 line count is: `grep -cvE '^$|^[\!]' < $1` >> $2

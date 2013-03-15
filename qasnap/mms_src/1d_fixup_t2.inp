@@ -1,0 +1,22 @@
+! Input from namelist
+&invar
+  nthreads=10
+  ndimen=1
+  nx=20
+  lx=10.0
+  nmom=2
+  nang=12
+  ng=10
+  mat_opt=0
+  src_opt=3
+  timedep=1
+  it_det=0
+  tf=5.0
+  nsteps=100
+  iitm=5
+  oitm=100
+  epsi=1.E-4
+  fluxp=0
+  scatp=0
+  fixup=1
+/

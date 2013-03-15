@@ -1,0 +1,109 @@
+SNAP: SN (Discrete Ordinates) Application Proxy
+
+SNAP serves as a proxy application for the LANL deterministic transport code
+PARTISN. It uses a parallelization strategy modeled off PARTISN. This includes
+KBA sweeps coupled with distributed memory decomposition over the spatial domain
+using MPI. Next, the energy domain is threaded, with work performed on the
+cores of a multicore compute node or the accelerating chip of the hybrid
+architecture, using OpenMP. Lastly it uses vectorization of the angular domain
+(all angles in an octant).
+
+SNAP has been written to the Fortran 90/95 standard. It has been successfully
+built with, but not necessarily limited to, gfortran and ifort. Moreover, the
+code has been built with the profiling tool Byfl. The accompanying Makefile
+retains some of the old make options for different build types. However, the
+current build system depends on the availability of MPI and OpenMP libraries.
+Builds without these libraries will require modification to the source code to
+remove related subroutine calls and directives.
+
+MPI implementations typically suggest using a "wrapper" compiler to compile
+the code. SNAP has been built and tested with OpenMPI. OpenMPI allows one to
+set the underlying Fortran compiler with the environment variable OMPI_FC,
+where the variable is set to the (path and) compiler of choice, e.g., ifort,
+gfortran, etc.
+
+The makefile currently uses:
+
+  FORTRAN = mpif90
+
+and all testing has been performed with
+
+  OMPI_FC = [path]/ifort
+
+Fortran compilation flags can be set according to the underlying compiler. The
+current flags are set for the ifort compiler and using OpenMP for parallel
+threading.
+
+  TARGET = snap
+  FFLAGS = -03 -openmp
+  FFLAG2 =
+
+where FFLAG2 is reserved for additional flags that may need applied differently,
+depending on the compiler. To make SNAP with these default settings, simply type
+
+  make
+
+on the command line within the SNAP directory.
+
+A debugging version of SNAP can be built by typing
+
+  make OPT=no
+
+on the command line. The unoptimized, debugging version of SNAP features
+bounds checking, back-tracing an error, and the necessary debug compiler flags.
+With ifort, these flags appear as:
+
+  FFLAGS = -g -O0 -check bounds -traceback -openmp
+  FFLAG2 =
+
+The values for these compilation variables have been modified for various
+Fortran compilers and the Makefile provides details of what has been used
+previously. These lines are commented out for clarity at this time and to
+ensure that changes to the build system are made carefully before attempting
+to rebuild with a different compiler.
+
+The SNAP directory can be cleaned up of its module and object files if the
+user desires with:
+
+  make clean
+
+This removes all the *.mod and *.o files, as well as *.bc files from Byfl
+builds. Moreover, it will enforce complete recompilation of all files upon
+the next instance of "make" or "make OPT=no." Currently, there is no separate
+directory for the compilation files of separate optimized and unoptimized
+builds. The user must do a "make clean" before building the code if the
+previous build used the opposite command.
+
+Lastly, a line count report is generated with:
+
+  make count
+
+The line count report excludes blank lines and comments. It counts the number
+of code lines in all *.f90 files and sums the results. The information is
+printed to the the "Lines" file.
+
+Because SNAP currently requires building with MPI, to execute SNAP, use the
+following command:
+
+  mpirun -np [#] [path]/snap [infile] [outfile]
+
+This command will automatically run with the number of threads specified by
+the input file, which is used to set the number of OpenMP threads, overwriting
+any environment variable to set the number of threads. Testing has shown that
+to ensure proper concurrency of work, the above command can be modified to
+
+  mpirun -cpus-per-proc [#threads] -np [#procs] [path]/snap [infile] [outfile]
+
+Lastly, a user may wish to test the various thread affinity settings used to
+bind threads to processing elements. Testing has been done with with a disabled
+Intel thread affinity interface.
+
+  setenv KMP_AFFINITY disabled (csh)
+
+The command line is read for the input/output file names. If one of the names
+is missing, the code will not execute. Moreover, the output file overwrites
+any pre-existing files of the same name.
+
+
+---03/13/2013
+

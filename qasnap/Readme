@@ -1,0 +1,64 @@
+SNAP: SN (Discrete Ordinates) Application Proxy
+
+Regression Testing Files
+
+Provided are two directories with input and output of several SNAP jobs. The
+included files are designed to test several features of the SNAP coding. Users
+may start with the sample inputs to scale to larger problems. Typical problems
+SNAP's model code PARTISN is expected to handle include the following ranges:
+
+Number of angles per octant (nang): 10 - 2,000
+Number of energy groups (ng): 30 - 150
+Number of spatial cells per MPI rank [nx*ny*nz/(npey*npez)]: 2,000-5,000
+Scattering order (nmom): 2-4
+
+We strongly urge user to consider these ranges for scaling studies.
+
+The regression tests are divided into two sets. "mms_src" uses the method of
+manufactured solutions setting (src_opt=3) to generate a source that is used
+in the SNAP computations. "center_src" uses the center source option (src_opt=1)
+to set an isotropic source of strength unity and compute the resulting flux
+solution. Each set has problems of varying size and parallel decomposition.
+Moreover each set has problems with and without the fixup algorithm.
+
+Due to the design of SNAP, the solution produced has no physical meaning.
+Moreover, the numerical algorithm is known to have instabilities that will
+prevent some problems from converging. Modifying the problem can be done to
+produce a solution that can be analyzed, mainly for debugging (e.g., if the
+solution should be symmetric). However, if the solution does not converge,
+warning messages are printed to the standard output (terminal) and to the
+output file, and the timing summary is still provided. Given that SNAP has
+been designed to perform the same operations as its model PARTISN without
+actually solving a real physical system, the timing summary should help users
+understand the performance of the problem being tested and relate that
+performance to that expected of PARTISN.
+
+That said, since SNAP may be modified for particular architectures, the
+regression tests are provided to ensure that any modifications still produce
+the same result as the base code provided. The method of manufactured solutions
+algorithm should help test problems of any size, given that such parameters
+do not lead to a non-converging setup.
+
+In each testing directory, three scripts are provided to assist users who
+wish to test the base code or a build with modifications. The script 'genall'
+establish baseline cases. Use genall with the command:
+
+./genall [path]/[code name]
+
+Likewise, the script 'chkall' produces new outputs for comparison with some
+reference output. Use chkall with the command:
+
+./chkall [path]/[code name]
+
+Lastly, if the new outputs are to be set as the baseline use 'mvnewtoold' to
+properly rename the files.
+
+./mvnewtoold
+
+To compare outputs, some key parameters one may wish to consider include the
+number of iterations, the flux solution, or in the case of method of
+manufactured solutions (src_opt=3) the maximum and minimum differences between
+the manufactured and computed solutions.
+
+---03/07/2013
+

@@ -1,0 +1,59 @@
+
+# 1-D cases
+mv -f 1d_mms_st.new 1d_mms_st.old
+mv -f 1d_mms_st.flux.new 1d_mms_st.flux.old
+mv -f 1d_mms_st.slgg.new 1d_mms_st.slgg.old
+
+mv -f 1d_mms_t1.new 1d_mms_t1.old
+
+mv -f 1d_mms_t2.new 1d_mms_t2.old
+
+
+mv -f 1d_fixup_st.new 1d_fixup_st.old
+mv -f 1d_fixup_st.flux.new 1d_fixup_st.flux.old
+mv -f 1d_fixup_st.slgg.new 1d_fixup_st.slgg.old
+
+mv -f 1d_fixup_t1.new 1d_fixup_t1.old
+
+mv -f 1d_fixup_t2.new 1d_fixup_t2.old
+
+# 2-D cases
+mv -f 2d_mms_st.new 2d_mms_st.old
+mv -f 2d_mms_st.flux.new 2d_mms_st.flux.old
+mv -f 2d_mms_st.slgg.new 2d_mms_st.slgg.old
+
+mv -f 2d_mms_t1.new 2d_mms_t1.old
+
+mv -f 2d_mms_t2.new 2d_mms_t2.old
+
+
+mv -f 2d_fixup_st.new 2d_fixup_st.old
+mv -f 2d_fixup_st.flux.new 2d_fixup_st.flux.old
+mv -f 2d_fixup_st.slgg.new 2d_fixup_st.slgg.old
+
+mv -f 2d_fixup_t1.new 2d_fixup_t1.old
+
+mv -f 2d_fixup_t2.new 2d_fixup_t2.old
+
+# 3-D cases
+mv -f 3d_mms_st.new 3d_mms_st.old
+mv -f 3d_mms_st.flux.new 3d_mms_st.flux.old
+mv -f 3d_mms_st.slgg.new 3d_mms_st.slgg.old
+
+mv -f 3d_mms_t1.new 3d_mms_t1.old
+
+mv -f 3d_mms_t2.new 3d_mms_t2.old
+
+mv -f 3d_model.new 3d_model.old
+
+
+mv -f 3d_fixup_st.new 3d_fixup_st.old
+mv -f 3d_fixup_st.flux.new 3d_fixup_st.flux.old
+mv -f 3d_fixup_st.slgg.new 3d_fixup_st.slgg.old
+
+mv -f 3d_fixup_t1.new 3d_fixup_t1.old
+
+mv -f 3d_fixup_t2.new 3d_fixup_t2.old
+
+mv -f 3d_mod_fixup.new 3d_mod_fixup.old
+

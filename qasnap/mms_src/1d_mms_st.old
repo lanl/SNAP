@@ -1,0 +1,558 @@
+ SNAP: SN (Discrete Ordinates) Application Proxy
+ Version Number..  1.00 
+ Version Date..  03-07-2013
+ Ran on  3- 7-2013 at time 16:17: 5
+
+********************************************************************************
+
+          Input Echo - Values from input or default
+********************************************************************************
+
+  NML=invar
+     npey=     1
+     npez=     1
+     ichunk=     4
+     nthreads=     2
+     ndimen=  1
+     nx=    20
+     ny=     1
+     nz=     1
+     lx=  2.0000E-01
+     ly=  1.0000E+00
+     lz=  1.0000E+00
+     nmom=   4
+     nang=   12
+     ng=   10
+     mat_opt=  0
+     src_opt=  3
+     scatp=  1
+     epsi=  1.0000E-04
+     iitm=   5
+     oitm=  100
+     timedep=  0
+     tf=  1.0000E+00
+     nsteps=    10
+     it_det=  1
+     fluxp=  2
+     fixup=  0
+
+********************************************************************************
+
+   ***WARNING: INPUT_CHECK: NSTEPS reset to 1 for static calc      
+
+          Calculation Run-time Parameters Echo
+********************************************************************************
+
+  Geometry
+    ndimen = 1
+    nx =    20
+    ny =     1
+    nz =     1
+    lx =  2.0000E-01
+    ly =  1.0000E+00
+    lz =  1.0000E+00
+    dx =  1.0000E-02
+    dy =  0.0000E+00
+    dz =  0.0000E+00
+
+  Sn
+    nmom = 4
+    nang =   12
+    noct = 2
+
+    w =  4.1667E-02   ... uniform weights
+
+          mu              eta               xi
+     4.16666667E-02
+     1.25000000E-01
+     2.08333333E-01
+     2.91666667E-01
+     3.75000000E-01
+     4.58333333E-01
+     5.41666667E-01
+     6.25000000E-01
+     7.08333333E-01
+     7.91666667E-01
+     8.75000000E-01
+     9.58333333E-01
+
+  Material Map
+    mat_opt = 0   -->   nmat = 1
+    Base material (default for every cell) = 1
+
+  Source Map
+    src_opt = 3
+    MMS-generated source
+
+  Pseudo Cross Sections Data
+    ng =  10
+
+    Material 1
+    Group         Total         Absorption      Scattering
+       1       1.000000E+00    5.000000E-01    5.000000E-01
+       2       1.010000E+00    5.050000E-01    5.050000E-01
+       3       1.020000E+00    5.100000E-01    5.100000E-01
+       4       1.030000E+00    5.150000E-01    5.150000E-01
+       5       1.040000E+00    5.200000E-01    5.200000E-01
+       6       1.050000E+00    5.250000E-01    5.250000E-01
+       7       1.060000E+00    5.300000E-01    5.300000E-01
+       8       1.070000E+00    5.350000E-01    5.350000E-01
+       9       1.080000E+00    5.400000E-01    5.400000E-01
+      10       1.090000E+00    5.450000E-01    5.450000E-01
+
+  Solution Control Parameters
+    epsi =  1.0000E-04
+    iitm =   5
+    oitm =  100
+    timedep = 0
+    it_det = 1
+    fluxp = 2
+    fixup = 0
+
+
+  Parallelization Parameters
+    npey =     1
+    npez =     1
+    nthreads =    2
+
+          Thread Support Level
+           0 - MPI_THREAD_SINGLE
+           1 - MPI_THREAD_FUNNELED
+           2 - MPI_THREAD_SERIALIZED
+           3 - MPI_THREAD_MULTIPLE
+    thread_level =  0
+
+********************************************************************************
+
+          Iteration Monitor
+********************************************************************************
+ ********************
+  Outer   1
+    Group   1     Inner     1     Dfmxi  8.4312E-01
+    Group   2     Inner     1     Dfmxi  1.8398E+00
+    Group   3     Inner     1     Dfmxi  2.8118E+00
+    Group   4     Inner     1     Dfmxi  3.7694E+00
+    Group   5     Inner     1     Dfmxi  4.7091E+00
+    Group   6     Inner     1     Dfmxi  5.6244E+00
+    Group   7     Inner     1     Dfmxi  6.5032E+00
+    Group   8     Inner     1     Dfmxi  7.3215E+00
+    Group   9     Inner     1     Dfmxi  8.0185E+00
+    Group  10     Inner     1     Dfmxi  7.6190E+00
+    Group   1     Inner     2     Dfmxi  6.8009E-01
+    Group   2     Inner     2     Dfmxi  4.1102E-01
+    Group   3     Inner     2     Dfmxi  3.0191E-01
+    Group   4     Inner     2     Dfmxi  2.8174E-01
+    Group   5     Inner     2     Dfmxi  2.8478E-01
+    Group   6     Inner     2     Dfmxi  3.0428E-01
+    Group   7     Inner     2     Dfmxi  3.4859E-01
+    Group   8     Inner     2     Dfmxi  4.6123E-01
+    Group   9     Inner     2     Dfmxi  1.1311E+00
+    Group  10     Inner     2     Dfmxi  6.5220E-01
+    Group   1     Inner     3     Dfmxi  9.0966E-02
+    Group   2     Inner     3     Dfmxi  8.2812E-03
+    Group   3     Inner     3     Dfmxi  6.6249E-03
+    Group   4     Inner     3     Dfmxi  6.3191E-03
+    Group   5     Inner     3     Dfmxi  6.4156E-03
+    Group   6     Inner     3     Dfmxi  6.8013E-03
+    Group   7     Inner     3     Dfmxi  7.5932E-03
+    Group   8     Inner     3     Dfmxi  9.3491E-03
+    Group   9     Inner     3     Dfmxi  1.5873E-02
+    Group  10     Inner     3     Dfmxi  1.7335E-01
+    Group   1     Inner     4     Dfmxi  3.9261E-03
+    Group   2     Inner     4     Dfmxi  2.1603E-04
+    Group   3     Inner     4     Dfmxi  1.7421E-04
+    Group   4     Inner     4     Dfmxi  1.6728E-04
+    Group   5     Inner     4     Dfmxi  1.7091E-04
+    Group   6     Inner     4     Dfmxi  1.8227E-04
+    Group   7     Inner     4     Dfmxi  2.0463E-04
+    Group   8     Inner     4     Dfmxi  2.5311E-04
+    Group   9     Inner     4     Dfmxi  4.2975E-04
+    Group  10     Inner     4     Dfmxi  2.6171E-02
+    Group   1     Inner     5     Dfmxi  1.5328E-04
+    Group   2     Inner     5     Dfmxi  5.6352E-06
+    Group   3     Inner     5     Dfmxi  4.5736E-06
+    Group   4     Inner     5     Dfmxi  4.4199E-06
+    Group   5     Inner     5     Dfmxi  4.5443E-06
+    Group   6     Inner     5     Dfmxi  4.8765E-06
+    Group   7     Inner     5     Dfmxi  5.5084E-06
+    Group   8     Inner     5     Dfmxi  6.8549E-06
+    Group   9     Inner     5     Dfmxi  1.1707E-05
+    Group  10     Inner     5     Dfmxi  3.3165E-03
+    1    Dfmxo= 8.3746E+00    No. Inners=   50
+ ********************
+  Outer   2
+    Group   1     Inner     1     Dfmxi  1.1305E+01
+    Group   2     Inner     1     Dfmxi  8.0837E-01
+    Group   3     Inner     1     Dfmxi  4.2138E-01
+    Group   4     Inner     1     Dfmxi  3.3975E-01
+    Group   5     Inner     1     Dfmxi  3.4814E-01
+    Group   6     Inner     1     Dfmxi  4.1929E-01
+    Group   7     Inner     1     Dfmxi  5.7609E-01
+    Group   8     Inner     1     Dfmxi  9.3212E-01
+    Group   9     Inner     1     Dfmxi  2.2558E+00
+    Group  10     Inner     1     Dfmxi  3.1012E+00
+    Group   1     Inner     2     Dfmxi  4.6370E-02
+    Group   2     Inner     2     Dfmxi  1.2693E-02
+    Group   3     Inner     2     Dfmxi  8.4787E-03
+    Group   4     Inner     2     Dfmxi  7.3001E-03
+    Group   5     Inner     2     Dfmxi  7.4785E-03
+    Group   6     Inner     2     Dfmxi  8.6064E-03
+    Group   7     Inner     2     Dfmxi  1.0714E-02
+    Group   8     Inner     2     Dfmxi  1.4233E-02
+    Group   9     Inner     2     Dfmxi  2.0585E-02
+    Group  10     Inner     2     Dfmxi  1.9895E-01
+    Group   1     Inner     3     Dfmxi  1.7366E-03
+    Group   2     Inner     3     Dfmxi  3.2963E-04
+    Group   3     Inner     3     Dfmxi  2.2257E-04
+    Group   4     Inner     3     Dfmxi  1.9309E-04
+    Group   5     Inner     3     Dfmxi  1.9903E-04
+    Group   6     Inner     3     Dfmxi  2.3022E-04
+    Group   7     Inner     3     Dfmxi  2.8777E-04
+    Group   8     Inner     3     Dfmxi  3.8333E-04
+    Group   9     Inner     3     Dfmxi  5.5437E-04
+    Group  10     Inner     3     Dfmxi  2.0652E-02
+    Group   1     Inner     4     Dfmxi  6.7403E-05
+    Group   2     Inner     4     Dfmxi  8.5975E-06
+    Group   3     Inner     4     Dfmxi  5.8431E-06
+    Group   4     Inner     4     Dfmxi  5.1018E-06
+    Group   5     Inner     4     Dfmxi  5.2917E-06
+    Group   6     Inner     4     Dfmxi  6.1590E-06
+    Group   7     Inner     4     Dfmxi  7.7457E-06
+    Group   8     Inner     4     Dfmxi  1.0379E-05
+    Group   9     Inner     4     Dfmxi  1.5099E-05
+    Group  10     Inner     4     Dfmxi  2.4961E-03
+    Group   1     Inner     4     Dfmxi  6.7403E-05
+    Group   2     Inner     4     Dfmxi  8.5975E-06
+    Group   3     Inner     4     Dfmxi  5.8431E-06
+    Group   4     Inner     4     Dfmxi  5.1018E-06
+    Group   5     Inner     4     Dfmxi  5.2917E-06
+    Group   6     Inner     4     Dfmxi  6.1590E-06
+    Group   7     Inner     4     Dfmxi  7.7457E-06
+    Group   8     Inner     4     Dfmxi  1.0379E-05
+    Group   9     Inner     4     Dfmxi  1.5099E-05
+    Group  10     Inner     5     Dfmxi  3.0683E-04
+    2    Dfmxo= 1.1802E+01    No. Inners=   41
+ ********************
+  Outer   3
+    Group   1     Inner     1     Dfmxi  8.8351E-02
+    Group   2     Inner     1     Dfmxi  4.0985E-02
+    Group   3     Inner     1     Dfmxi  2.8363E-02
+    Group   4     Inner     1     Dfmxi  2.3024E-02
+    Group   5     Inner     1     Dfmxi  2.0795E-02
+    Group   6     Inner     1     Dfmxi  2.0811E-02
+    Group   7     Inner     1     Dfmxi  2.3474E-02
+    Group   8     Inner     1     Dfmxi  3.0744E-02
+    Group   9     Inner     1     Dfmxi  4.9238E-02
+    Group  10     Inner     1     Dfmxi  1.1624E-01
+    Group   1     Inner     2     Dfmxi  3.1947E-03
+    Group   2     Inner     2     Dfmxi  1.0397E-03
+    Group   3     Inner     2     Dfmxi  7.3300E-04
+    Group   4     Inner     2     Dfmxi  6.0194E-04
+    Group   5     Inner     2     Dfmxi  5.4830E-04
+    Group   6     Inner     2     Dfmxi  5.5212E-04
+    Group   7     Inner     2     Dfmxi  6.2499E-04
+    Group   8     Inner     2     Dfmxi  8.1775E-04
+    Group   9     Inner     2     Dfmxi  1.2944E-03
+    Group  10     Inner     2     Dfmxi  1.3005E-02
+    Group   1     Inner     3     Dfmxi  1.2387E-04
+    Group   2     Inner     3     Dfmxi  2.7108E-05
+    Group   3     Inner     3     Dfmxi  1.9241E-05
+    Group   4     Inner     3     Dfmxi  1.5904E-05
+    Group   5     Inner     3     Dfmxi  1.4578E-05
+    Group   6     Inner     3     Dfmxi  1.4771E-05
+    Group   7     Inner     3     Dfmxi  1.6823E-05
+    Group   8     Inner     3     Dfmxi  2.2141E-05
+    Group   9     Inner     3     Dfmxi  3.5242E-05
+    Group  10     Inner     3     Dfmxi  1.5843E-03
+    Group   1     Inner     4     Dfmxi  4.8114E-06
+    Group   2     Inner     3     Dfmxi  2.7108E-05
+    Group   3     Inner     3     Dfmxi  1.9241E-05
+    Group   4     Inner     3     Dfmxi  1.5904E-05
+    Group   5     Inner     3     Dfmxi  1.4578E-05
+    Group   6     Inner     3     Dfmxi  1.4771E-05
+    Group   7     Inner     3     Dfmxi  1.6823E-05
+    Group   8     Inner     3     Dfmxi  2.2141E-05
+    Group   9     Inner     3     Dfmxi  3.5242E-05
+    Group  10     Inner     4     Dfmxi  1.9494E-04
+    Group   1     Inner     4     Dfmxi  4.8114E-06
+    Group   2     Inner     3     Dfmxi  2.7108E-05
+    Group   3     Inner     3     Dfmxi  1.9241E-05
+    Group   4     Inner     3     Dfmxi  1.5904E-05
+    Group   5     Inner     3     Dfmxi  1.4578E-05
+    Group   6     Inner     3     Dfmxi  1.4771E-05
+    Group   7     Inner     3     Dfmxi  1.6823E-05
+    Group   8     Inner     3     Dfmxi  2.2141E-05
+    Group   9     Inner     3     Dfmxi  3.5242E-05
+    Group  10     Inner     5     Dfmxi  2.4014E-05
+    3    Dfmxo= 1.3280E-01    No. Inners=   33
+ ********************
+  Outer   4
+    Group   1     Inner     1     Dfmxi  6.3027E-03
+    Group   2     Inner     1     Dfmxi  3.0160E-03
+    Group   3     Inner     1     Dfmxi  2.1211E-03
+    Group   4     Inner     1     Dfmxi  1.7613E-03
+    Group   5     Inner     1     Dfmxi  1.6197E-03
+    Group   6     Inner     1     Dfmxi  1.6147E-03
+    Group   7     Inner     1     Dfmxi  1.7489E-03
+    Group   8     Inner     1     Dfmxi  2.1180E-03
+    Group   9     Inner     1     Dfmxi  3.0978E-03
+    Group  10     Inner     1     Dfmxi  6.8150E-03
+    Group   1     Inner     2     Dfmxi  2.4447E-04
+    Group   2     Inner     2     Dfmxi  7.8755E-05
+    Group   3     Inner     2     Dfmxi  5.5791E-05
+    Group   4     Inner     2     Dfmxi  4.6634E-05
+    Group   5     Inner     2     Dfmxi  4.3159E-05
+    Group   6     Inner     2     Dfmxi  4.3289E-05
+    Group   7     Inner     2     Dfmxi  4.7166E-05
+    Group   8     Inner     2     Dfmxi  5.7445E-05
+    Group   9     Inner     2     Dfmxi  8.4441E-05
+    Group  10     Inner     2     Dfmxi  8.3794E-04
+    Group   1     Inner     3     Dfmxi  9.4977E-06
+    Group   2     Inner     2     Dfmxi  7.8755E-05
+    Group   3     Inner     2     Dfmxi  5.5791E-05
+    Group   4     Inner     2     Dfmxi  4.6634E-05
+    Group   5     Inner     2     Dfmxi  4.3159E-05
+    Group   6     Inner     2     Dfmxi  4.3289E-05
+    Group   7     Inner     2     Dfmxi  4.7166E-05
+    Group   8     Inner     2     Dfmxi  5.7445E-05
+    Group   9     Inner     2     Dfmxi  8.4441E-05
+    Group  10     Inner     3     Dfmxi  1.0321E-04
+    Group   1     Inner     3     Dfmxi  9.4977E-06
+    Group   2     Inner     2     Dfmxi  7.8755E-05
+    Group   3     Inner     2     Dfmxi  5.5791E-05
+    Group   4     Inner     2     Dfmxi  4.6634E-05
+    Group   5     Inner     2     Dfmxi  4.3159E-05
+    Group   6     Inner     2     Dfmxi  4.3289E-05
+    Group   7     Inner     2     Dfmxi  4.7166E-05
+    Group   8     Inner     2     Dfmxi  5.7445E-05
+    Group   9     Inner     2     Dfmxi  8.4441E-05
+    Group  10     Inner     4     Dfmxi  1.2716E-05
+    4    Dfmxo= 7.7754E-03    No. Inners=   23
+
+  No. Outers=   4    No. Inners=  147
+
+********************************************************************************
+
+          Calculation Final Scalar Flux Solution
+********************************************************************************
+
+ ***********************************
+  Group=   1   Z Mid-Plane=    1
+ ***********************************
+
+     y    x    1      x    2      x    3      x    4      x    5      x    6
+     1  7.8276E-02  2.3280E-01  3.8159E-01  5.2099E-01  6.4756E-01  7.5819E-01
+
+     y    x    7      x    8      x    9      x   10      x   11      x   12
+     1  8.5014E-01  9.2117E-01  9.6952E-01  9.9399E-01  9.9399E-01  9.6952E-01
+
+     y    x   13      x   14      x   15      x   16      x   17      x   18
+     1  9.2117E-01  8.5014E-01  7.5819E-01  6.4756E-01  5.2099E-01  3.8159E-01
+
+     y    x   19      x   20
+     1  2.3280E-01  7.8276E-02
+
+********************************************************************************
+
+
+ ***********************************
+  Group=   2   Z Mid-Plane=    1
+ ***********************************
+
+     y    x    1      x    2      x    3      x    4      x    5      x    6
+     1  1.5677E-01  4.6583E-01  7.6342E-01  1.0422E+00  1.2954E+00  1.5166E+00
+
+     y    x    7      x    8      x    9      x   10      x   11      x   12
+     1  1.7006E+00  1.8426E+00  1.9393E+00  1.9883E+00  1.9883E+00  1.9393E+00
+
+     y    x   13      x   14      x   15      x   16      x   17      x   18
+     1  1.8426E+00  1.7006E+00  1.5166E+00  1.2954E+00  1.0422E+00  7.6342E-01
+
+     y    x   19      x   20
+     1  4.6583E-01  1.5677E-01
+
+********************************************************************************
+
+
+ ***********************************
+  Group=   3   Z Mid-Plane=    1
+ ***********************************
+
+     y    x    1      x    2      x    3      x    4      x    5      x    6
+     1  2.3524E-01  6.9882E-01  1.1452E+00  1.5634E+00  1.9431E+00  2.2750E+00
+
+     y    x    7      x    8      x    9      x   10      x   11      x   12
+     1  2.5509E+00  2.7640E+00  2.9091E+00  2.9825E+00  2.9825E+00  2.9091E+00
+
+     y    x   13      x   14      x   15      x   16      x   17      x   18
+     1  2.7640E+00  2.5509E+00  2.2750E+00  1.9431E+00  1.5634E+00  1.1452E+00
+
+     y    x   19      x   20
+     1  6.9882E-01  2.3524E-01
+
+********************************************************************************
+
+
+ ***********************************
+  Group=   4   Z Mid-Plane=    1
+ ***********************************
+
+     y    x    1      x    2      x    3      x    4      x    5      x    6
+     1  3.1370E-01  9.3180E-01  1.5270E+00  2.0846E+00  2.5909E+00  3.0334E+00
+
+     y    x    7      x    8      x    9      x   10      x   11      x   12
+     1  3.4013E+00  3.6854E+00  3.8788E+00  3.9767E+00  3.9767E+00  3.8788E+00
+
+     y    x   13      x   14      x   15      x   16      x   17      x   18
+     1  3.6854E+00  3.4013E+00  3.0334E+00  2.5909E+00  2.0846E+00  1.5270E+00
+
+     y    x   19      x   20
+     1  9.3180E-01  3.1370E-01
+
+********************************************************************************
+
+
+ ***********************************
+  Group=   5   Z Mid-Plane=    1
+ ***********************************
+
+     y    x    1      x    2      x    3      x    4      x    5      x    6
+     1  3.9213E-01  1.1648E+00  1.9087E+00  2.6058E+00  3.2386E+00  3.7918E+00
+
+     y    x    7      x    8      x    9      x   10      x   11      x   12
+     1  4.2516E+00  4.6068E+00  4.8485E+00  4.9709E+00  4.9709E+00  4.8485E+00
+
+     y    x   13      x   14      x   15      x   16      x   17      x   18
+     1  4.6068E+00  4.2516E+00  3.7918E+00  3.2386E+00  2.6058E+00  1.9087E+00
+
+     y    x   19      x   20
+     1  1.1648E+00  3.9213E-01
+
+********************************************************************************
+
+
+ ***********************************
+  Group=   6   Z Mid-Plane=    1
+ ***********************************
+
+     y    x    1      x    2      x    3      x    4      x    5      x    6
+     1  4.7054E-01  1.3977E+00  2.2905E+00  3.1269E+00  3.8863E+00  4.5501E+00
+
+     y    x    7      x    8      x    9      x   10      x   11      x   12
+     1  5.1019E+00  5.5281E+00  5.8182E+00  5.9650E+00  5.9650E+00  5.8182E+00
+
+     y    x   13      x   14      x   15      x   16      x   17      x   18
+     1  5.5281E+00  5.1019E+00  4.5501E+00  3.8863E+00  3.1269E+00  2.2905E+00
+
+     y    x   19      x   20
+     1  1.3977E+00  4.7054E-01
+
+********************************************************************************
+
+
+ ***********************************
+  Group=   7   Z Mid-Plane=    1
+ ***********************************
+
+     y    x    1      x    2      x    3      x    4      x    5      x    6
+     1  5.4890E-01  1.6306E+00  2.6722E+00  3.6480E+00  4.5340E+00  5.3084E+00
+
+     y    x    7      x    8      x    9      x   10      x   11      x   12
+     1  5.9521E+00  6.4493E+00  6.7878E+00  6.9591E+00  6.9591E+00  6.7878E+00
+
+     y    x   13      x   14      x   15      x   16      x   17      x   18
+     1  6.4493E+00  5.9521E+00  5.3084E+00  4.5340E+00  3.6480E+00  2.6722E+00
+
+     y    x   19      x   20
+     1  1.6306E+00  5.4890E-01
+
+********************************************************************************
+
+
+ ***********************************
+  Group=   8   Z Mid-Plane=    1
+ ***********************************
+
+     y    x    1      x    2      x    3      x    4      x    5      x    6
+     1  6.2719E-01  1.8634E+00  3.0538E+00  4.1690E+00  5.1816E+00  6.0666E+00
+
+     y    x    7      x    8      x    9      x   10      x   11      x   12
+     1  6.8023E+00  7.3705E+00  7.7573E+00  7.9531E+00  7.9531E+00  7.7573E+00
+
+     y    x   13      x   14      x   15      x   16      x   17      x   18
+     1  7.3705E+00  6.8023E+00  6.0666E+00  5.1816E+00  4.1690E+00  3.0538E+00
+
+     y    x   19      x   20
+     1  1.8634E+00  6.2719E-01
+
+********************************************************************************
+
+
+ ***********************************
+  Group=   9   Z Mid-Plane=    1
+ ***********************************
+
+     y    x    1      x    2      x    3      x    4      x    5      x    6
+     1  7.0530E-01  2.0960E+00  3.4352E+00  4.6898E+00  5.8290E+00  6.8246E+00
+
+     y    x    7      x    8      x    9      x   10      x   11      x   12
+     1  7.6523E+00  8.2915E+00  8.7267E+00  8.9469E+00  8.9469E+00  8.7267E+00
+
+     y    x   13      x   14      x   15      x   16      x   17      x   18
+     1  8.2915E+00  7.6523E+00  6.8246E+00  5.8290E+00  4.6898E+00  3.4352E+00
+
+     y    x   19      x   20
+     1  2.0960E+00  7.0530E-01
+
+********************************************************************************
+
+
+ ***********************************
+  Group=  10   Z Mid-Plane=    1
+ ***********************************
+
+     y    x    1      x    2      x    3      x    4      x    5      x    6
+     1  7.8180E-01  2.3270E+00  3.8149E+00  5.2088E+00  6.4744E+00  7.5807E+00
+
+     y    x    7      x    8      x    9      x   10      x   11      x   12
+     1  8.5002E+00  9.2105E+00  9.6939E+00  9.9387E+00  9.9387E+00  9.6939E+00
+
+     y    x   13      x   14      x   15      x   16      x   17      x   18
+     1  9.2105E+00  8.5002E+00  7.5807E+00  6.4744E+00  5.2088E+00  3.8149E+00
+
+     y    x   19      x   20
+     1  2.3270E+00  7.8180E-01
+
+********************************************************************************
+
+          MMS Verification
+********************************************************************************
+
+    Manufactured/Computed Solutions Max Diff= 2.533140E-03
+
+    Manufactured/Computed Solutions Min Diff= 1.115165E-04
+
+********************************************************************************
+
+          Timing Summary
+********************************************************************************
+
+  Code Section                          Time (seconds)
+ **************                        ****************
+    Parallel Setup                       7.8988E-04
+    Input                                3.5787E-04
+    Setup                                1.2141E-02
+    Solve                                2.8429E-03
+       Parameter Setup                   2.5630E-04
+       Outer Source                      7.9870E-05
+       Inner Iterations                  2.3711E-03
+          Inner Source                   7.2002E-05
+          Transport Sweeps               6.0511E-04
+          Inner Misc Ops                 1.6940E-03
+       Solution Misc Ops                 1.3566E-04
+    Output                               1.4195E-02
+  Total Execution time                   3.8696E-02
+
+  Grind Time (nanoseconds)         4.0291E+01
+
+********************************************************************************
