@@ -325,16 +325,7 @@ SNAP is Unclassified and contains no Unclassified Controlled Nuclear Information
 Authors
 -------
 
-Joe Zerr, rzerr _ at _ lanl.gov
-Randal Baker, rsb _ at _ lanl.gov
+Joe Zerr, CCS-2, Los Alamos National Laboratory
+Randal Baker, CCS-2, Los Alamos National Laboratory
 
-Additional Contact
-------------------
-
-Al McPherson, mcpherson _ at _ lanl.gov
-
-Last Modification to this Readme
---------------------------------
-    
-03/13/2013
-
+Questions and issues: `snap@lanl.gov`
