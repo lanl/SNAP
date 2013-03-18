@@ -1,0 +1,5 @@
+S\-N\-A\-P serves as a proxy application for the L\-A\-N\-L deterministic transport code P\-A\-R\-T\-I\-S\-N. It uses a parallelization strategy modeled off P\-A\-R\-T\-I\-S\-N. This includes K\-B\-A sweeps coupled with distributed memory decomposition over the spatial domain using M\-P\-I. Next, the energy domain is threaded, with work performed on the cores of a multicore compute node or the accelerating chip of the hybrid architecture, using Open\-M\-P. Lastly it uses vectorization of the angular domain (all angles in an octant).
+
+S\-N\-A\-P has been written to the Fortran 90/95 standard. It has been successfully built with, but not necessarily limited to, gfortran and ifort. Moreover, the code has been built with the profiling tool Byfl. The accompanying Makefile retains some of the old make options for different build types. However, the current build system depends on the availability of M\-P\-I and Open\-M\-P libraries. Builds without these libraries will require modification to the source code to remove related subroutine calls and directives.
+
+Please see the R\-E\-A\-D\-M\-E file for further information about compiling and running S\-N\-A\-P. 
