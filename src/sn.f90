@@ -1,11 +1,13 @@
-MODULE sn_module
+!-----------------------------------------------------------------------
+!
+! MODULE: sn_module
+!> @brief
+!> This module contains the variables and setup subroutines related to
+!> the mock discrete ordinates treament in SNAP.
+!
+!-----------------------------------------------------------------------
 
-!-----------------------------------------------------------------------
-!
-! This module contains the variables and setup subroutines related to
-! the mock discrete ordinates treament in SNAP.
-!
-!-----------------------------------------------------------------------
+MODULE sn_module
 
   USE global_module, ONLY: i_knd, r_knd, zero, one
 

@@ -1,11 +1,13 @@
-MODULE input_module
+!-----------------------------------------------------------------------
+!
+! MODULE: input_module
+!> @brief
+!> This module controls the reading of the input file and checking the
+!> input parameters for acceptable values.
+!
+!-----------------------------------------------------------------------
 
-!-----------------------------------------------------------------------
-!
-! This module controls the reading of the input file and checking the
-! input parameters for acceptable values.
-!
-!-----------------------------------------------------------------------
+MODULE input_module
 
   USE global_module, ONLY: i_knd, r_knd, iunit, ounit, zero, one
 

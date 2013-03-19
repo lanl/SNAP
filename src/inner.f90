@@ -1,13 +1,15 @@
-MODULE inner_module
+!-----------------------------------------------------------------------
+!
+! MODULE: inner_module
+!> @brief
+!> This module controls the inner iterations. Inner iterations include
+!> the KBA mesh sweep, which is parallelized via MPI and vectorized over
+!> angles in a given octant. Inner source computed here and inner
+!> convergence is checked.
+!
+!-----------------------------------------------------------------------
 
-!-----------------------------------------------------------------------
-!
-! This module controls the inner iterations. Inner iterations include
-! the KBA mesh sweep, which is parallelized via MPI and vectorized over
-! angles in a given octant. Inner source computed here and inner
-! convergence is checked.
-!
-!-----------------------------------------------------------------------
+MODULE inner_module
 
   USE global_module, ONLY: i_knd, r_knd, l_knd, zero, one, ounit
 

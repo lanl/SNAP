@@ -1,12 +1,14 @@
-MODULE plib_module
+!-----------------------------------------------------------------------
+!
+! MODULE: plib_module
+!> @brief
+!> This module contains the variables that control parallel decomposition
+!> and the subroutines for parallel environment setup. Only module that
+!> requires MPI library interaction except for time_module (MPI_WTIME).
+!
+!-----------------------------------------------------------------------
 
-!-----------------------------------------------------------------------
-!
-! This module contains the variables that control parallel decomposition
-! and the subroutines for parallel environment setup. Only module that
-! requires MPI library interaction except for time_module (MPI_WTIME).
-!
-!-----------------------------------------------------------------------
+MODULE plib_module
 
   USE global_module, ONLY: i_knd, r_knd, l_knd
 

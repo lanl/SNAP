@@ -1,12 +1,14 @@
-MODULE octsweep_module
+!-----------------------------------------------------------------------
+!
+! MODULE: octsweep_module
+!> @brief
+!> This module controls the setup and calls for sweeping a single octant
+!> pair. It calls for the actual sweep logic depending on the spatial
+!> dimensionality of the problem.
+!
+!-----------------------------------------------------------------------
 
-!-----------------------------------------------------------------------
-!
-! This module controls the setup and calls for sweeping a single octant
-! pair. It calls for the actual sweep logic depending on the spatial
-! dimensionality of the problem.
-!
-!-----------------------------------------------------------------------
+MODULE octsweep_module
 
   USE global_module, ONLY: i_knd, r_knd, zero
 

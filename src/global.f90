@@ -1,11 +1,13 @@
-MODULE global_module
+!-----------------------------------------------------------------------
+!
+! MODULE: global_module
+!> @brief
+!> Global variables for data types, file names and unit numbers, and
+!> commonly used numbers
+!
+!-----------------------------------------------------------------------
 
-!-----------------------------------------------------------------------
-!
-! Global variables for data types, file names and unit numbers, and
-! commonly used numbers
-!
-!-----------------------------------------------------------------------
+MODULE global_module
 
   IMPLICIT NONE
 

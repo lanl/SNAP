@@ -1,12 +1,14 @@
-MODULE solvar_module
-
 !-----------------------------------------------------------------------
 !
-! This module contains several variables that are used in the solution
-! process, including their allocation and deallocation. Also includes
-! initialization of sweep parameters.
+! MODULE: solvar_module
+!> @brief
+!> This module contains several variables that are used in the solution
+!> process, including their allocation and deallocation. Also includes
+!> initialization of sweep parameters.
 ! 
 !-----------------------------------------------------------------------
+
+MODULE solvar_module
 
   USE global_module, ONLY: i_knd, r_knd, zero
 

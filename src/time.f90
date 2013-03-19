@@ -1,12 +1,14 @@
-MODULE time_module
+!-----------------------------------------------------------------------
+!
+! MODULE: time_module
+!> @brief
+!> This module contains the variables that measure SNAP's execution
+!> times for different pieces of code and the subroutine used to get the
+!> time. It also has the timing summary print.
+!
+!-----------------------------------------------------------------------
 
-!-----------------------------------------------------------------------
-!
-! This module contains the variables that measure SNAP's execution
-! times for different pieces of code and the subroutine used to get the
-! time. It also has the timing summary print.
-!
-!-----------------------------------------------------------------------
+MODULE time_module
 
   USE global_module, ONLY: r_knd, i_knd, zero, ounit
 

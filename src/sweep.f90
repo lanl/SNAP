@@ -1,10 +1,12 @@
-MODULE sweep_module
+!-----------------------------------------------------------------------
+!
+! MODULE: sweep_module
+!> @brief
+!> This module contains all the subroutines related to the mesh sweep.
+!
+!-----------------------------------------------------------------------
 
-!-----------------------------------------------------------------------
-!
-! This module contains all the subroutines related to the mesh sweep.
-!
-!-----------------------------------------------------------------------
+MODULE sweep_module
 
   USE global_module, ONLY: i_knd, zero, l_knd
 

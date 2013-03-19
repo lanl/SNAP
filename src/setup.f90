@@ -1,12 +1,14 @@
-MODULE setup_module
+!-----------------------------------------------------------------------
+!
+! MODULE: setup_module
+!> @brief
+!> This module controls problem setup, including geometry setup, angular
+!> domain setup, data setup, material and source layouts. Calls for
+!> data allocation.
+!
+!-----------------------------------------------------------------------
 
-!-----------------------------------------------------------------------
-!
-! This module controls problem setup, including geometry setup, angular
-! domain setup, data setup, material and source layouts. Calls for
-! data allocation.
-!
-!-----------------------------------------------------------------------
+MODULE setup_module
 
   USE global_module, ONLY: i_knd, r_knd, ounit, zero, half, one, two
 

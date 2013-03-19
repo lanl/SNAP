@@ -1,12 +1,14 @@
-MODULE data_module
+!-----------------------------------------------------------------------
+!
+! MODULE: data_module
+!> @brief
+!> This module contains the variables and setup subroutines for the mock
+!> cross section data. It establishes the number of groups and constructs
+!> the cross section arrays.
+!
+!-----------------------------------------------------------------------
 
-!-----------------------------------------------------------------------
-!
-! This module contains the variables and setup subroutines for the mock
-! cross section data. It establishes the number of groups and constructs
-! the cross section arrays.
-!
-!-----------------------------------------------------------------------
+MODULE data_module
 
   USE global_module, ONLY: i_knd, r_knd, zero
 

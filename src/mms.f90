@@ -1,11 +1,13 @@
-MODULE mms_module
+!-----------------------------------------------------------------------
+!
+! MODULE: mms_module
+!> @brief
+!> This module contains all the setup and verification subroutines for
+!> code verification with MMS.
+!
+!-----------------------------------------------------------------------
 
-!-----------------------------------------------------------------------
-!
-! This module contains all the setup and verification subroutines for
-! code verification with MMS.
-!
-!-----------------------------------------------------------------------
+MODULE mms_module
 
   USE global_module, ONLY: i_knd, r_knd, ounit, zero, pi, one, half
 

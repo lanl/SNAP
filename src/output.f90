@@ -1,10 +1,12 @@
-MODULE output_module
+!-----------------------------------------------------------------------
+!
+! MODULE: output_module
+!> @brief
+!> This module controls final solution output.
+!
+!-----------------------------------------------------------------------
 
-!-----------------------------------------------------------------------
-!
-! This module controls final solution output.
-!
-!-----------------------------------------------------------------------
+MODULE output_module
 
   USE global_module, ONLY: i_knd, r_knd, ounit, zero
 

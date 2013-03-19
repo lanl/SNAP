@@ -1,3 +1,11 @@
+!-----------------------------------------------------------------------
+!
+! MODULE: version_module
+!> @brief
+!> This module handles version information.
+!
+!-----------------------------------------------------------------------
+
 MODULE version_module
 
   USE global_module, ONLY: i_knd, ounit

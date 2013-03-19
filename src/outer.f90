@@ -1,13 +1,15 @@
-MODULE outer_module
+!-----------------------------------------------------------------------
+!
+! MODULE: outer_module
+!> @brief
+!> This module controls the outer iterations. Outer iterations are
+!> threaded over the energy dimension and represent a Jacobi iteration
+!> strategy. Includes setting the outer source. Checking outer iteration
+!> convergence.
+!
+!-----------------------------------------------------------------------
 
-!-----------------------------------------------------------------------
-!
-! This module controls the outer iterations. Outer iterations are
-! threaded over the energy dimension and represent a Jacobi iteration
-! strategy. Includes setting the outer source. Checking outer iteration
-! convergence.
-!
-!-----------------------------------------------------------------------
+MODULE outer_module
 
   USE global_module, ONLY: i_knd, r_knd, zero, one
 

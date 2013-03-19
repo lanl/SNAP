@@ -1,11 +1,13 @@
-MODULE utils_module
+!-----------------------------------------------------------------------
+!
+! MODULE: utils_module
+!> @brief
+!> This module contains utility subroutines for handling file open/close,
+!> errors, command line reading, and program termination.
+!
+!-----------------------------------------------------------------------
 
-!-----------------------------------------------------------------------
-!
-! This module contains utility subroutines for handling file open/close,
-! errors, command line reading, and program termination.
-!
-!-----------------------------------------------------------------------
+MODULE utils_module
 
   USE global_module, ONLY: i_knd, ifile, ofile
 
