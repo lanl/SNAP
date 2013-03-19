@@ -3,6 +3,7 @@ var NAVTREE =
   [ "SNAP", "index.html", [
     [ "SNAP documentation", "index.html", null ],
     [ "Data Types List", null, [
+      [ "Data Types", "classes.html", null ],
       [ "Data Fields", "functions.html", [
         [ "All", "functions.html", "functions_dup" ],
         [ "Functions/Subroutines", "functions_func.html", null ],
@@ -21,7 +22,7 @@ var NAVTREE =
 
 var NAVTREEINDEX =
 [
-"control_8f90.html",
+"classes.html",
 ];
 
 var navTreeSubIndices = new Array();
