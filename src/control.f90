@@ -1,9 +1,7 @@
 !-----------------------------------------------------------------------
+!
 ! MODULE: control_module
-!
-! DESCRIPTION:
-!
-!>@brief
+!> @brief
 !> This module contains the variables that control SNAP's solver
 !> routines. This includes the time-dependent variables.
 !
@@ -22,8 +20,8 @@ MODULE control_module
 !
 ! Module Input Variables
 !
-! epsi     - convergence criterion
-! iitm     - max inner iterations
+!> @param[in] epsi     - convergence criterion
+!> @param[in] iitm     - max inner iterations
 ! oitm     - max outer iterations
 ! timedep  - 0/1=no/yes perform a time-dependent calculation
 ! tf       - final time
