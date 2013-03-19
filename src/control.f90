@@ -1,11 +1,15 @@
-MODULE control_module
+!-----------------------------------------------------------------------
+! MODULE: control_module
+!
+! DESCRIPTION:
+!
+!>@brief
+!> This module contains the variables that control SNAP's solver
+!> routines. This includes the time-dependent variables.
+!
+!-----------------------------------------------------------------------
 
-!-----------------------------------------------------------------------
-!
-! This module contains the variables that control SNAP's solver
-! routines. This includes the time-dependent variables.
-!
-!-----------------------------------------------------------------------
+MODULE control_module
 
   USE global_module, ONLY: i_knd, r_knd, l_knd, zero, one
 
