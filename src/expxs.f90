@@ -1,11 +1,13 @@
-MODULE expxs_module
+!-----------------------------------------------------------------------
+!
+! MODULE: expxs_module
+!> @brief
+!> This module contains the subroutines for expanding a cross section to
+!> a full spatial map.
+!
+!-----------------------------------------------------------------------
 
-!-----------------------------------------------------------------------
-!
-! This module contains the subroutines for expanding a cross section to
-! a full spatial map.
-!
-!-----------------------------------------------------------------------
+MODULE expxs_module
 
   USE global_module, ONLY: i_knd, r_knd, zero
 

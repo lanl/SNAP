@@ -1,10 +1,12 @@
-MODULE dealloc_module
+!-----------------------------------------------------------------------
+!
+! MODULE: dealloc_module
+!> @brief
+!> This module controls the deallocation process of run-time arrays.
+!
+!-----------------------------------------------------------------------
 
-!-----------------------------------------------------------------------
-!
-! This module controls the deallocation process of run-time arrays.
-!
-!-----------------------------------------------------------------------
+MODULE dealloc_module
 
   USE global_module, ONLY: i_knd
 

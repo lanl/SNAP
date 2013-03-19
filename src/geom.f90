@@ -1,12 +1,14 @@
-MODULE geom_module
+!-----------------------------------------------------------------------
+!
+! MODULE: geom_module
+!> @brief
+!> This module contains the variables that relate to the geometry of the
+!> problem and the subroutines necessary to allocate and deallocate
+!> geometry related data as necessary.
+!
+!-----------------------------------------------------------------------
 
-!-----------------------------------------------------------------------
-!
-! This module contains the variables that relate to the geometry of the
-! problem and the subroutines necessary to allocate and deallocate
-! geometry related data as necessary.
-!
-!-----------------------------------------------------------------------
+MODULE geom_module
 
   USE global_module, ONLY: i_knd, r_knd, zero, one, two
 

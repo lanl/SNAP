@@ -1,10 +1,12 @@
-MODULE dim1_sweep_module
+!-----------------------------------------------------------------------
+!
+! MODULE: dim1_sweep_module
+!> @brief
+!> This module contains the 1D mesh sweep logic.
+!
+!-----------------------------------------------------------------------
 
-!-----------------------------------------------------------------------
-!
-! This module contains the 1D mesh sweep logic.
-!
-!-----------------------------------------------------------------------
+MODULE dim1_sweep_module
 
   USE global_module, ONLY: i_knd, r_knd, zero, two, one, half
 
