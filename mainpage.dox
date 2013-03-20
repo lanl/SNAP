@@ -1,15 +1,26 @@
 /**
 
-\mainpage SNAP Documentation
+\mainpage SNAP Doxygen Documentation Main Page
 
-SNAP: SN (Discrete Ordinates) Application Proxy
-===============================================
+Brief Description
+-----------------
 
-Description
------------
+SNAP serves as a proxy application to model the performance of a modern discrete ordinates neutral particle transport application. 
 
-SNAP serves as a proxy application to model the performance of a modern discrete ordinates neutral particle transport application. SNAP may be considered an update to [Sweep3D](http://www.ccs3.lanl.gov/PAL/software.shtml), intended for hybrid computing architectures. It is modeled off the Los Alamos National Laboratory code PARTISN. PARTISN solves the linear Boltzmann transport equation (TE), a governing equation for determining the number of neutral particles (e.g., neutrons and gamma rays) in a multi-dimensional phase space. SNAP itself is not a particle transport application; SNAP incorporates no actual physics in its available data, nor does it use numerical operators specifically designed for particle transport. Rather, SNAP mimics the computational workload, memory requirements, and communication patterns of PARTISN. The equation it solves has been composed to use the same number of operations, use the same data layout, and load elements of the arrays in approximately the same order. Although the equation SNAP solves looks similar to the TE, it has no real world relevance.
+Classification
+--------------
 
-Please read the README file for more details.
+SNAP is Unclassified and contains no Unclassified Controlled Nuclear Information. It has been assigned Los Alamos Computer Code number LA-CC-13-016.
+
+Authors
+-------
+
+* Joe Zerr, CCS-2, Los Alamos National Laboratory
+* Randal Baker, CCS-2, Los Alamos National Laboratory
+
+Questions and issues: snap@lanl.gov
+
+
+Please read the following file, "SNAP: SN (Discrete Ordinates) Application Proxy" for more details.
 
 */
