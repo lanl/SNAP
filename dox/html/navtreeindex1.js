@@ -65,8 +65,6 @@ var NAVTREEINDEX1 =
 "functions_vars.html":[1,2,2],
 "geom_8f90.html":[2,0,0,6],
 "global_8f90.html":[2,0,0,7],
-"globals.html":[2,1,0],
-"globals_func.html":[2,1,1],
 "index.html":[],
 "index.html":[0],
 "inner_8f90.html":[2,0,0,8],
