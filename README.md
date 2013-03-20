@@ -1,5 +1,4 @@
 /**
-\mainpage README.md
 
 SNAP: SN (Discrete Ordinates) Application Proxy
 ===============================================
