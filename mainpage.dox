@@ -12,12 +12,26 @@ Classification
 
 SNAP is Unclassified and contains no Unclassified Controlled Nuclear Information. It has been assigned Los Alamos Computer Code number LA-CC-13-016.
 
-@author Joe Zerr, CCS-2, Los Alamos National Laboratory
-@author Randal Baker, CCS-2, Los Alamos National Laboratory
+Authors
+-------
+
+Joe Zerr, CCS-2, Los Alamos National Laboratory
+Randal Baker, CCS-2, Los Alamos National Laboratory
+
+Contact
+-------
 
 Questions and issues: snap@lanl.gov
 
+Detailed Description
+--------------------
 
+Modules can be browsed under "Data Types List" in the sidebar. Module descriptions include caller graphs.
+
+Functions/Subroutines and Variables can be browsed under "Data Types List/Data Fields"
+
+Source code can be browsed under "Files" in the sidebar. Call graphs are available for snap_main and translv.
+ 
 Please read the file, "SNAP: SN (Discrete Ordinates) Application Proxy" for more details.
 
 */
