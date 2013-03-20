@@ -1,7 +1,7 @@
 var NAVTREE =
 [
   [ "SNAP", "index.html", [
-    [ "SNAP documentation", "index.html", null ],
+    [ "README.md", "index.html", null ],
     [ "Data Types List", null, [
       [ "Data Types List", "annotated.html", "annotated" ],
       [ "Data Types", "classes.html", null ],

@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['snap_20documentation',['SNAP documentation',['../index.html',1,'']]],
   ['s_5fxs',['s_xs',['../classsolvar__module.html#ab36a684b0d77a635a3eb402da029b7b7',1,'solvar_module']]],
   ['scatp',['scatp',['../classdata__module.html#a7ac9af7f12e8f03d3ba40fa78904d5a1',1,'data_module']]],
   ['setup',['setup',['../classsetup__module.html#a302c0c32f6276d487ccd246981c5a4f6',1,'setup_module']]],
