@@ -23,8 +23,8 @@ Contact
 
 Questions and issues: snap@lanl.gov
 
-Detailed Description
---------------------
+Doxygen Navigation
+------------------
 
 Modules can be browsed under "Data Types List" in the sidebar. Module descriptions include caller graphs.
 
@@ -32,6 +32,9 @@ Functions/Subroutines and Variables can be browsed under "Data Types List/Data F
 
 Source code can be browsed under "Files" in the sidebar. Call graphs are available for snap_main and translv.
  
-Please read the file, "SNAP: SN (Discrete Ordinates) Application Proxy" for more details.
+Detailed Description
+--------------------
+
+Please read the file, "SNAP: SN (Discrete Ordinates) Application Proxy" for a more description of the code.
 
 */
