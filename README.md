@@ -1,5 +1,3 @@
-/**
-
 SNAP: SN (Discrete Ordinates) Application Proxy
 ===============================================
 
@@ -332,4 +330,3 @@ Authors
 
 Questions and issues: snap@lanl.gov
 
-*/

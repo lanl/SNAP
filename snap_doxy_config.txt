@@ -655,7 +655,7 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories
 # with spaces.
 
-INPUT                  = /Users/mewall/Common/packages/snap/src /Users/mewall/Common/packages/snap/README.md
+INPUT                  = /Users/mewall/Common/packages/snap/src /Users/mewall/Common/packages/snap/README.md /Users/mewall/Common/packages/snap/mainpage.dox
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding, which is
@@ -673,7 +673,7 @@ INPUT_ENCODING         = UTF-8
 # *.hxx *.hpp *.h++ *.idl *.odl *.cs *.php *.php3 *.inc *.m *.mm *.dox *.py
 # *.f90 *.f *.for *.vhd *.vhdl
 
-FILE_PATTERNS          = *.dox *.txt *.f90
+FILE_PATTERNS          = *.txt *.f90
 
 # The RECURSIVE tag can be used to turn specify whether or not subdirectories
 # should be searched for input files as well. Possible values are YES and NO.
