@@ -1,3 +1,6 @@
+/**
+\mainpage README.md
+
 SNAP: SN (Discrete Ordinates) Application Proxy
 ===============================================
 
@@ -329,3 +332,5 @@ Authors
 * Randal Baker, CCS-2, Los Alamos National Laboratory
 
 Questions and issues: snap@lanl.gov
+
+*/

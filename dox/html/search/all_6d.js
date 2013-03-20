@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['mainpage_2edox',['mainpage.dox',['../mainpage_8dox.html',1,'']]],
   ['mat',['mat',['../classdata__module.html#aee30087acd108308e1a8e8bdd3f14dcf',1,'data_module']]],
   ['mat_5fopt',['mat_opt',['../classdata__module.html#a191b122ec7d6da5c691c45d89d65694f',1,'data_module']]],
   ['max_5fthreads',['max_threads',['../classplib__module.html#aac421ecf4251867c4bff7045095d596c',1,'plib_module']]],
