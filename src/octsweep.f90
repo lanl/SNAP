@@ -88,7 +88,7 @@ MODULE octsweep_module
         fluxm(:,:,1,1,g), wmu, flkx(id,1,1,g), t_xs(:,1,1,g) )
     ELSE
       CALL dim3_sweep ( ich, id, d1, d2, d3, d4, jd, kd, jlo, klo,     &
-        oct, g, jhi, khi, jst, kst, psii(:,:,:,g), psij(:,:,g),        &
+        oct, g, jhi, khi, jst, kst, psii(:,:,:,g), psij(:,:,:,g),      &
         psik(:,:,:,g), qtot(:,:,:,:,g), ec(:,:,oct), vdelt(g),         &
         ptr_in(:,:,:,:,i1,i2), ptr_out(:,:,:,:,i1,i2),                 &
         dinv(:,:,:,:,g), flux(:,:,:,g), fluxm(:,:,:,:,g),              &

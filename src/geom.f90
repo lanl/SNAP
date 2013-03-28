@@ -8,7 +8,7 @@ MODULE geom_module
 !
 !-----------------------------------------------------------------------
 
-  USE global_module, ONLY: i_knd, r_knd, zero, one, two
+  USE global_module, ONLY: i_knd, r_knd, zero, one, two, l_knd
 
   IMPLICIT NONE
 
@@ -55,15 +55,40 @@ MODULE geom_module
 ! hk(nang) - Spatial DD z-coefficient
 !
 ! dinv(nang,nx,ny,nz,ng) - Sweep denominator, pre-computed/inverted
+!
+! ndiag    - number of diagonals of mini-KBA sweeps in nested threading
 !_______________________________________________________________________
 
-  INTEGER(i_knd) :: ny_gl, nz_gl, jlb, jub, klb, kub, nc
+  INTEGER(i_knd) :: ny_gl, nz_gl, jlb, jub, klb, kub, nc, ndiag
 
   REAL(r_knd) :: dx, dy, dz, hi
 
   REAL(r_knd), ALLOCATABLE, DIMENSION(:) :: hj, hk
 
   REAL(r_knd), ALLOCATABLE, DIMENSION(:,:,:,:,:) :: dinv
+!_______________________________________________________________________
+!
+! Derived data types for mini-KBA diagonals
+!
+! cell_id_type      - type for holding ijk indices of a cell on a given
+!                     diagonal
+! ic, j, k          - ijk integer indices of cell_id_type
+! diag_type         - type for holding diagonal information
+! len               - number of cells on a diagonal line/plane
+! cell_id(len)      - array of cell ijk indices
+! diag(ndiag)       - array of diagonal lines/planes information
+!_______________________________________________________________________
+
+  TYPE cell_id_type
+    INTEGER(i_knd) :: ic, j, k
+  END TYPE cell_id_type
+
+  TYPE diag_type
+    INTEGER(i_knd) :: len
+    TYPE(cell_id_type), ALLOCATABLE, DIMENSION(:) :: cell_id
+  END TYPE diag_type
+
+  TYPE(diag_type), ALLOCATABLE, DIMENSION(:) :: diag
 
 
   CONTAINS
@@ -105,8 +130,27 @@ MODULE geom_module
 !
 !-----------------------------------------------------------------------
 !_______________________________________________________________________
+!
+!   Local variables
+!_______________________________________________________________________
+
+    INTEGER(i_knd) :: i
+!_______________________________________________________________________
+!
+!   Deallocate the sweep parameters
+!_______________________________________________________________________
 
     DEALLOCATE( hj, hk, dinv )
+!_______________________________________________________________________
+!
+!   Deallocate the diagonal related arrays
+!_______________________________________________________________________
+
+    DO i = 1, ndiag
+      DEALLOCATE( diag(i)%cell_id )
+    END DO
+
+    DEALLOCATE( diag )
 !_______________________________________________________________________
 !_______________________________________________________________________
 
@@ -171,6 +215,124 @@ MODULE geom_module
 !_______________________________________________________________________
 
   END SUBROUTINE param_calc
+
+
+  SUBROUTINE diag_setup ( do_nested, ichunk, ierr )
+
+!-----------------------------------------------------------------------
+!
+! Allocate and set up the values of the derived data type 'diag' which
+! stores number of diagonals, each one's number of cells/length, and the
+! ijk indices of the cells on the diagonal.
+!
+!-----------------------------------------------------------------------
+
+    INTEGER(i_knd), INTENT(IN) :: ichunk
+
+    INTEGER(i_knd), INTENT(OUT) :: ierr
+
+    LOGICAL(l_knd), INTENT(IN) :: do_nested
+!_______________________________________________________________________
+!
+!   Local variables
+!_______________________________________________________________________
+
+    INTEGER(i_knd) :: i, j, k, nn, ing
+
+    INTEGER(i_knd), ALLOCATABLE, DIMENSION(:) :: indx
+!_______________________________________________________________________
+!
+!   Set up the diagonal indices according to do_nested. If 1, use
+!   mini-KBA sweeps and thus allocate many diagonals.
+!_______________________________________________________________________
+
+    ierr = 0
+
+    IF ( do_nested ) THEN
+
+      ndiag = ichunk + ny + nz - 2
+
+      ALLOCATE( diag(ndiag), indx(ndiag), STAT=ierr )
+      IF ( ierr /= 0 ) RETURN
+
+      diag%len = 0
+      indx = 0
+!_______________________________________________________________________
+!
+!     Cells of same diagonal all have same value according to i+j+k-2
+!     formula. Use that to compute len for each diagonal. Use ichunk.
+!_______________________________________________________________________
+
+      DO k = 1, nz
+      DO j = 1, ny
+      DO i = 1, ichunk
+        nn = i + j + k - 2
+        diag(nn)%len = diag(nn)%len + 1
+      END DO
+      END DO
+      END DO
+!_______________________________________________________________________
+!
+!     Next allocate cell_id array within diag type according to len
+!_______________________________________________________________________
+
+      DO nn = 1, ndiag
+        ing = diag(nn)%len
+        ALLOCATE( diag(nn)%cell_id(ing), STAT=ierr )
+        IF ( ierr /= 0 ) RETURN
+      END DO
+!_______________________________________________________________________
+!
+!     Lastly, set each cell's actual ijk indices in this diagonal map
+!_______________________________________________________________________
+
+      DO k = 1, nz
+      DO j = 1, ny
+      DO i = 1, ichunk
+        nn = i + j + k - 2
+        indx(nn) = indx(nn) + 1
+        ing = indx(nn)
+        diag(nn)%cell_id(ing)%ic = i
+        diag(nn)%cell_id(ing)%j  = j
+        diag(nn)%cell_id(ing)%k  = k
+      END DO
+      END DO
+      END DO
+
+      DEALLOCATE( indx )
+
+    ELSE
+!_______________________________________________________________________
+!
+!     Otherwise, use standard sweep map. No mini-KBA. One "diagonal",
+!     which contains all the cells in typical i, then j, then k
+!     lexographical order.
+!_______________________________________________________________________
+
+      ndiag = 1
+      ALLOCATE( diag(1), STAT=ierr )
+      IF ( ierr /= 0 ) RETURN
+      ALLOCATE( diag(1)%cell_id(ichunk*ny*nz), STAT=ierr )
+      IF ( ierr /= 0 ) RETURN
+
+      diag(1)%len = ichunk*ny*nz
+      ing = 0
+      DO k = 1, nz
+      DO j = 1, ny
+      DO i = 1, ichunk
+        ing = ing + 1
+        diag(1)%cell_id(ing)%ic = i
+        diag(1)%cell_id(ing)%j  = j
+        diag(1)%cell_id(ing)%k  = k
+      END DO
+      END DO
+      END DO
+
+    END IF        
+!_______________________________________________________________________
+!_______________________________________________________________________
+
+  END SUBROUTINE diag_setup
 
 
 END MODULE geom_module

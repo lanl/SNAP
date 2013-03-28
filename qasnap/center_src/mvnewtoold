@@ -8,6 +8,8 @@ mv -f nout07 out07
 mv -f nout08 out08
 mv -f nout09 out09
 mv -f nout10 out10
+mv -f nout11 out11
+mv -f nout12 out12
 
 mv -f nfout01 fout01
 mv -f nfout02 fout02
@@ -19,3 +21,5 @@ mv -f nfout07 fout07
 mv -f nfout08 fout08
 mv -f nfout09 fout09
 mv -f nfout10 fout10
+mv -f nfout11 fout11
+mv -f nfout12 fout12

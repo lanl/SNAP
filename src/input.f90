@@ -10,7 +10,7 @@ MODULE input_module
   USE global_module, ONLY: i_knd, r_knd, iunit, ounit, zero, one
 
   USE plib_module, ONLY: npey, npez, ichunk, nthreads, iproc, root,    &
-    comm_snap, bcast, nproc, barrier
+    comm_snap, bcast, nproc, barrier, nnested
 
   USE geom_module, ONLY: ndimen, nx, ny, nz, lx, ly, lz
 
@@ -55,7 +55,7 @@ MODULE input_module
 
     NAMELIST / invar / npey, npez, ichunk, nthreads, ndimen, nx, ny,   &
       nz, lx, ly, lz, nmom, nang, ng, epsi, iitm, oitm, timedep, tf,   &
-      nsteps, mat_opt, src_opt, scatp, it_det, fluxp, fixup
+      nsteps, mat_opt, src_opt, scatp, it_det, fluxp, fixup, nnested
 !_______________________________________________________________________
 !
 !   Read the input file. Echo to output file. Call for an input variable
@@ -121,7 +121,7 @@ MODULE input_module
     WRITE( ounit, 121 ) ( star, i = 1, 80 )
     WRITE( ounit, 122 ) ( star, i = 1, 80 )
     WRITE( ounit, 123 )
-    WRITE( ounit, 124 ) npey, npez, ichunk, nthreads
+    WRITE( ounit, 124 ) npey, npez, ichunk, nthreads, nnested
     WRITE( ounit, 125 ) ndimen, nx, ny, nz
     WRITE( ounit, 126 ) lx, ly, lz
     WRITE( ounit, 127 ) nmom, nang
@@ -140,7 +140,8 @@ MODULE input_module
     124 FORMAT( 5X, 'npey= ', I5, /,                                   &
                 5X, 'npez= ', I5, /,                                   &
                 5X, 'ichunk= ', I5, /,                                 &
-                5X, 'nthreads= ', I5 )
+                5X, 'nthreads= ', I5, /,                               &
+                5X, 'nnested= ', I3 )
 
     125 FORMAT( 5X, 'ndimen= ', I2, /,                                 &
                 5X, 'nx= ', I5, /,                                     &
@@ -261,6 +262,20 @@ MODULE input_module
       nthreads = 1
       error = '*WARNING: INPUT_CHECK: NTHREADS must be positive; ' //  &
               'reset to 1'
+      CALL print_error ( ounit, error )
+    END IF
+
+    IF ( nnested < 0 ) THEN
+      nnested = 0
+      error = '*WARNING: INPUT_CHECK: NNESTED must be ' //             &
+              'non-negative; reset to 0'
+      CALL print_error ( ounit, error )
+    END IF
+
+    IF ( nnested == 1 ) THEN
+      nnested = 0
+      error = '*WARNING: INPUT_CHECK: NNESTED=1 same as 0+overhead;' //&
+              ' reset to 0'
       CALL print_error ( ounit, error )
     END IF
 !_______________________________________________________________________
@@ -504,6 +519,7 @@ MODULE input_module
       ipak(19) = it_det
       ipak(20) = fluxp
       ipak(21) = fixup
+      ipak(22) = nnested
 
       dpak(1) = lx
       dpak(2) = ly
@@ -549,6 +565,7 @@ MODULE input_module
       it_det    = ipak(19)
       fluxp     = ipak(20)
       fixup     = ipak(21)
+      nnested   = ipak(22)
 
       lx     = dpak(1)
       ly     = dpak(2)

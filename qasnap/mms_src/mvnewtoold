@@ -46,6 +46,8 @@ mv -f 3d_mms_t2.new 3d_mms_t2.old
 
 mv -f 3d_model.new 3d_model.old
 
+mv -f 3d_model_n.new 3d_model_n.old
+
 
 mv -f 3d_fixup_st.new 3d_fixup_st.old
 mv -f 3d_fixup_st.flux.new 3d_fixup_st.flux.old
@@ -56,4 +58,6 @@ mv -f 3d_fixup_t1.new 3d_fixup_t1.old
 mv -f 3d_fixup_t2.new 3d_fixup_t2.old
 
 mv -f 3d_mod_fixup.new 3d_mod_fixup.old
+
+mv -f 3d_mod_fix_n.new 3d_mod_fix_n.old
 
