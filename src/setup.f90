@@ -32,7 +32,8 @@ MODULE setup_module
 
   USE plib_module, ONLY: npey, npez, glmax, comm_snap, yproc, zproc,   &
     iproc, root, nthreads, num_grth, thread_level, thread_single,      &
-    thread_funneled, thread_serialized, thread_multiple
+    thread_funneled, thread_serialized, thread_multiple, nnested,      &
+    do_nested
 
   IMPLICIT NONE
 
@@ -683,6 +684,11 @@ MODULE setup_module
     WRITE( ounit, 183 ) thread_single, thread_funneled,                &
       thread_serialized, thread_multiple
     WRITE( ounit, 184 ) thread_level
+    IF ( do_nested ) THEN
+      WRITE( ounit, 185 ) nnested
+    ELSE
+      WRITE( ounit, 186 ) nnested
+    END IF
 
     WRITE( ounit, 159 ) ( star, i = 1, 80 )
 !_______________________________________________________________________
@@ -748,6 +754,10 @@ MODULE setup_module
                 10X, I2, ' - MPI_THREAD_SERIALIZED', /                 &
                 10X, I2, ' - MPI_THREAD_MULTIPLE' )
     184 FORMAT( 4X, 'thread_level = ', I2, / )
+    185 FORMAT( 4X, '.TRUE. nested threading', /, 6X, 'nnested = ',    &
+                I4, / )
+    186 FORMAT( 4X, '.FALSE. nested threading', /, 6X, 'nnested = ',   &
+                I4, / )
 
     159 FORMAT( 80A, / )
 !_______________________________________________________________________

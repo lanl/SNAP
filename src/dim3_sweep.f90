@@ -10,9 +10,10 @@ MODULE dim3_sweep_module
 
   USE global_module, ONLY: i_knd, r_knd, zero, two, one, half
 
-  USE plib_module, ONLY: ichunk, firsty, lasty, firstz, lastz
+  USE plib_module, ONLY: ichunk, firsty, lasty, firstz, lastz,         &
+    nnested
 
-  USE geom_module, ONLY: nx, hi, hj, hk, ndimen, ny, nz
+  USE geom_module, ONLY: nx, hi, hj, hk, ndimen, ny, nz, ndiag, diag
 
   USE sn_module, ONLY: cmom, nang, mu, w, noct
 
@@ -60,9 +61,9 @@ MODULE dim3_sweep_module
 
     REAL(r_knd), DIMENSION(nang,cmom), INTENT(IN) :: ec
 
-    REAL(r_knd), DIMENSION(nang,ichunk), INTENT(INOUT) :: psij
-
     REAL(r_knd), DIMENSION(nang,ny,nz), INTENT(INOUT) :: psii
+
+    REAL(r_knd), DIMENSION(nang,ichunk,nz), INTENT(INOUT) :: psij
 
     REAL(r_knd), DIMENSION(nang,ichunk,ny), INTENT(INOUT) :: psik
 
@@ -98,16 +99,14 @@ MODULE dim3_sweep_module
 !   Local variables
 !_______________________________________________________________________
 
-    INTEGER(i_knd) :: ist, ic, ii, i, j, k, l, ibl, ibr, ibb, ibt,     &
-      ibf, ibk, ic1
+    INTEGER(i_knd) :: ist, d, n, ic, i, j, k, l, ibl, ibr, ibb, ibt,   &
+      ibf, ibk
 
     REAL(r_knd) :: sum_hv
 
     REAL(r_knd), DIMENSION(nang) :: psi, pc, den
 
     REAL(r_knd), DIMENSION(nang,4) :: hv, fxhv
-
-    REAL(r_knd), DIMENSION(nang,ichunk) :: qm
 !_______________________________________________________________________
 !
 !   Set up the sweep order in the i-direction.
@@ -115,44 +114,43 @@ MODULE dim3_sweep_module
 
     ist = -1
     IF ( id == 2 ) ist = 1
-
-    ic1 = (ich-1)*ichunk + 1
 !_______________________________________________________________________
 !
-!   Loop over nz (k) and ny (j) cells
+!   Zero out the outgoing boundary arrays and fixup array
 !_______________________________________________________________________
 
-    k_loop: DO k = klo, khi, kst
-    j_loop: DO j = jlo, jhi, jst
-!_______________________________________________________________________
-!
-!     Set up the mms source if necessary. Set up fixup monitor.
-!_______________________________________________________________________
+    jb_out = zero
+    kb_out = zero
 
-      qm = zero
-      IF ( src_opt == 3 ) qm = qim(:,ic1:ic1+ichunk-1,j,k,oct,g)
-
-      fxhv = zero
+    fxhv = zero
 !_______________________________________________________________________
 !
-!     Sweep the i cells of the chunk. Compute chunk ii and global i
-!     indices.
+!   Loop over cells along the diagonals. When only 1 diagonal, it's
+!   normal sweep order. Otherwise, nested threading performs mini-KBA.
 !_______________________________________________________________________
 
-      ic_loop: DO ic = 1, ichunk
+  !$OMP PARALLEL NUM_THREADS(nnested) DEFAULT(SHARED) FIRSTPRIVATE(fxhv)
 
-        IF ( ist == -1 ) THEN
-          ii = ichunk - ic + 1
+    diagonal_loop: DO d = 1, ndiag
+
+  !$OMP DO SCHEDULE(STATIC,1) PRIVATE(n,ic,i,j,k,l,psi,pc,sum_hv,hv,den)
+      line_loop: DO n = 1, diag(d)%len
+
+        ic = diag(d)%cell_id(n)%ic
+
+        IF ( ist < 0 ) THEN
+          i = ich*ichunk - ic + 1
         ELSE
-          ii = ic
+          i = (ich-1)*ichunk + ic
         END IF
 
-        i = (ich-1)*ichunk + ii
+        IF ( i > nx ) CYCLE line_loop
 
-        IF ( i > nx ) THEN
-          jb_out(:,ic,k) = zero; kb_out(:,ic,j) = zero
-          CYCLE ic_loop
-        END IF
+        j = diag(d)%cell_id(n)%j
+        IF ( jst < 0 ) j = ny - j + 1
+
+        k = diag(d)%cell_id(n)%k
+        IF ( kst < 0 ) k = nz - k + 1
 !_______________________________________________________________________
 !
 !       Left/right boundary conditions, always vacuum.
@@ -178,16 +176,16 @@ MODULE dim3_sweep_module
         ibb = 0; ibt = 0
         IF ( j == jlo ) THEN
           IF ( jd==1 .AND. lasty ) THEN
-            psij(:,ic) = zero
+            psij(:,ic,k) = zero
           ELSE IF ( jd==2 .AND. firsty ) THEN
             SELECT CASE ( ibb )
               CASE ( 0 )
-                psij(:,ic) = zero
+                psij(:,ic,k) = zero
               CASE ( 1 )
-                psij(:,ic) = zero
+                psij(:,ic,k) = zero
             END SELECT
           ELSE
-            psij(:,ic) = jb_in(:,ic,k)
+            psij(:,ic,k) = jb_in(:,ic,k)
           END IF
         END IF
 !_______________________________________________________________________
@@ -216,7 +214,8 @@ MODULE dim3_sweep_module
 !       Compute the angular source
 !_______________________________________________________________________
 
-        psi = qtot(1,i,j,k) + qm(:,ii)
+        psi = qtot(1,i,j,k)
+        IF ( src_opt == 3 ) psi = psi + qim(:,i,j,k,oct,g)
 
         DO l = 2, cmom
           psi = psi + ec(:,l)*qtot(l,i,j,k)
@@ -226,7 +225,7 @@ MODULE dim3_sweep_module
 !       Compute the numerator for the update formula
 !_______________________________________________________________________
 
-        pc = psi + psii(:,j,k)*mu*hi + psij(:,ic)*hj + psik(:,ic,j)*hk
+        pc = psi + psii(:,j,k)*mu*hi + psij(:,ic,k)*hj + psik(:,ic,j)*hk
         IF ( vdelt /= zero ) pc = pc + vdelt*ptr_in(:,i,j,k)
 !_______________________________________________________________________
 !
@@ -239,7 +238,7 @@ MODULE dim3_sweep_module
           psi = pc*dinv(:,i,j,k)
 
           psii(:,j,k) = two*psi - psii(:,j,k)
-          psij(:,ic) = two*psi - psij(:,ic)
+          psij(:,ic,k) = two*psi - psij(:,ic,k)
           IF ( ndimen == 3 ) psik(:,ic,j) = two*psi - psik(:,ic,j)
           IF ( vdelt /= zero )                                         &
             ptr_out(:,i,j,k) = two*psi - ptr_in(:,i,j,k)
@@ -258,7 +257,7 @@ MODULE dim3_sweep_module
           fixup_loop: DO
 
             fxhv(:,1) = two*pc - psii(:,j,k)
-            fxhv(:,2) = two*pc - psij(:,ic)
+            fxhv(:,2) = two*pc - psij(:,ic,k)
             IF ( ndimen == 3 ) fxhv(:,3) = two*pc - psik(:,ic,j)
             IF ( vdelt /= zero ) fxhv(:,4) = two*pc - ptr_in(:,i,j,k)
 
@@ -277,7 +276,7 @@ MODULE dim3_sweep_module
 !_______________________________________________________________________
 
             pc = psii(:,j,k)*mu*hi*(one+hv(:,1)) +                     &
-              psij(:,ic)*hj*(one+hv(:,2)) +                            &
+              psij(:,ic,k)*hj*(one+hv(:,2)) +                          &
               psik(:,ic,j)*hk*(one+hv(:,3))
             IF ( vdelt /= zero )                                       &
               pc = pc + vdelt*ptr_in(:,i,j,k)*(one+hv(:,4))
@@ -301,7 +300,7 @@ MODULE dim3_sweep_module
           psi = pc
 
           psii(:,j,k) = fxhv(:,1) * hv(:,1)
-          psij(:,ic) = fxhv(:,2) * hv(:,2)
+          psij(:,ic,k) = fxhv(:,2) * hv(:,2)
           IF ( ndimen == 3 ) psik(:,ic,j) = fxhv(:,3) * hv(:,3)
           IF ( vdelt /= zero ) ptr_out(:,i,j,k) = fxhv(:,4) * hv(:,4)
 
@@ -345,7 +344,7 @@ MODULE dim3_sweep_module
           ELSE IF ( jd==1 .AND. firsty ) THEN
             IF ( ibb == 1 ) CONTINUE
           ELSE
-            jb_out(:,ic,k) = psij(:,ic)
+            jb_out(:,ic,k) = psij(:,ic,k)
           END IF
         END IF
 
@@ -370,7 +369,7 @@ MODULE dim3_sweep_module
 
         IF ( (jd==1 .AND. firsty) .OR. (jd==2 .AND. lasty) ) THEN
           flky(i,j+jd-1,k) = flky(i,j+jd-1,k) +                        &
-            jst*SUM( weta*psij(:,ic) )
+            jst*SUM( weta*psij(:,ic,k) )
         END IF
 
         IF ( ((kd==1 .AND. firstz) .OR. (kd==2 .AND. lastz)) .AND.     &
@@ -383,10 +382,12 @@ MODULE dim3_sweep_module
 !       Finish the loops
 !_______________________________________________________________________
 
-      END DO ic_loop
+     END DO line_loop
+  !$OMP END DO
 
-   END DO j_loop
-   END DO k_loop
+   END DO diagonal_loop
+
+  !$OMP END PARALLEL
 !_______________________________________________________________________
 !_______________________________________________________________________
 

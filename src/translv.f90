@@ -10,10 +10,10 @@ SUBROUTINE translv
   USE global_module, ONLY: i_knd, r_knd, ounit, zero, half, one, two
 
   USE plib_module, ONLY: glmax, comm_snap, iproc, root, thread_num,    &
-    ichunk
+    ichunk, do_nested
 
   USE geom_module, ONLY: geom_alloc, geom_dealloc, dinv, param_calc,   &
-    nx, ny_gl, nz_gl
+    nx, ny_gl, nz_gl, diag_setup
 
   USE sn_module, ONLY: nang, noct, mu, eta, xi
 
@@ -84,6 +84,18 @@ SUBROUTINE translv
       'arrays'
     CALL print_error ( ounit, error )
     CALL stop_run ( 3, 2, 0 )
+  END IF
+!_______________________________________________________________________
+!
+! Call for setup of the mini-KBA diagonal map
+!_______________________________________________________________________
+
+  CALL diag_setup ( do_nested, ichunk, ierr )
+  CALL glmax ( ierr, comm_snap )
+  IF ( ierr /= 0 ) THEN
+    error = '***ERROR: DIAG_SETUP: Allocation error of diag type array'
+    CALL print_error ( ounit, error )
+    CALL stop_run ( 3, 3, 0 )
   END IF
 
   CALL wtime ( t2 )

@@ -44,6 +44,12 @@ MODULE utils_module
     INTEGER(i_knd) :: n
 !_______________________________________________________________________
 !
+!   Declaration potentially needed for Cray. Seems harmless for others.
+!_______________________________________________________________________
+
+    INTEGER, EXTERNAL :: IARGC
+!_______________________________________________________________________
+!
 !   Return if not root. Loop over the first two command line arguments
 !   to get i/o file names.
 !_______________________________________________________________________

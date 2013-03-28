@@ -8,9 +8,13 @@
 !
 !-----------------------------------------------------------------------
 
+<<<<<<< HEAD
 MODULE geom_module
 
+  USE global_module, ONLY: i_knd, r_knd, zero, one, two
+=======
   USE global_module, ONLY: i_knd, r_knd, zero, one, two, l_knd
+>>>>>>> v1.01
 
   IMPLICIT NONE
 

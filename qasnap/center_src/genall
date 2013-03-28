@@ -9,7 +9,9 @@ mpirun -cpus-per-proc 4 -np 4 $1 in06 out06
 mpirun -cpus-per-proc 2 -np 8 $1 in07 out07
 mpirun -cpus-per-proc 2 -np 8 $1 in08 out08
 mpirun -cpus-per-proc 4 -np 4 $1 in09 out09
-mpirun -cpus-per-proc 4 -np 4 $1 in09 out09
+mpirun -cpus-per-proc 4 -np 4 $1 in10 out10
+mpirun -cpus-per-proc 4 -np 4 $1 in11 out11
+mpirun -cpus-per-proc 4 -np 4 $1 in12 out12
 
 # Fixup
 mpirun -cpus-per-proc 3 -np 4 $1 fin01 fout01 
@@ -22,3 +24,5 @@ mpirun -cpus-per-proc 2 -np 8 $1 fin07 fout07
 mpirun -cpus-per-proc 2 -np 8 $1 fin08 fout08
 mpirun -cpus-per-proc 4 -np 4 $1 fin09 fout09
 mpirun -cpus-per-proc 4 -np 4 $1 fin10 fout10
+mpirun -cpus-per-proc 4 -np 4 $1 fin11 fout11
+mpirun -cpus-per-proc 4 -np 4 $1 fin12 fout12

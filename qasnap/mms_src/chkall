@@ -50,6 +50,8 @@ mpirun -cpus-per-proc 2 -np 8 $1 3d_mms_t2.inp 3d_mms_t2.new
 
 mpirun -cpus-per-proc 2 -np 8 $1 3d_model.inp 3d_model.new
 
+mpirun -cpus-per-proc 4 -np 4 $1 3d_model_n.inp 3d_model_n.new
+
 # Fixup
 mpirun -cpus-per-proc 4 -np 4 $1 3d_fixup_st.inp 3d_fixup_st.new
 mv -f flux 3d_fixup_st.flux.new
@@ -60,4 +62,6 @@ mpirun -cpus-per-proc 2 -np 8 $1 3d_fixup_t1.inp 3d_fixup_t1.new
 mpirun -cpus-per-proc 2 -np 8 $1 3d_fixup_t2.inp 3d_fixup_t2.new
 
 mpirun -cpus-per-proc 2 -np 8 $1 3d_mod_fixup.inp 3d_mod_fixup.new
+
+mpirun -cpus-per-proc 4 -np 4 $1 3d_mod_fix_n.inp 3d_mod_fix_n.new
 

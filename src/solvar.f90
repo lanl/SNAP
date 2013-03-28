@@ -47,7 +47,7 @@ MODULE solvar_module
 ! s_xs(nmom,nx,ny,nz,ng)  - In-group scattering cross section on mesh
 !
 ! psii(nang,ny,nz,ng)     - Working psi_x array
-! psij(nang,ichunk,ng)    - Working psi_y array
+! psij(nang,ichunk,nz,ng) - Working psi_y array
 ! psik(nang,ichunk,ny,ng) - Working psi_z array
 !
 ! jb_in(nang,ichunk,nz,ng)  - y-dir boundary flux in from comm
@@ -61,11 +61,9 @@ MODULE solvar_module
 !
 !_______________________________________________________________________
 
-  REAL(r_knd), ALLOCATABLE, DIMENSION(:,:,:) :: psij
-
   REAL(r_knd), ALLOCATABLE, DIMENSION(:,:,:,:) :: flux, fluxpo, fluxpi,&
-    t_xs, a_xs, psii, psik, jb_in, jb_out, kb_in, kb_out, flkx, flky,  &
-    flkz
+    t_xs, a_xs, psii, psij, psik, jb_in, jb_out, kb_in, kb_out, flkx,  &
+    flky, flkz
 
   REAL(r_knd), ALLOCATABLE, DIMENSION(:,:,:,:,:) :: qtot, q2grp, fluxm,&
     s_xs
@@ -146,7 +144,7 @@ MODULE solvar_module
 !   Working arrays
 !_______________________________________________________________________
 
-    ALLOCATE( psii(nang,ny,nz,ng), psij(nang,ichunk,ng),               &
+    ALLOCATE( psii(nang,ny,nz,ng), psij(nang,ichunk,nz,ng),            &
       psik(nang,ichunk,ny,ng), STAT=ierr )
     IF ( ierr /= 0 ) RETURN
 

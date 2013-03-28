@@ -48,9 +48,10 @@ MODULE plib_module
 ! npez     - Number of MPI processes in the z-direction
 ! ichunk   - Size of work chunks in the x-direction
 ! nthreads - Number of OpenMP threads for energy parallelism
+! nnested  - number of nested threads
 !_______________________________________________________________________
 
-  INTEGER(i_knd) :: npey=1, npez=1, ichunk=4, nthreads=1
+  INTEGER(i_knd) :: npey=1, npez=1, ichunk=4, nthreads=1, nnested=0
 !_______________________________________________________________________
 !
 ! Run-time variables
@@ -91,6 +92,7 @@ MODULE plib_module
 !
 ! num_grth  - minimum number of nthreads and ng; used to ensure loop
 !             over groups with communications is sized properly
+! do_nested - true/false use nested threading, i.e., mini-KBA
 !_______________________________________________________________________
 
   INTEGER(i_knd), PARAMETER :: root=0, g_off = 2**16
@@ -100,7 +102,7 @@ MODULE plib_module
     thread_single, thread_funneled, thread_serialized, thread_multiple,&
     max_threads, num_grth
 
-  LOGICAL(l_knd) :: firsty, lasty, firstz, lastz
+  LOGICAL(l_knd) :: firsty, lasty, firstz, lastz, do_nested
 
   INCLUDE 'mpif.h'
 
@@ -775,6 +777,13 @@ MODULE plib_module
     END IF
 
     CALL OMP_SET_NUM_THREADS ( nthreads )
+!_______________________________________________________________________
+!
+!   Setup for nested threading
+!_______________________________________________________________________
+
+    do_nested = nnested > 0
+    CALL OMP_SET_NESTED ( do_nested )
 !_______________________________________________________________________
 !_______________________________________________________________________
 
