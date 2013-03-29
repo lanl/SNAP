@@ -39,7 +39,7 @@ MODULE utils_module
 !   Local variables
 !_______________________________________________________________________
 
-    CHARACTER(LEN=16) :: arg
+    CHARACTER(LEN=64) :: arg
 
     INTEGER(i_knd) :: n
 !_______________________________________________________________________
@@ -96,7 +96,7 @@ MODULE utils_module
 
     CHARACTER(LEN=*), INTENT(IN) :: fstat, faction
 
-    CHARACTER(LEN=16), INTENT(IN) :: fname
+    CHARACTER(LEN=*), INTENT(IN) :: fname
 
     CHARACTER(LEN=64), INTENT(OUT) :: error
 
@@ -108,7 +108,7 @@ MODULE utils_module
 !   Local variables.
 !_______________________________________________________________________
 
-    CHARACTER(LEN=16) :: tname
+    CHARACTER(LEN=64) :: tname
 !_______________________________________________________________________
 !
 !   Return if not root. Open the file with specified unit, name, status,
