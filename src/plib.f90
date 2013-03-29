@@ -93,7 +93,7 @@ MODULE plib_module
 ! do_nested - true/false use nested threading, i.e., mini-KBA
 !_______________________________________________________________________
 
-  INTEGER(i_knd), PARAMETER :: root=0, g_off = 2**16
+  INTEGER(i_knd), PARAMETER :: root=0, g_off = 2**14
 
   INTEGER(i_knd) :: nproc, iproc, comm_snap, comm_space, sproc, ycomm, &
     zcomm, yproc, zproc, ylop, yhip, zlop, zhip, thread_level,         &
@@ -817,7 +817,7 @@ MODULE plib_module
   END SUBROUTINE plock_omp
 
 
-  FUNCTION thread_num
+  FUNCTION thread_num ()
 
 !-----------------------------------------------------------------------
 !
