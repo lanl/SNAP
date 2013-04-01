@@ -17,7 +17,7 @@ var searchData=
   ['psend_5fd_5f2d',['psend_d_2d',['../interfaceplib__module_1_1psend.html#abd8d4a0655fcc3593051cfc1edd21c10',1,'plib_module::psend::psend_d_2d()'],['../classplib__module.html#aece115e45bdb1399b9c969366b46404e',1,'plib_module::psend_d_2d()']]],
   ['psend_5fd_5f3d',['psend_d_3d',['../interfaceplib__module_1_1psend.html#ab3ba2a056e9710585569a50d9f851575',1,'plib_module::psend::psend_d_3d()'],['../classplib__module.html#ac202cc24041fff90fa56158d02d64f70',1,'plib_module::psend_d_3d()']]],
   ['psii',['psii',['../classsolvar__module.html#a70ce9ad936b5c35e2638616537a783be',1,'solvar_module']]],
-  ['psij',['psij',['../classsolvar__module.html#a538acac9dd6036215210811a55c04ee8',1,'solvar_module']]],
+  ['psij',['psij',['../classsolvar__module.html#af00b829c43b620a6bde607f930f7b937',1,'solvar_module']]],
   ['psik',['psik',['../classsolvar__module.html#a9d00ffefc30874b3b293efb307b3e551',1,'solvar_module']]],
   ['ptr_5fin',['ptr_in',['../classsolvar__module.html#ac95d5a5e2f90e8f827801c3616afd3cc',1,'solvar_module']]],
   ['ptr_5fout',['ptr_out',['../classsolvar__module.html#aaa582c1084c73e20d39d834455a825d1',1,'solvar_module']]]

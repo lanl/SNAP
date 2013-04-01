@@ -26,7 +26,7 @@ Questions and issues: snap@lanl.gov
 Doxygen Navigation
 ------------------
 
-Modules can be browsed under "Data Types List" in the sidebar. Module descriptions include caller graphs.
+Modules can be browsed under "Data Types List" in the sidebar. Module descriptions include call graphs and caller graphs.
 
 Functions/Subroutines and Variables can be browsed under "Data Types List/Data Fields"
 

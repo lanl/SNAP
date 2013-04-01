@@ -1,8 +1,12 @@
 var classgeom__module =
 [
+    [ "cell_id_type", "structgeom__module_1_1cell__id__type.html", "structgeom__module_1_1cell__id__type" ],
+    [ "diag_type", "structgeom__module_1_1diag__type.html", "structgeom__module_1_1diag__type" ],
+    [ "diag_setup", "classgeom__module.html#acda7d9d57b6e0f83c88ad91b909f1b82", null ],
     [ "geom_alloc", "classgeom__module.html#ac4ae76d14c7253c3c87ae0f55b1d4b1a", null ],
     [ "geom_dealloc", "classgeom__module.html#ab2401a2eca471da4ca28fe634b5350d4", null ],
     [ "param_calc", "classgeom__module.html#aa09319572e809c686211758ef5fb129e", null ],
+    [ "diag", "classgeom__module.html#a5e8f7c5c9e3886c2d92abd9d5e8f4e20", null ],
     [ "dinv", "classgeom__module.html#ae4c351982371a6870429ab660ec35e45", null ],
     [ "dx", "classgeom__module.html#a2f292c19b0e9bfc4cde1d54f0e9d4472", null ],
     [ "dy", "classgeom__module.html#a13234163c83c1041d8053ab0f4ea5d40", null ],
@@ -18,6 +22,7 @@ var classgeom__module =
     [ "ly", "classgeom__module.html#adc5d5005b562bb94578c33b5bcde0012", null ],
     [ "lz", "classgeom__module.html#aba080d6dd2b57ad40676a7331daaa824", null ],
     [ "nc", "classgeom__module.html#af92dc09eacd9c240bd51ea2792a13820", null ],
+    [ "ndiag", "classgeom__module.html#af0fed67c5ea2d50ee5063a4c83f43f00", null ],
     [ "ndimen", "classgeom__module.html#a764bf4ab4dc187512c803d73505e6b57", null ],
     [ "nx", "classgeom__module.html#a7a5902416f1d33e2a27620d6c82db061", null ],
     [ "ny", "classgeom__module.html#a38b87580d41ec11b8719f65f06b8b0a3", null ],
