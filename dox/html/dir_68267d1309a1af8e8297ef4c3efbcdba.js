@@ -19,7 +19,9 @@ var dir_68267d1309a1af8e8297ef4c3efbcdba =
       [ "expxs_module", "classexpxs__module.html", "classexpxs__module" ]
     ] ],
     [ "geom.f90", "geom_8f90.html", [
-      [ "geom_module", "classgeom__module.html", "classgeom__module" ]
+      [ "geom_module", "classgeom__module.html", "classgeom__module" ],
+      [ "cell_id_type", "structgeom__module_1_1cell__id__type.html", "structgeom__module_1_1cell__id__type" ],
+      [ "diag_type", "structgeom__module_1_1diag__type.html", "structgeom__module_1_1diag__type" ]
     ] ],
     [ "global.f90", "global_8f90.html", [
       [ "global_module", "classglobal__module.html", "classglobal__module" ]
