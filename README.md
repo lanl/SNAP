@@ -8,20 +8,21 @@ SNAP serves as a proxy application to model the performance of a modern discrete
 
 The solution to the time-dependent TE is a "flux" function of seven independent variables: three spatial (3-D spatial mesh), two angular (set of discrete ordinates, directions in which particles travel), one energy (particle speeds binned into "groups"), and one temporal. PARTISN, and therefore SNAP, uses domain decomposition over these dimensions to coherently distribute the data and the tasks associated with solving the equation. The parallelization strategy is expected to be the most efficient compromise between computing resources and the iterative strategy necessary to converge the flux.
 
-The iterative strategy is comprised of a set of two nested loops. These nested loops are performed for each step of a time-dependent calculation, wherein any particular time step requires information from the preceding one. No parallelization is performed over the temporal domain. However, for time-dependent calculations two copies of the unknown flux must be stored, each copy an array of the six remaining dimensions. The outer iterative loop involves solving for the flux over the energy domain with updated information about coupling among the energy groups. Typical calculations require tens to hundreds of groups, making the energy domain suitable for threading with the node's (or nodes') provided accelerator. The inner loop involves sweeping across the entire spatial mesh along each discrete direction of the angular domain. The spatial mesh may be immensely large. Therefore, SNAP spatially decomposes the problem across nodes and communicates needed information according to the KBA method. KBA is a transport-specific application of general parallel wavefront methods. Lastly, although KBA efficiency is improved by pipelining operations according to the angle, current chipsets operate best with vectorized operations. During a mesh sweep, SNAP operations are vectorized over angles to take advantage of the modern hardware.
+The iterative strategy is comprised of a set of two nested loops. These nested loops are performed for each step of a time-dependent calculation, wherein any particular time step requires information from the preceding one. No parallelization is performed over the temporal domain. However, for time-dependent calculations two copies of the unknown flux must be stored, each copy an array of the six remaining dimensions. The outer iterative loop involves solving for the flux over the energy domain with updated information about coupling among the energy groups. Typical calculations require tens to hundreds of groups, making the energy domain suitable for threading with the node's (or nodes') provided accelerator. The inner loop involves sweeping across the entire spatial mesh along each discrete direction of the angular domain. The spatial mesh may be immensely large. Therefore, SNAP spatially decomposes the problem across nodes and communicates needed information according to the KBA method. KBA is a transport-specific application of general parallel wavefront methods. Nested threads, spawned by the energy group threads, are available to use in one of two ways. Per one approach, nested threads may be used to further parallelize the work to sweep different energy groups assigned to a main-level thread. This option is still experimental and has only been implemented to work in the case of using a single MPI process. Alternatively, nested threads are used to perform "mini KBA" sweeps by concurrently operating on cells lying on the same diagonal of spatial sub-domains already decomposed across the distributed memory architecture (i.e., different MPI ranks). Lastly, although KBA efficiency is improved by pipelining operations according to the angle, current chipsets operate best with vectorized operations. During a mesh sweep, SNAP operations are vectorized over angles to take advantage of the modern hardware.
 
 SNAP should be tested with problem sizes that accurately reflect the types of calculations PARTISN frequently handles. The spatial domain shall be decomposed to 2,000--4,000 cells per node (MPI rank). Each node will own all the energy groups and angles for that group of cells; typical calculations feature 10--100 energy groups and as few as 100 to as many as 2,000 angles. Moreover, sufficient memory must be provided to store two full copies of the solution vector for time-dependent calculations. The preceding parameters assume current trends in available per core memory. Significant advances or detriments affecting this assumption shall require reconsideration of appropriate parameters per compute node.
 
 Compilation
 -----------
 
-SNAP has been written to the Fortran 90/95 standard. It has been successfully built with, but not necessarily limited to, gfortran and ifort. Moreover, the code has been built with the profiling tool [Byfl](https://github.com/losalamos/byfl). The accompanying Makefile retains some of the old make options for different build types. However, the current build system depends on the availability of MPI and OpenMP libraries. Builds without these libraries will require modification to the source code to remove related subroutine calls and directives.
+SNAP has been written to the Fortran 90/95 standard primarily. The retrieval of command line arguments, which contain file names, is handled with a standard Fortran 2003 intrinsic subroutine. It has been successfully built with, but not necessarily limited to, gfortran and ifort. Moreover, the code has been built with the profiling tool [Byfl](https://github.com/losalamos/byfl). The accompanying Makefile provides sample build options for gfortran and ifort. The build system depends on the availability of MPI. Both example builds assume the usage of mpif90 from an MPI installation. Builds may be selected by switching the COMPILER option in the Makefile or choosing one with the "make COMPILER=[]" command. The builds also assume the availability of OpenMP. Compiling SNAP without MPI or OpenMP will require modification to the source code to remove related subroutine calls and directives.
 
 MPI implementations typically suggest using a "wrapper" compiler to compile the code. SNAP has been built and tested with OpenMPI. OpenMPI allows one to set the underlying Fortran compiler with the environment variable OMPI_FC, where the variable is set to the (path and) compiler of choice, e.g., ifort, gfortran, etc.
 
 The makefile currently uses:
 
     FORTRAN = mpif90
+    COMPILER = ifort
 
 and all testing has been performed with
 
@@ -29,8 +30,8 @@ and all testing has been performed with
 
 Fortran compilation flags can be set according to the underlying compiler. The current flags are set for the ifort compiler and using OpenMP for parallel threading.
 
-    TARGET = snap
-    FFLAGS = -03 -openmp
+    TARGET = isnap
+    FFLAGS = -03 -[q]openmp -align array32byte -fp-model fast -fp-speculation fast -xHost
     FFLAG2 =
 
 where `FFLAG2` is reserved for additional flags that may need applied differently, depending on the compiler. To make SNAP with these default settings, simply type
@@ -45,7 +46,7 @@ A debugging version of SNAP can be built by typing
 
 on the command line. The unoptimized, debugging version of SNAP features bounds checking, back-tracing an error, and the necessary debug compiler flags. With ifort, these flags appear as:
 
-    FFLAGS = -g -O0 -check bounds -traceback -openmp
+    FFLAGS = -O0 -[q]openmp -g -check bounds -traceback -warn unused
     FFLAG2 =
 
 The values for these compilation variables have been modified for various Fortran compilers and the Makefile provides details of what has been used previously. These lines are commented out for clarity at this time and to ensure that changes to the build system are made carefully before attempting to rebuild with a different compiler.
@@ -73,10 +74,6 @@ This command will automatically run with the number of threads specified by the 
 
     mpirun -cpus-per-proc [#threads] -np [#procs] [path]/snap [infile] [outfile]
 
-Lastly, a user may wish to test the various thread affinity settings used to bind threads to processing elements. Testing has been done with a disabled Intel thread affinity interface.
-
-    setenv KMP_AFFINITY disabled (csh)
-
 The command line is read for the input/output file names. If one of the names is missing, the code will not execute. Moreover, the output file overwrites any pre-existing files of the same name.
 
 Sample Input
@@ -86,32 +83,37 @@ The following is a sample input of a SNAP job. Several other examples are provid
 
     ! Input from namelist
     &invar
-      nthreads=2
       npey=2
       npez=2
+      ichunk=2
+      nthreads=2
+      nnested=1
       ndimen=3
-      nx=4
-      lx=1.0
-      ny=4
-      ly=1.0
-      nz=4
-      lz=1.0
-      ichunk=4
-      nmom=2
-      nang=8
-      ng=2
+      nx=6
+      lx=0.6
+      ny=6
+      ly=0.6
+      nz=6
+      lz=0.6
+      nmom=1
+      nang=10
+      ng=4
+      epsi=1.0E-4
+      iitm=5
+      oitm=30
+      timedep=0
+      tf=1.0
+      nsteps=1
       mat_opt=0
       src_opt=0
-      timedep=0
-      it_det=0
-      tf=0.0
-      nsteps=1
-      iitm=5
-      oitm=100
-      epsi=1.E-4
-      fluxp=0
       scatp=0
-      fixup=0
+      it_det=0
+      fluxp=0
+      fixup=1
+      soloutp=1
+      kplane=0
+      popout=0
+      swp_typ=0
     /
 
 Sample Output
@@ -120,104 +122,119 @@ Sample Output
 The following is the corresponding output to the above case. A brief outline of the output file contents is version and run time information, echo of input (or default) values of the namelist variables, echo of relevant parameters after setup, iteration monitor, mid-plane flux output, and the timing summary. Warning and error messages may be printed throughout the output file to alert the user to some problem with the execution. Unlike errors, warnings do not cause program termination.
 
      SNAP: SN (Discrete Ordinates) Application Proxy
-     Version Number..  1.00 
-     Version Date..  03-07-2013
-     Ran on  3-13-2013 at time 14: 5:39
+     Version Number..  1.05
+     Version Date..  02-19-2015
+     Ran on  2-20-2015 at time 10:53:26
     
     ********************************************************************************
     
-              Input Echo - Values from input or default
+              keyword Input Echo - Values from input or
+    
+    default
     ********************************************************************************
     
       NML=invar
          npey=     2
          npez=     2
-         ichunk=     4
+         ichunk=     2
          nthreads=     2
+         nnested=   1
          ndimen=  3
-         nx=     4
-         ny=     4
-         nz=     4
-         lx=  1.0000E+00
-         ly=  1.0000E+00
-         lz=  1.0000E+00
-         nmom=   2
-         nang=    8
-         ng=    2
+         nx=     6
+         ny=     6
+         nz=     6
+         lx=  6.0000E-01
+         ly=  6.0000E-01
+         lz=  6.0000E-01
+         nmom=   1
+         nang=   10
+         ng=    4
          mat_opt=  0
          src_opt=  0
          scatp=  0
          epsi=  1.0000E-04
          iitm=   5
-         oitm=  100
+         oitm=   30
          timedep=  0
-         tf=  0.0000E+00
+         tf=  1.0000E+00
          nsteps=     1
+         swp_typ=  0
          it_det=  0
+         soloutp=  1
+         kplane=    0
+         popout=  0
          fluxp=  0
-         fixup=  0
+         fixup=  1
     
     ********************************************************************************
     
-              Calculation Run-time Parameters Echo
+              keyword Calculation Run-time Parameters Echo
     ********************************************************************************
     
       Geometry
         ndimen = 3
-        nx =     4
-        ny =     4
-        nz =     4
-        lx =  1.0000E+00
-        ly =  1.0000E+00
-        lz =  1.0000E+00
-        dx =  2.5000E-01
-        dy =  2.5000E-01
-        dz =  2.5000E-01
+        nx =     6
+        ny =     6
+        nz =     6
+        lx =  6.0000E-01
+        ly =  6.0000E-01
+        lz =  6.0000E-01
+        dx =  1.0000E-01
+        dy =  1.0000E-01
+        dz =  1.0000E-01
     
       Sn
-        nmom = 2
-        nang =    8
+        nmom = 1
+        nang =   10
         noct = 8
     
-        w =  1.5625E-02   ... uniform weights
+        w =  1.2500E-02   ... uniform weights
     
               mu              eta               xi
-         6.25000000E-02   9.37500000E-01   3.42326598E-01
-         1.87500000E-01   8.12500000E-01   5.51985054E-01
-         3.12500000E-01   6.87500000E-01   6.55505530E-01
-         4.37500000E-01   5.62500000E-01   7.01560760E-01
-         5.62500000E-01   4.37500000E-01   7.01560760E-01
-         6.87500000E-01   3.12500000E-01   6.55505530E-01
-         8.12500000E-01   1.87500000E-01   5.51985054E-01
-         9.37500000E-01   6.25000000E-02   3.42326598E-01
+         5.00000000E-02   9.50000000E-01   3.08220700E-01
+         1.50000000E-01   8.50000000E-01   5.04975247E-01
+         2.50000000E-01   7.50000000E-01   6.12372436E-01
+         3.50000000E-01   6.50000000E-01   6.74536878E-01
+         4.50000000E-01   5.50000000E-01   7.03562364E-01
+         5.50000000E-01   4.50000000E-01   7.03562364E-01
+         6.50000000E-01   3.50000000E-01   6.74536878E-01
+         7.50000000E-01   2.50000000E-01   6.12372436E-01
+         8.50000000E-01   1.50000000E-01   5.04975247E-01
+         9.50000000E-01   5.00000000E-02   3.08220700E-01
     
       Material Map
         mat_opt = 0   -->   nmat = 1
         Base material (default for every cell) = 1
-        
+    
       Source Map
         src_opt = 0
         Source strength per cell (where applied) = 1.0
         Source map:
             Starting cell: (     1,     1,     1 )
-            Ending cell:   (     4,     4,     4 )
+            Ending cell:   (     6,     6,     6 )
     
       Pseudo Cross Sections Data
-        ng =   2
+        ng =   4
     
         Material 1
         Group         Total         Absorption      Scattering
            1       1.000000E+00    5.000000E-01    5.000000E-01
            2       1.010000E+00    5.050000E-01    5.050000E-01
+           3       1.020000E+00    5.100000E-01    5.100000E-01
+           4       1.030000E+00    5.150000E-01    5.150000E-01
     
       Solution Control Parameters
         epsi =  1.0000E-04
         iitm =   5
-        oitm =  100
+        oitm =   30
         timedep = 0
+        swp_typ = 0
         it_det = 0
+        soloutp = 1
+        kplane =    0
+        popout = 0
         fluxp = 0
-        fixup = 0
+        fixup = 1
     
     
       Parallelization Parameters
@@ -225,77 +242,117 @@ The following is the corresponding output to the above case. A brief outline of 
         npez =     2
         nthreads =    2
     
-              Thread Support Level
+          Thread Support Level
                0 - MPI_THREAD_SINGLE
                1 - MPI_THREAD_FUNNELED
                2 - MPI_THREAD_SERIALIZED
                3 - MPI_THREAD_MULTIPLE
         thread_level =  0
     
+        .FALSE. nested threading
+          nnested =    1
+    
+        Parallel Computational Efficiency = 0.8889
+    
     ********************************************************************************
     
-              Iteration Monitor
+              keyword Iteration Monitor
     ********************************************************************************
       Outer
-        1    Dfmxo= 5.5956E-01    No. Inners=   10
-        2    Dfmxo= 1.3849E-01    No. Inners=    8
-        3    Dfmxo= 2.8164E-03    No. Inners=    6
+        1    Dfmxo= 3.5528E-01    No. Inners=   17
+        2    Dfmxo= 1.7376E-01    No. Inners=   14
+        3    Dfmxo= 8.6338E-03    No. Inners=    9
     
-      No. Outers=   3    No. Inners=   24
-    
-    ********************************************************************************
-    
-              Calculation Final Scalar Flux Solution
-    ********************************************************************************
-    
-     ***********************************
-      Group=   1   Z Mid-Plane=    3
-     ***********************************
-    
-         y    x    1      x    2      x    3      x    4
-         4  3.1216E-01  3.9666E-01  3.9666E-01  3.1216E-01
-         3  3.9683E-01  5.0638E-01  5.0638E-01  3.9683E-01
-         2  3.9683E-01  5.0638E-01  5.0638E-01  3.9683E-01
-         1  3.1216E-01  3.9666E-01  3.9666E-01  3.1216E-01
+      No. Outers=   3    No. Inners=   40
     
     ********************************************************************************
     
+              keyword Scalar Flux Solution
+    ********************************************************************************
     
      ***********************************
-      Group=   2   Z Mid-Plane=    3
+      Group=   1   Z Mid-Plane=    4
      ***********************************
     
-         y    x    1      x    2      x    3      x    4
-         4  3.8033E-01  4.9130E-01  4.9130E-01  3.8033E-01
-         3  4.9210E-01  6.3838E-01  6.3838E-01  4.9210E-01
-         2  4.9210E-01  6.3838E-01  6.3838E-01  4.9210E-01
-         1  3.8033E-01  4.9130E-01  4.9130E-01  3.8033E-01
+         y    x    1      x    2      x    3      x    4      x    5      x    6
+         6  1.8403E-01  2.3461E-01  2.4743E-01  2.4743E-01  2.3461E-01  1.8403E-01
+         5  2.3461E-01  2.9818E-01  3.1572E-01  3.1572E-01  2.9818E-01  2.3461E-01
+         4  2.4743E-01  3.1572E-01  3.3604E-01  3.3604E-01  3.1572E-01  2.4743E-01
+         3  2.4743E-01  3.1572E-01  3.3604E-01  3.3604E-01  3.1572E-01  2.4743E-01
+         2  2.3461E-01  2.9818E-01  3.1572E-01  3.1572E-01  2.9818E-01  2.3461E-01
+         1  1.8403E-01  2.3461E-01  2.4743E-01  2.4743E-01  2.3461E-01  1.8403E-01
     
     ********************************************************************************
     
-              Timing Summary
+    
+     ***********************************
+      Group=   2   Z Mid-Plane=    4
+     ***********************************
+    
+     y    x    1      x    2      x    3      x    4      x    5      x    6
+     6  1.8434E-01  2.3510E-01  2.4797E-01  2.4797E-01  2.3510E-01  1.8434E-01
+     5  2.3510E-01  2.9891E-01  3.1654E-01  3.1654E-01  2.9891E-01  2.3510E-01
+     4  2.4797E-01  3.1654E-01  3.3697E-01  3.3697E-01  3.1654E-01  2.4797E-01
+     3  2.4797E-01  3.1654E-01  3.3697E-01  3.3697E-01  3.1654E-01  2.4797E-01
+     2  2.3510E-01  2.9891E-01  3.1654E-01  3.1654E-01  2.9891E-01  2.3510E-01
+     1  1.8434E-01  2.3510E-01  2.4797E-01  2.4797E-01  2.3510E-01  1.8434E-01
+    
+    ********************************************************************************
+    
+    
+     ***********************************
+      Group=   3   Z Mid-Plane=    4
+     ***********************************
+    
+         y    x    1      x    2      x    3      x    4      x    5      x    6
+         6  1.8990E-01  2.4282E-01  2.5648E-01  2.5648E-01  2.4282E-01  1.8990E-01
+         5  2.4282E-01  3.0956E-01  3.2828E-01  3.2828E-01  3.0956E-01  2.4282E-01
+         4  2.5648E-01  3.2828E-01  3.4996E-01  3.4996E-01  3.2828E-01  2.5648E-01
+         3  2.5648E-01  3.2828E-01  3.4996E-01  3.4996E-01  3.2828E-01  2.5648E-01
+         2  2.4282E-01  3.0956E-01  3.2828E-01  3.2828E-01  3.0956E-01  2.4282E-01
+         1  1.8990E-01  2.4282E-01  2.5648E-01  2.5648E-01  2.4282E-01  1.8990E-01
+    
+    ********************************************************************************
+    
+    
+     ***********************************
+      Group=   4   Z Mid-Plane=    4
+     ***********************************
+    
+         y    x    1      x    2      x    3      x    4      x    5      x    6
+         6  2.2018E-01  2.8475E-01  3.0277E-01  3.0277E-01  2.8475E-01  2.2018E-01
+         5  2.8475E-01  3.6725E-01  3.9202E-01  3.9202E-01  3.6725E-01  2.8475E-01
+         4  3.0277E-01  3.9202E-01  4.2062E-01  4.2062E-01  3.9202E-01  3.0277E-01
+         3  3.0277E-01  3.9202E-01  4.2062E-01  4.2062E-01  3.9202E-01  3.0277E-01
+         2  2.8475E-01  3.6725E-01  3.9202E-01  3.9202E-01  3.6725E-01  2.8475E-01
+         1  2.2018E-01  2.8475E-01  3.0277E-01  3.0277E-01  2.8475E-01  2.2018E-01
+    
+    ********************************************************************************
+    
+              keyword Timing Summary
     ********************************************************************************
     
       Code Section                          Time (seconds)
      **************                        ****************
-        Parallel Setup                       1.0433E-03
-        Input                                4.7398E-04
-        Setup                                5.8007E-04
-        Solve                                2.2089E-03
-           Parameter Setup                   2.1720E-04
-           Outer Source                      1.8597E-05
-           Inner Iterations                  1.8098E-03
-              Inner Source                   3.0279E-05
-              Transport Sweeps               1.4706E-03
-              Inner Misc Ops                 3.0899E-04
-           Solution Misc Ops                 1.6332E-04
-        Output                               2.6178E-04
-      Total Execution time                   1.5435E-02
+        Parallel Setup                       9.7394E-04
+        Input                                4.7112E-04
+        Setup                                7.1216E-04
+        Solve                                7.6568E-03
+           Parameter Setup                   2.8968E-04
+           Outer Source                      3.0041E-05
+           Inner Iterations                  7.0901E-03
+              Inner Source                   5.4121E-05
+              Transport Sweeps               6.6264E-03
+              Inner Misc Ops                 4.0960E-04
+           Solution Misc Ops                 2.4700E-04
+        Output                               6.4492E-04
+      Total Execution time                   3.4652E-02
     
-      Grind Time (nanoseconds)         2.2471E+01
+      Grind Time (nanoseconds)         1.1078E+01
     
     ********************************************************************************
     
+
 Additional outputs in the form of `slgg` and `flux` files are available when requested according to the `scatp` and `fluxp` input variables, respectively.
 
 License
@@ -325,8 +382,16 @@ SNAP is Unclassified and contains no Unclassified Controlled Nuclear Information
 Authors
 -------
 
-* Joe Zerr, CCS-2, Los Alamos National Laboratory
-* Randal Baker, CCS-2, Los Alamos National Laboratory
+Joe Zerr, rzerr _ at _ lanl.gov
+Randal Baker, rsb _ at _ lanl.gov
 
-Questions and issues: snap@lanl.gov
+Additional Contact
+------------------
+
+Al McPherson, mcpherson _ at _ lanl.gov
+
+Last Modification to this Readme
+--------------------------------
+    
+02/20/2015
 

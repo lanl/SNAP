@@ -14,7 +14,7 @@ MODULE solvar_module
 
   USE plib_module, ONLY: ichunk
 
-  USE geom_module, ONLY: nx, ny, nz
+  USE geom_module, ONLY: nx, ny, nz, nc
 
   USE sn_module, ONLY: nang, noct, nmom, cmom
 
@@ -34,17 +34,19 @@ MODULE solvar_module
 ! ptr_in(nang,nx,ny,nz,noct,ng)   - Incoming time-edge flux pointer
 ! ptr_out(nang,nx,ny,nz,noct,ng)  - Outgoing time-edge flux pointer
 !
-! flux(nx,ny,nz,ng)          - Scalar flux moments array
-! fluxpo(nx,ny,nz,ng)        - Previous outer copy of scalar flux array
-! fluxpi(nx,ny,nz,ng)        - Previous inner copy of scalar flux array
+! flux0(nx,ny,nz,ng)         - Scalar flux moments array
+! flux0po(nx,ny,nz,ng)       - Previous outer copy of scalar flux array
+! flux0pi(nx,ny,nz,ng)       - Previous inner copy of scalar flux array
 ! fluxm(cmom-1,nx,ny,nz,ng)  - Flux moments array
 !
-! q2grp(cmom,nx,ny,nz,ng)  - Out-of-group scattering + fixed sources
-! qtot(cmom,nx,ny,nz,ng)   - Total source: q2grp + within-group source
+! q2grp0(nx,ny,nz,ng)        - Isotropic out-of-group + fixed sources
+! q2grpm(cmom-1,nx,ny,nz,ng) - Anisotropic out-of-group + fixed sources
+! qtot(cmom,ichunk,ny,nz,nc,ng) - Total source: q2grp0 + q2grpm +
+!                                 within-group source
 !
 ! t_xs(nx,ny,nz,ng)       - Total cross section on mesh
 ! a_xs(nx,ny,nz,ng)       - Absorption cross section on mesh
-! s_xs(nmom,nx,ny,nz,ng)  - In-group scattering cross section on mesh
+! s_xs(nx,ny,nz,nmom,ng)  - In-group scattering cross section on mesh
 !
 ! psii(nang,ny,nz,ng)     - Working psi_x array
 ! psij(nang,ichunk,nz,ng) - Working psi_y array
@@ -59,14 +61,19 @@ MODULE solvar_module
 ! flky(nx,ny+1,nz,ng)     - y-dir leakage array
 ! flkz(nx,ny,nz+1,ng)     - z-dir leakage array
 !
+! pop(ng)        - particle population spectrum
+!
 !_______________________________________________________________________
 
-  REAL(r_knd), ALLOCATABLE, DIMENSION(:,:,:,:) :: flux, fluxpo, fluxpi,&
-    t_xs, a_xs, psii, psij, psik, jb_in, jb_out, kb_in, kb_out, flkx,  &
-    flky, flkz
+  REAL(r_knd), ALLOCATABLE, DIMENSION(:) :: pop
 
-  REAL(r_knd), ALLOCATABLE, DIMENSION(:,:,:,:,:) :: qtot, q2grp, fluxm,&
-    s_xs
+  REAL(r_knd), ALLOCATABLE, DIMENSION(:,:,:,:) :: flux0, flux0po,      &
+    flux0pi, q2grp0, t_xs, a_xs, psii, psij, psik, jb_in, jb_out,      &
+    kb_in, kb_out, flkx, flky, flkz
+
+  REAL(r_knd), ALLOCATABLE, DIMENSION(:,:,:,:,:) :: q2grpm, fluxm, s_xs
+
+  REAL(r_knd), ALLOCATABLE, DIMENSION(:,:,:,:,:,:) :: qtot
 
   REAL(r_knd), DIMENSION(:,:,:,:,:,:), POINTER :: ptr_in, ptr_out
 
@@ -105,27 +112,49 @@ MODULE solvar_module
     END IF
 !_______________________________________________________________________
 !
-!   Allocate the flux moments arrays. Keep an old copy.
+!   Allocate the flux moments arrays. Keep an old copy. If isotropic,
+!   allocate fluxm as a dummy array to make passing contiguous pieces of
+!   it in argument lists possible even in debug mode. There are better
+!   ways to do this, but want to keep data structures simple for others
+!   to change as they want easily.
 !_______________________________________________________________________
 
-    ALLOCATE( flux(nx,ny,nz,ng), fluxpo(nx,ny,nz,ng),                  &
-      fluxpi(nx,ny,nz,ng), fluxm(cmom-1,nx,ny,nz,ng), STAT=ierr )
+    ALLOCATE( flux0(nx,ny,nz,ng), flux0po(nx,ny,nz,ng),                &
+      flux0pi(nx,ny,nz,ng), STAT=ierr )
     IF ( ierr /= 0 ) RETURN
 
-    flux   = zero
-    fluxpo = zero
-    fluxpi = zero
-    fluxm  = zero
+    IF ( cmom > 1 ) THEN
+      ALLOCATE( fluxm(cmom-1,nx,ny,nz,ng), STAT=ierr )
+      IF ( ierr /= 0 ) RETURN
+    ELSE
+      ALLOCATE( fluxm(0:0,nx,ny,nz,ng), STAT=ierr )
+      IF ( ierr /= 0 ) RETURN
+    END IF
+
+    flux0   = zero
+    flux0po = zero
+    flux0pi = zero
+    fluxm   = zero
 !_______________________________________________________________________
 !
-!   Allocate the source arrays.
+!   Allocate the source arrays. Do the same thing for q2grpm as was done
+!   to fluxm above.
 !_______________________________________________________________________
 
-    ALLOCATE( q2grp(cmom,nx,ny,nz,ng), qtot(cmom,nx,ny,nz,ng),         &
+    ALLOCATE( q2grp0(nx,ny,nz,ng), qtot(cmom,ichunk,ny,nz,nc,ng),      &
       STAT=ierr )
     IF ( ierr /= 0 ) RETURN
 
-    q2grp = zero
+    IF ( cmom > 1 ) THEN
+      ALLOCATE( q2grpm(cmom-1,nx,ny,nz,ng), STAT=ierr )
+      IF ( ierr /= 0 ) RETURN
+    ELSE
+      ALLOCATE( q2grpm(0:0,nx,ny,nz,ng), STAT=ierr )
+      IF ( ierr /= 0 ) RETURN
+    END IF
+
+    q2grp0 = zero
+    q2grpm = zero
     qtot = zero
 !_______________________________________________________________________
 !
@@ -133,7 +162,7 @@ MODULE solvar_module
 !_______________________________________________________________________
 
     ALLOCATE( t_xs(nx,ny,nz,ng), a_xs(nx,ny,nz,ng),                    &
-      s_xs(nmom,nx,ny,nz,ng), STAT=ierr )
+      s_xs(nx,ny,nz,nmom,ng), STAT=ierr )
     IF ( ierr /= 0 ) RETURN
 
     t_xs = zero
@@ -177,6 +206,15 @@ MODULE solvar_module
     flky = zero
     flkz = zero
 !_______________________________________________________________________
+!
+!   Particle population spectrum
+!_______________________________________________________________________
+
+    ALLOCATE( pop(ng), STAT=ierr )
+    IF ( ierr /= 0 ) RETURN
+
+    pop = zero
+!_______________________________________________________________________
 !_______________________________________________________________________
 
   END SUBROUTINE solvar_alloc
@@ -192,12 +230,13 @@ MODULE solvar_module
 !_______________________________________________________________________
 
     DEALLOCATE( ptr_in, ptr_out )
-    DEALLOCATE( flux, fluxpo, fluxpi, fluxm )
-    DEALLOCATE( q2grp, qtot )
+    DEALLOCATE( flux0, flux0po, flux0pi, fluxm )
+    DEALLOCATE( q2grp0, q2grpm, qtot )
     DEALLOCATE( t_xs, a_xs, s_xs )
     DEALLOCATE( psii, psij, psik )
     DEALLOCATE( jb_in, jb_out, kb_in, kb_out )
     DEALLOCATE( flkx, flky, flkz )
+    DEALLOCATE( pop )
 !_______________________________________________________________________
 !_______________________________________________________________________
 

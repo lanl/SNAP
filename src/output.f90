@@ -16,18 +16,18 @@ MODULE output_module
 
   USE data_module, ONLY: ng, src_opt
 
-  USE control_module, ONLY: fluxp, otrdone
+  USE control_module, ONLY: fluxp, otrdone, soloutp, kplane
 
   USE utils_module, ONLY: open_file, close_file, print_error, stop_run
 
-  USE solvar_module, ONLY: flux, fluxm
+  USE solvar_module, ONLY: flux0, fluxm
 
   USE mms_module, ONLY: mms_verify_1
 
   USE time_module, ONLY: tout, wtime
 
   USE plib_module, ONLY: iproc, root, yproc, zproc, bcast, comm_snap,  &
-    comm_space, sproc, cartrank, npey, psend, precv
+    comm_space, sproc, cartrank, npey, psend, precv, barrier
 
   IMPLICIT NONE
 
@@ -66,120 +66,114 @@ MODULE output_module
 !_______________________________________________________________________
 
     CALL wtime ( t1 )
-!_______________________________________________________________________
-!
-!   Return immediately if the flux didn't converge.
-!_______________________________________________________________________
-
-    IF ( .NOT. otrdone ) THEN
-      CALL wtime ( t2 )
-      tout = t2 - t1
-      RETURN
-    END IF
-!_______________________________________________________________________
-!
-!   If did converge, set up error check variables and allocate the
-!   printing array.
-!_______________________________________________________________________
 
     ierr = 0
     error = ' '
-
-    IF ( iproc == root ) THEN
-
-      WRITE( ounit, 301 ) ( star, i = 1, 80 )
-
-      ALLOCATE( fprnt(nx,ny_gl), STAT=ierr )
-      fprnt = zero
-
-    END IF
-
-    CALL bcast ( ierr, comm_snap, root )
-    IF ( ierr /= 0 ) THEN
-      error = '***ERROR: OUTPUT: Allocation error'
-      CALL print_error ( ounit, error )
-      CALL stop_run ( 3, 3, 0 )
-    END IF
 !_______________________________________________________________________
 !
-!   Get global indices of local PE bounds
+!   Get global indices of local PE bounds.
 !_______________________________________________________________________
 
     klb = zproc*nz + 1
     kub = (zproc+1) * nz
 !_______________________________________________________________________
 !
-!   Choose the mid-plane. Determine k local index.
+!   Only if requested, print solution at mid-plane.
 !_______________________________________________________________________
 
-    k = nz_gl/2 + 1
-    kloc = MOD( k-1, nz ) + 1
-!_______________________________________________________________________
-!
-!   Loops over groups. Send/Recv message. Print flux.
-!_______________________________________________________________________
-
-    g_loop: DO g = 1, ng
-!_______________________________________________________________________
-!
-!     If global k index is within proc's bounds, send message to root of
-!     flux on that plane
-!_______________________________________________________________________
-
-      IF ( klb<=k .AND. k<=kub ) THEN
-        mtag = sproc*ng + kloc + g
-        CALL output_send ( mtag, flux(:,:,kloc,g) )
-      END IF
-!_______________________________________________________________________
-!
-!     Presets the printed flux to its own value if there is only one
-!     proc or npez=1. Receives messages in order for proper printing.
-!_______________________________________________________________________
+    IF ( soloutp == 1 ) THEN
 
       IF ( iproc == root ) THEN
-
-        co(1) = (k-1)/nz
-        fprnt(:,1:ny) = flux(:,:,kloc,g)
-        WRITE( ounit, 302 ) ( star, i = 1, 35 ), g, k,                 &
-          ( star, i = 1, 35 )
-
-        DO jp = 0, npey-1
-          jlb = jp*ny + 1
-          jub = (jp+1) * ny
-          co(2) = jp
-          CALL cartrank ( co, rank, comm_space )
-          mtag = rank*ng + kloc + g
-          CALL output_recv ( mtag, rank, fprnt(:,jlb:jub) )
-        END DO
-
-        DO i = 1, nx, 6
-          is = i + 6 - 1
-          IF ( is > nx ) is = nx
-          WRITE( ounit, FMT=303, ADVANCE='NO' )
-          DO ii = i, is
-            WRITE( ounit, FMT=304, ADVANCE='NO' ) ii
-          END DO
-          WRITE( ounit, FMT=305, ADVANCE='YES' )
-          DO j = ny_gl, 1, -1
-            WRITE( ounit, 306 ) j, ( fprnt(ii,j), ii = i, is )
-          END DO
-        END DO
-
-        WRITE( ounit, 307 ) ( star, i = 1, 80 )
-
+        WRITE( ounit, 301 ) ( star, i = 1, 80 )
+        ALLOCATE( fprnt(nx,ny_gl), STAT=ierr )
+        fprnt = zero
       END IF
 
-    END DO g_loop
+      CALL bcast ( ierr, comm_snap, root )
+      IF ( ierr /= 0 ) THEN
+        error = '***ERROR: OUTPUT: Allocation error'
+        CALL print_error ( ounit, error )
+        CALL stop_run ( 1, 3, 3, 0 )
+      END IF
 !_______________________________________________________________________
 !
-!   Cleanup
+!     Choose the mid-plane. If user specified a k-plane via kplane
+!     input, use that value instead. Determine k local index.
 !_______________________________________________________________________
 
-    IF ( iproc == root ) DEALLOCATE( fprnt )
+      k = nz_gl/2 + 1
+      IF ( kplane /= 0 ) k = kplane
+      kloc = MOD( k-1, nz ) + 1
+!_______________________________________________________________________
+!
+!     Loops over groups. Send/Recv message. Print flux.
+!_______________________________________________________________________
+
+      g_loop: DO g = 1, ng
+!_______________________________________________________________________
+!
+!       If global k index is within proc's bounds, send message to root
+!       of flux on that plane
+!_______________________________________________________________________
+
+        IF ( klb<=k .AND. k<=kub ) THEN
+          mtag = g
+          CALL output_send ( mtag, flux0(:,:,kloc,g) )
+        END IF
+!_______________________________________________________________________
+!
+!       Presets the printed flux to its own value if there is only one
+!       proc or npez=1. Receives messages in order for proper printing.
+!_______________________________________________________________________
+
+        IF ( iproc == root ) THEN
+
+          co(1) = (k-1)/nz
+          fprnt(:,1:ny) = flux0(:,:,kloc,g)
+          WRITE( ounit, 302 ) ( star, i = 1, 35 ), g, k,               &
+            ( star, i = 1, 35 )
+
+          DO jp = 0, npey-1
+            jlb = jp*ny + 1
+            jub = (jp+1) * ny
+            co(2) = jp
+            CALL cartrank ( co, rank, comm_space )
+            mtag = g
+            CALL output_recv ( mtag, rank, fprnt(:,jlb:jub) )
+          END DO
+
+          DO i = 1, nx, 6
+            is = i + 6 - 1
+            IF ( is > nx ) is = nx
+            WRITE( ounit, FMT=303, ADVANCE='NO' )
+            DO ii = i, is
+              WRITE( ounit, FMT=304, ADVANCE='NO' ) ii
+            END DO
+            WRITE( ounit, FMT=305, ADVANCE='YES' )
+            DO j = ny_gl, 1, -1
+              WRITE( ounit, 306 ) j, ( fprnt(ii,j), ii = i, is )
+            END DO
+          END DO
+
+          WRITE( ounit, 307 ) ( star, i = 1, 80 )
+
+        END IF
+
+      END DO g_loop
+!_______________________________________________________________________
+!
+!     Cleanup
+!_______________________________________________________________________
+
+      IF ( iproc == root ) DEALLOCATE( fprnt )
+
+    END IF
 !_______________________________________________________________________
 !
 !   Print flux to file if requested
 !_______________________________________________________________________
+
+    call barrier ( comm_snap )
 
     IF ( fluxp > 0 ) CALL output_flux_file ( klb, kub )
 !_______________________________________________________________________
@@ -187,13 +181,13 @@ MODULE output_module
 !   If MMS solution, verify compared to ref_flux
 !_______________________________________________________________________
 
-    IF ( src_opt == 3 ) CALL mms_verify_1 ( flux )
+    IF ( src_opt == 3 ) CALL mms_verify_1 ( flux0 )
 
     CALL wtime ( t2 )
     tout = t2 - t1
 !_______________________________________________________________________
 
-    301 FORMAT( 10X, 'Calculation Final Scalar Flux Solution', /, 80A )
+    301 FORMAT( 10X, 'keyword Scalar Flux Solution', /, 80A )
     302 FORMAT( /, 1X, 35A, /, 2X, 'Group= ', I3, 2X, ' Z Mid-Plane= ',&
                 I4, /, 1X, 35A )
     303 FORMAT( /, 5X, 'y' )
@@ -266,8 +260,8 @@ MODULE output_module
 
     CHARACTER(LEN=64) :: error
 
-    INTEGER(i_knd) :: i, j, k, g, is, ii, l, ierr, fu=16, mtag, jp, kp,&
-      jlb, jub, kloc, rank
+    INTEGER(i_knd) :: i, j, k, g, l, ierr, fu=16, mtag, jp, jlb, jub,  &
+      kloc, rank
 
     INTEGER(i_knd), DIMENSION(2) :: co
 
@@ -283,7 +277,7 @@ MODULE output_module
     CALL bcast ( ierr, comm_snap, root )
     IF ( ierr /= 0 ) THEN
       CALL print_error (ounit, error )
-      CALL stop_run ( 3, 3, 0 )
+      CALL stop_run ( 1, 3, 3, 0 )
     END IF
 
     IF ( iproc == root ) THEN
@@ -294,7 +288,7 @@ MODULE output_module
     IF ( ierr /= 0 ) THEN
       error = '***ERROR: OUTPUT_FLUX_FILE: Allocation error'
       CALL print_error ( ounit, error )
-      CALL stop_run ( 3, 3, 0 )
+      CALL stop_run ( 1, 3, 3, 0 )
     END IF
 !_______________________________________________________________________
 !
@@ -323,25 +317,25 @@ MODULE output_module
         DO k = 1, nz_gl
 
           kloc = MOD( k-1, nz ) + 1
-
           IF ( klb<=k .AND. k<=kub ) THEN
-            mtag = sproc*ng*nz + (g-1)*nz + kloc
+            mtag = l*ng*nz + (g-1)*nz + kloc
             IF ( l == 1 ) THEN
-              CALL output_send ( mtag, flux(:,:,kloc,g) )
+              CALL output_send ( mtag, flux0(:,:,kloc,g) )
             ELSE
               CALL output_send ( mtag, fluxm(l-1,:,:,kloc,g) )
             END IF
           END IF
+     
 
           IF ( iproc == root ) THEN
             co(1) = (k-1)/nz
-            fprnt(:,1:ny) = flux(:,:,kloc,g)
+            fprnt(:,1:ny) = flux0(:,:,kloc,g)
             DO jp = 0, npey-1
               jlb = jp*ny + 1
               jub = (jp+1) * ny
               co(2) = jp
               CALL cartrank ( co, rank, comm_space )
-              mtag = rank*ng*nz + (g-1)*nz + kloc
+              mtag = l*ng*nz + (g-1)*nz + kloc
               CALL output_recv ( mtag, rank, fprnt(:,jlb:jub) )
             END DO
             WRITE( fu, 324 ) ( ( fprnt(i,j), i = 1, nx ), j = 1, ny_gl )
@@ -362,7 +356,7 @@ MODULE output_module
     CALL bcast ( ierr, comm_snap, root )
     IF ( ierr /= 0 ) THEN
       CALL print_error ( ounit, error )
-      CALL stop_run ( 3, 3, 0 )
+      CALL stop_run ( 1, 3, 3, 0 )
     END IF
 !_______________________________________________________________________
 

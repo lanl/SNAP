@@ -11,7 +11,8 @@ MODULE mms_module
 
   USE global_module, ONLY: i_knd, r_knd, ounit, zero, pi, one, half
 
-  USE geom_module, ONLY: nx, ny, nz, lx, ly, lz, dx, dy, dz, ndimen
+  USE geom_module, ONLY: nx, ny, nz, lx, ly, lz, dx, dy, dz, ndimen,   &
+    ny_gl, nz_gl
 
   USE sn_module, ONLY: cmom, nang, mu, eta, xi, w, noct, ec, nmom, lma
 
@@ -20,7 +21,7 @@ MODULE mms_module
   USE control_module, ONLY: timedep, tf, dt, tolr
 
   USE plib_module, ONLY: yproc, zproc, iproc, root, glmax, glmin,      &
-    comm_snap
+    comm_snap, glsum
 
   IMPLICIT NONE
 
@@ -233,7 +234,7 @@ MODULE mms_module
 !   Local variables
 !_______________________________________________________________________
 
-    INTEGER(i_knd) :: i, j, k, g, l, m, n, id, is, jd, js, kd, ks
+    INTEGER(i_knd) :: i, j, k, g, l, n
 
     REAL(r_knd), DIMENSION(cmom-1) :: p
 
@@ -522,7 +523,7 @@ MODULE mms_module
 
     INTEGER(i_knd) :: i
 
-    REAL(r_knd) :: dfmx, dfmn
+    REAL(r_knd) :: dfmx, dfmn, dfsm
 
     REAL(r_knd), DIMENSION(nx,ny,nz,ng) :: df
 !_______________________________________________________________________
@@ -539,10 +540,15 @@ MODULE mms_module
     dfmn = MINVAL( df )
     CALL glmin ( dfmn, comm_snap )
 
+    dfsm = SUM( df )
+    CALL glsum ( dfsm, comm_snap )
+    dfsm = dfsm / REAL( nx*ny_gl*nz_gl*ng )
+
     IF ( iproc == root ) THEN
       WRITE( ounit, 421 ) ( star, i = 1, 80 )
       WRITE( ounit, 422 ) dfmx
       WRITE( ounit, 425 ) dfmn
+      WRITE( ounit, 426 ) dfsm
       WRITE( ounit, 428 ) ( star, i = 1, 80 )
     END IF
 !_______________________________________________________________________
@@ -551,6 +557,8 @@ MODULE mms_module
     422 FORMAT( /, 4X, 'Manufactured/Computed Solutions Max Diff=',    &
                  ES13.6 )
     425 FORMAT( /, 4X, 'Manufactured/Computed Solutions Min Diff=',    &
+                 ES13.6 )
+    426 FORMAT( /, 4X, 'Manufactured/Computed Solutions Avg Diff=',    &
                  ES13.6 )
     428 FORMAT( /, 80A, / )
 !_______________________________________________________________________

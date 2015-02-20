@@ -13,7 +13,7 @@ MODULE setup_module
   USE global_module, ONLY: i_knd, r_knd, ounit, zero, half, one, two
 
   USE geom_module, ONLY: ndimen, nx, ny, nz, lx, ly, lz, dx, dy, dz,   &
-    ny_gl, nz_gl, jlb, jub, klb, kub
+    ny_gl, nz_gl, jlb, jub, klb, kub, nc, jdim, kdim
 
   USE sn_module, ONLY: nang, mu, eta, xi, w, nmom, noct, sn_allocate,  &
     expcoeff
@@ -22,7 +22,7 @@ MODULE setup_module
     sigt, siga, sigs, slgg, data_allocate
 
   USE control_module, ONLY: epsi, iitm, oitm, timedep, tf, nsteps, dt, &
-    it_det, fluxp, fixup
+    swp_typ, it_det, fluxp, fixup, soloutp, kplane, popout
 
   USE mms_module, ONLY: mms_setup
 
@@ -31,9 +31,9 @@ MODULE setup_module
   USE time_module, ONLY: tset, wtime
 
   USE plib_module, ONLY: npey, npez, glmax, comm_snap, yproc, zproc,   &
-    iproc, root, nthreads, num_grth, thread_level, thread_single,      &
+    iproc, root, nthreads, thread_level, thread_single,                &
     thread_funneled, thread_serialized, thread_multiple, nnested,      &
-    do_nested
+    do_nested, ichunk, pce
 
   IMPLICIT NONE
 
@@ -67,7 +67,8 @@ MODULE setup_module
 !
 !   First put input ny and nz into ny_gl and nz_gl respectively. Use ny
 !   and nz for local sizes. Determine global indices of local bounds.
-!   Establish min of nthreads and ng for threaded MPI calls in sweep.
+!   Set the number of spatial work chunks, nc. Set number of sweep
+!   directions in y/z, jdim/kdim.
 !_______________________________________________________________________
 
     CALL wtime ( t1 )
@@ -82,7 +83,17 @@ MODULE setup_module
     klb = zproc*nz + 1
     kub = (zproc+1) * nz
 
-    num_grth = MIN( nthreads, ng )
+    nc = nx/ichunk
+
+    jdim = MIN( ndimen, 2 )
+    kdim = MAX( ndimen-1, 1 )
+!_______________________________________________________________________
+!
+!   Compute PCE
+!_______________________________________________________________________
+
+    pce = one / ( one + ( nthreads*(two*npey+npez-3.0_r_knd) ) /       &
+                        ( 4.0_r_knd*nc*ng ) )
 !_______________________________________________________________________
 !
 !   Allocate needed arrays
@@ -91,7 +102,7 @@ MODULE setup_module
     CALL setup_alloc ( flg, ierr, error )
     IF ( ierr /= 0 ) THEN
       CALL print_error ( ounit, error )
-      CALL stop_run ( flg, 0, 0 )
+      CALL stop_run ( 1, flg, 0, 0 )
     END IF
 !_______________________________________________________________________
 !
@@ -117,7 +128,7 @@ MODULE setup_module
     CALL setup_src ( qis, qie, qjs, qje, qks, qke, ierr, error )
     IF ( ierr /= 0 ) THEN
       CALL print_error ( ounit, error )
-      CALL stop_run ( 2, 0, 0 )
+      CALL stop_run ( 1, 2, 0, 0 )
     END IF
 !_______________________________________________________________________
 !
@@ -134,7 +145,7 @@ MODULE setup_module
     CALL glmax ( ierr, comm_snap )
     IF ( ierr /= 0 ) THEN
       CALL print_error ( ounit, error )
-      CALL stop_run ( 3, 0, 0 )
+      CALL stop_run ( 1, 3, 0, 0 )
     END IF
 
     CALL wtime ( t2 )
@@ -677,7 +688,8 @@ MODULE setup_module
     END IF
 
     WRITE( ounit, 157 )
-    WRITE( ounit, 158 ) epsi, iitm, oitm, timedep, it_det, fluxp, fixup
+    WRITE( ounit, 158 ) epsi, iitm, oitm, timedep, swp_typ, it_det,    &
+      soloutp, kplane, popout, fluxp, fixup
 
     WRITE( ounit, 181 )
     WRITE( ounit, 182 ) npey, npez, nthreads
@@ -689,11 +701,13 @@ MODULE setup_module
     ELSE
       WRITE( ounit, 186 ) nnested
     END IF
+    WRITE ( ounit, 187 ) pce
 
     WRITE( ounit, 159 ) ( star, i = 1, 80 )
 !_______________________________________________________________________
 
-    131 FORMAT( 10X, 'Calculation Run-time Parameters Echo', /, 80A, / )
+    131 FORMAT( 10X, 'keyword Calculation Run-time Parameters Echo', /,&
+                80A, / )
 
     132 FORMAT( 2X, 'Geometry' )
     133 FORMAT( 4X, 'ndimen = ', I1, /, 4X, 'nx = ', I5, /, 4X,        &
@@ -740,10 +754,12 @@ MODULE setup_module
     156 FORMAT( 5X, I3, 6X, ES11.4 )
 
     157 FORMAT( /, 2X, 'Solution Control Parameters' )
-    158 FORMAT( 4X, 'epsi = ', ES11.4, /, 4X, 'iitm = ', I3, /, 4X,    &
-                'oitm = ', I4, /, 4X, 'timedep = ', I1, /, 4X,         &
-                'it_det = ', I1, /, 4X, 'fluxp = ', I1, /, 4X,         &
-                'fixup = ', I1, / )
+    158 FORMAT( 4X, 'epsi = ', ES11.4, /, 4X, 'iitm = ', I3, /,        &
+                4X, 'oitm = ', I4, /, 4X, 'timedep = ', I1, /,         &
+                4X, 'swp_typ = ', I1, / 4X, 'it_det = ', I1, /,        &
+                4X, 'soloutp = ', I1, /, 4X, 'kplane = ', I4, /,       &
+                4X, 'popout = ', I1, /, 4X, 'fluxp = ', I1, /,         &
+                4X, 'fixup = ', I1, / )
 
     181 FORMAT( /, 2X, 'Parallelization Parameters' )
     182 FORMAT( 4X, 'npey = ', I5, /, 4X, 'npez = ', I5, /, 4X,        &
@@ -758,6 +774,7 @@ MODULE setup_module
                 I4, / )
     186 FORMAT( 4X, '.FALSE. nested threading', /, 6X, 'nnested = ',   &
                 I4, / )
+    187 FORMAT( 4X, 'Parallel Computational Efficiency = ', F6.4, / )
 
     159 FORMAT( 80A, / )
 !_______________________________________________________________________

@@ -79,7 +79,7 @@ PROGRAM snap_main
   USE plib_module, ONLY: pinit, iproc, root, comm_snap, bcast,         &
     pcomm_set, pinit_omp
 
-  USE control_module, ONLY: otrdone
+  USE control_module, ONLY: otrdone, swp_typ
 
   IMPLICIT NONE
 !_______________________________________________________________________
@@ -117,21 +117,21 @@ PROGRAM snap_main
   CALL bcast ( ierr, comm_snap, root )
   IF ( ierr /= 0 ) THEN
     CALL print_error ( 0, error )
-    CALL stop_run ( 0, 0, 0 )
+    CALL stop_run ( 0, 0, 0, 0 )
   END IF
 
   CALL open_file ( iunit, ifile, 'OLD', 'READ', ierr, error )
   CALL bcast ( ierr, comm_snap, root )
   IF ( ierr /= 0 ) THEN
     CALL print_error ( 0, error )
-    CALL stop_run ( 0, 0, 0 )
+    CALL stop_run ( 0, 0, 0, 0 )
   END IF
 
   CALL open_file ( ounit, ofile, 'REPLACE', 'WRITE', ierr, error )
   CALL bcast ( ierr, comm_snap, root )
   IF ( ierr /= 0 ) THEN
     CALL print_error ( 0, error )
-    CALL stop_run ( 0, 0, 0 )
+    CALL stop_run ( 0, 0, 0, 0 )
   END IF
 !_______________________________________________________________________
 !
@@ -150,7 +150,7 @@ PROGRAM snap_main
   CALL bcast ( ierr, comm_snap, root )
   IF ( ierr /= 0 ) THEN
     CALL print_error ( ounit, error )
-    CALL stop_run ( 0, 0, 0 )
+    CALL stop_run ( 0, 0, 0, 0 )
   END IF
 !_______________________________________________________________________
 !
@@ -192,7 +192,7 @@ PROGRAM snap_main
 !_______________________________________________________________________
 
   CALL dealloc_input ( 3 )
-  CALL dealloc_solve ( 3 )
+  CALL dealloc_solve ( swp_typ, 3 )
 
   CALL wtime ( t5 )
   tsnap = t5 - t1
@@ -206,13 +206,13 @@ PROGRAM snap_main
   CALL bcast ( ierr, comm_snap, root )
   IF ( ierr /= 0 ) THEN
     CALL print_error ( 0, error )
-    CALL stop_run ( 0, 0, 0 )
+    CALL stop_run ( 1, 0, 0, 0 )
   END IF
 
   IF ( otrdone ) THEN
-    CALL stop_run ( 0, 0, 1 )
+    CALL stop_run ( 1, 0, 0, 1 )
   ELSE
-    CALL stop_run ( 0, 0, 2 )
+    CALL stop_run ( 1, 0, 0, 2 )
   END IF
 !_______________________________________________________________________
 

@@ -2,8 +2,8 @@
 !
 ! MODULE: utils_module
 !> @brief
-!> This module contains utility subroutines for handling file open/close,
-!> errors, command line reading, and program termination.
+!> This module contains utility subroutines for handling file
+!> open/close, errors, command line reading, and program termination.
 !
 !-----------------------------------------------------------------------
 
@@ -13,7 +13,9 @@ MODULE utils_module
 
   USE dealloc_module
 
-  USE plib_module, ONLY: iproc, root, pend
+  USE plib_module, ONLY: iproc, root, pend, plock_omp, nthreads
+
+  USE control_module, ONLY: swp_typ
 
   IMPLICIT NONE
 
@@ -41,25 +43,21 @@ MODULE utils_module
 
     CHARACTER(LEN=64) :: arg
 
-    INTEGER(i_knd) :: n
-!_______________________________________________________________________
-!
-!   Declaration potentially needed for Cray. Seems harmless for others.
-!_______________________________________________________________________
-
-    INTEGER, EXTERNAL :: IARGC
+    INTEGER(i_knd) :: narg, n
 !_______________________________________________________________________
 !
 !   Return if not root. Loop over the first two command line arguments
 !   to get i/o file names.
 !_______________________________________________________________________
 
+    IF ( iproc /= root ) RETURN
+
     ierr = 0
     error = ''
 
-    IF ( iproc /= root ) RETURN
+    narg = COMMAND_ARGUMENT_COUNT ( )
 
-    IF ( IARGC() < 2 ) THEN
+    IF ( narg /= 2 ) THEN
       ierr = 1
       error = '***ERROR: CMDARG: Missing command line entry'
       RETURN
@@ -67,7 +65,7 @@ MODULE utils_module
 
     DO n = 1, 2
 
-      CALL GETARG ( n, arg )
+      CALL GET_COMMAND_ARGUMENT ( n, arg )
       arg = ADJUSTL( arg )
       IF ( arg(1:1)=='-' .OR. arg(1:1)=='<' .OR. arg(1:1)=='>' ) THEN
         ierr = 1
@@ -188,11 +186,8 @@ MODULE utils_module
 
     IF ( iproc /= root ) RETURN
 
-    IF ( funit > 0 ) THEN
-      WRITE( funit, 101 ) error
-    ELSE
-      WRITE( *, 101 ) error
-    END IF
+    WRITE( *, 101 ) error
+    IF ( funit > 0 ) WRITE( funit, 101 ) error
 !_______________________________________________________________________
 
     101 FORMAT( 3X, A, / )
@@ -202,7 +197,7 @@ MODULE utils_module
   END SUBROUTINE print_error
 
 
-  SUBROUTINE stop_run ( flg1, flg2, flg3 )
+  SUBROUTINE stop_run ( flg1, flg2, flg3, flg4 )
 
 !-----------------------------------------------------------------------
 !
@@ -210,28 +205,28 @@ MODULE utils_module
 !
 !-----------------------------------------------------------------------
 
-   INTEGER(i_knd), INTENT(IN) :: flg1, flg2, flg3
+   INTEGER(i_knd), INTENT(IN) :: flg1, flg2, flg3, flg4
 !_______________________________________________________________________
 !
-!   Local Variable
+!   Local Variables
 !_______________________________________________________________________
-
-    INTEGER(i_knd) :: ierr
 !_______________________________________________________________________
 !
 !   Deallocate if necessary. Depends on flg1, 0/1=no/yes deallocate.
 !_______________________________________________________________________
 
-    IF ( flg1 > 0 ) CALL dealloc_input ( flg1 )
+    IF ( flg1 > 0 ) CALL plock_omp ( 'destroy', nthreads )
 
-    IF ( flg2 > 0 ) CALL dealloc_solve ( flg2 )
+    IF ( flg2 > 0 ) CALL dealloc_input ( flg2 )
+
+    IF ( flg3 > 0 ) CALL dealloc_solve ( swp_typ, flg3 )
 
     IF ( iproc == root ) THEN
-      IF ( flg3 == 0 ) THEN
+      IF ( flg4 == 0 ) THEN
         WRITE( *, '(1X,A)') 'Aww SNAP. Program failed. Try again.'
-      ELSE IF ( flg3 == 1 ) THEN
+      ELSE IF ( flg4 == 1 ) THEN
         WRITE( *, '(1X,A)') 'Success! Done in a SNAP!'
-      ELSE IF ( flg3 == 2 ) THEN
+      ELSE IF ( flg4 == 2 ) THEN
         WRITE( *, '(1X,A)') 'Oh SNAP. That did not converge. But ' //  &
           'take a look at the Timing Summary anyway!'
       END IF

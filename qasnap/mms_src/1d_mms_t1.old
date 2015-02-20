@@ -1,11 +1,13 @@
  SNAP: SN (Discrete Ordinates) Application Proxy
- Version Number..  1.01 
- Version Date..  03-25-2013
- Ran on  3-25-2013 at time 13:48:44
+ Version Number..  1.05 
+ Version Date..  02-19-2015
+ Ran on  2-19-2015 at time 13:50: 2
 
 ********************************************************************************
 
-          Input Echo - Values from input or default
+          keyword Input Echo - Values from input or 
+
+default
 ********************************************************************************
 
   NML=invar
@@ -13,7 +15,7 @@
      npez=     1
      ichunk=     4
      nthreads=     4
-     nnested=   0
+     nnested=   1
      ndimen=  1
      nx=    20
      ny=     1
@@ -33,13 +35,17 @@
      timedep=  1
      tf=  1.0000E+00
      nsteps=    10
+     swp_typ=  0
      it_det=  0
+     soloutp=  0
+     kplane=    0
+     popout=  0
      fluxp=  0
      fixup=  0
 
 ********************************************************************************
 
-          Calculation Run-time Parameters Echo
+          keyword Calculation Run-time Parameters Echo
 ********************************************************************************
 
   Geometry
@@ -121,7 +127,11 @@
     iitm =   5
     oitm =  100
     timedep = 1
+    swp_typ = 0
     it_det = 0
+    soloutp = 0
+    kplane =    0
+    popout = 0
     fluxp = 0
     fixup = 0
 
@@ -139,11 +149,13 @@
     thread_level =  0
 
     .FALSE. nested threading
-      nnested =    0
+      nnested =    1
+
+    Parallel Computational Efficiency = 1.0000
 
 ********************************************************************************
 
-          Iteration Monitor
+          keyword Iteration Monitor
 ********************************************************************************
 
  ******************************
@@ -151,8 +163,8 @@
   Outer
     1    Dfmxo= 4.8265E-01    No. Inners=   41
     2    Dfmxo= 1.2747E+00    No. Inners=   31
-    3    Dfmxo= 1.8625E-02    No. Inners=   22
-    4    Dfmxo= 5.8383E-04    No. Inners=   20
+    3    Dfmxo= 1.8668E-02    No. Inners=   22
+    4    Dfmxo= 5.8138E-04    No. Inners=   20
 
   Cycle=   1    Time= 5.0000E-02    No. Outers=   4    No. Inners=  114
 
@@ -161,8 +173,8 @@
   Outer
     1    Dfmxo= 1.4476E+00    No. Inners=   41
     2    Dfmxo= 1.2772E+00    No. Inners=   31
-    3    Dfmxo= 1.8641E-02    No. Inners=   22
-    4    Dfmxo= 5.8400E-04    No. Inners=   20
+    3    Dfmxo= 1.8684E-02    No. Inners=   22
+    4    Dfmxo= 5.8187E-04    No. Inners=   20
 
   Cycle=   2    Time= 1.5000E-01    No. Outers=   4    No. Inners=  114
 
@@ -171,78 +183,78 @@
   Outer
     1    Dfmxo= 2.4119E+00    No. Inners=   41
     2    Dfmxo= 1.2796E+00    No. Inners=   31
-    3    Dfmxo= 1.8656E-02    No. Inners=   22
-    4    Dfmxo= 5.8412E-04    No. Inners=   20
+    3    Dfmxo= 1.8699E-02    No. Inners=   22
+    4    Dfmxo= 5.8234E-04    No. Inners=   20
 
   Cycle=   3    Time= 2.5000E-01    No. Outers=   4    No. Inners=  114
 
  ******************************
   Time Cycle   4
   Outer
-    1    Dfmxo= 3.3759E+00    No. Inners=   41
-    2    Dfmxo= 1.2805E+00    No. Inners=   31
-    3    Dfmxo= 1.8661E-02    No. Inners=   22
-    4    Dfmxo= 5.8413E-04    No. Inners=   20
+    1    Dfmxo= 3.3758E+00    No. Inners=   41
+    2    Dfmxo= 1.2804E+00    No. Inners=   31
+    3    Dfmxo= 1.8704E-02    No. Inners=   22
+    4    Dfmxo= 5.8252E-04    No. Inners=   20
 
   Cycle=   4    Time= 3.5000E-01    No. Outers=   4    No. Inners=  114
 
  ******************************
   Time Cycle   5
   Outer
-    1    Dfmxo= 4.3398E+00    No. Inners=   41
-    2    Dfmxo= 1.2811E+00    No. Inners=   31
-    3    Dfmxo= 1.8665E-02    No. Inners=   22
-    4    Dfmxo= 5.8414E-04    No. Inners=   20
+    1    Dfmxo= 4.3397E+00    No. Inners=   41
+    2    Dfmxo= 1.2810E+00    No. Inners=   31
+    3    Dfmxo= 1.8708E-02    No. Inners=   22
+    4    Dfmxo= 5.8263E-04    No. Inners=   20
 
   Cycle=   5    Time= 4.5000E-01    No. Outers=   4    No. Inners=  114
 
  ******************************
   Time Cycle   6
   Outer
-    1    Dfmxo= 5.3037E+00    No. Inners=   41
+    1    Dfmxo= 5.3035E+00    No. Inners=   41
     2    Dfmxo= 1.2814E+00    No. Inners=   31
-    3    Dfmxo= 1.8667E-02    No. Inners=   22
-    4    Dfmxo= 5.8415E-04    No. Inners=   20
+    3    Dfmxo= 1.8711E-02    No. Inners=   22
+    4    Dfmxo= 5.8271E-04    No. Inners=   20
 
   Cycle=   6    Time= 5.5000E-01    No. Outers=   4    No. Inners=  114
 
  ******************************
   Time Cycle   7
   Outer
-    1    Dfmxo= 6.2676E+00    No. Inners=   41
-    2    Dfmxo= 1.2817E+00    No. Inners=   31
-    3    Dfmxo= 1.8669E-02    No. Inners=   22
-    4    Dfmxo= 5.8415E-04    No. Inners=   20
+    1    Dfmxo= 6.2672E+00    No. Inners=   41
+    2    Dfmxo= 1.2816E+00    No. Inners=   31
+    3    Dfmxo= 1.8712E-02    No. Inners=   22
+    4    Dfmxo= 5.8276E-04    No. Inners=   20
 
   Cycle=   7    Time= 6.5000E-01    No. Outers=   4    No. Inners=  114
 
  ******************************
   Time Cycle   8
   Outer
-    1    Dfmxo= 7.2314E+00    No. Inners=   41
-    2    Dfmxo= 1.2819E+00    No. Inners=   31
-    3    Dfmxo= 1.8670E-02    No. Inners=   22
-    4    Dfmxo= 5.8416E-04    No. Inners=   20
+    1    Dfmxo= 7.2309E+00    No. Inners=   41
+    2    Dfmxo= 1.2818E+00    No. Inners=   31
+    3    Dfmxo= 1.8714E-02    No. Inners=   22
+    4    Dfmxo= 5.8280E-04    No. Inners=   20
 
   Cycle=   8    Time= 7.5000E-01    No. Outers=   4    No. Inners=  114
 
  ******************************
   Time Cycle   9
   Outer
-    1    Dfmxo= 8.1953E+00    No. Inners=   41
-    2    Dfmxo= 1.2821E+00    No. Inners=   31
-    3    Dfmxo= 1.8671E-02    No. Inners=   22
-    4    Dfmxo= 5.8416E-04    No. Inners=   20
+    1    Dfmxo= 8.1946E+00    No. Inners=   41
+    2    Dfmxo= 1.2819E+00    No. Inners=   31
+    3    Dfmxo= 1.8714E-02    No. Inners=   22
+    4    Dfmxo= 5.8283E-04    No. Inners=   20
 
   Cycle=   9    Time= 8.5000E-01    No. Outers=   4    No. Inners=  114
 
  ******************************
   Time Cycle  10
   Outer
-    1    Dfmxo= 9.1591E+00    No. Inners=   41
-    2    Dfmxo= 1.2822E+00    No. Inners=   31
-    3    Dfmxo= 1.8672E-02    No. Inners=   22
-    4    Dfmxo= 5.8416E-04    No. Inners=   20
+    1    Dfmxo= 9.1582E+00    No. Inners=   41
+    2    Dfmxo= 1.2821E+00    No. Inners=   31
+    3    Dfmxo= 1.8715E-02    No. Inners=   22
+    4    Dfmxo= 5.8285E-04    No. Inners=   20
 
   Cycle=  10    Time= 9.5000E-01    No. Outers=   4    No. Inners=  114
 
@@ -251,226 +263,36 @@
 
 ********************************************************************************
 
-          Calculation Final Scalar Flux Solution
-********************************************************************************
-
- ***********************************
-  Group=   1   Z Mid-Plane=    1
- ***********************************
-
-     y    x    1      x    2      x    3      x    4      x    5      x    6
-     1  7.4430E-02  2.2124E-01  3.6260E-01  4.9505E-01  6.1530E-01  7.2041E-01
-
-     y    x    7      x    8      x    9      x   10      x   11      x   12
-     1  8.0778E-01  8.7526E-01  9.2119E-01  9.4445E-01  9.4445E-01  9.2119E-01
-
-     y    x   13      x   14      x   15      x   16      x   17      x   18
-     1  8.7526E-01  8.0778E-01  7.2041E-01  6.1530E-01  4.9505E-01  3.6260E-01
-
-     y    x   19      x   20
-     1  2.2124E-01  7.4430E-02
-
-********************************************************************************
-
-
- ***********************************
-  Group=   2   Z Mid-Plane=    1
- ***********************************
-
-     y    x    1      x    2      x    3      x    4      x    5      x    6
-     1  1.4902E-01  4.4263E-01  7.2536E-01  9.9024E-01  1.2307E+00  1.4410E+00
-
-     y    x    7      x    8      x    9      x   10      x   11      x   12
-     1  1.6157E+00  1.7507E+00  1.8425E+00  1.8890E+00  1.8890E+00  1.8425E+00
-
-     y    x   13      x   14      x   15      x   16      x   17      x   18
-     1  1.7507E+00  1.6157E+00  1.4410E+00  1.2307E+00  9.9024E-01  7.2536E-01
-
-     y    x   19      x   20
-     1  4.4263E-01  1.4902E-01
-
-********************************************************************************
-
-
- ***********************************
-  Group=   3   Z Mid-Plane=    1
- ***********************************
-
-     y    x    1      x    2      x    3      x    4      x    5      x    6
-     1  2.2359E-01  6.6401E-01  1.0881E+00  1.4854E+00  1.8462E+00  2.1615E+00
-
-     y    x    7      x    8      x    9      x   10      x   11      x   12
-     1  2.4236E+00  2.6260E+00  2.7638E+00  2.8336E+00  2.8336E+00  2.7638E+00
-
-     y    x   13      x   14      x   15      x   16      x   17      x   18
-     1  2.6260E+00  2.4236E+00  2.1615E+00  1.8462E+00  1.4854E+00  1.0881E+00
-
-     y    x   19      x   20
-     1  6.6401E-01  2.2359E-01
-
-********************************************************************************
-
-
- ***********************************
-  Group=   4   Z Mid-Plane=    1
- ***********************************
-
-     y    x    1      x    2      x    3      x    4      x    5      x    6
-     1  2.9816E-01  8.8538E-01  1.4508E+00  1.9806E+00  2.4616E+00  2.8820E+00
-
-     y    x    7      x    8      x    9      x   10      x   11      x   12
-     1  3.2315E+00  3.5014E+00  3.6852E+00  3.7782E+00  3.7782E+00  3.6852E+00
-
-     y    x   13      x   14      x   15      x   16      x   17      x   18
-     1  3.5014E+00  3.2315E+00  2.8820E+00  2.4616E+00  1.9806E+00  1.4508E+00
-
-     y    x   19      x   20
-     1  8.8538E-01  2.9816E-01
-
-********************************************************************************
-
-
- ***********************************
-  Group=   5   Z Mid-Plane=    1
- ***********************************
-
-     y    x    1      x    2      x    3      x    4      x    5      x    6
-     1  3.7272E-01  1.1068E+00  1.8136E+00  2.4758E+00  3.0770E+00  3.6026E+00
-
-     y    x    7      x    8      x    9      x   10      x   11      x   12
-     1  4.0394E+00  4.3768E+00  4.6065E+00  4.7228E+00  4.7228E+00  4.6065E+00
-
-     y    x   13      x   14      x   15      x   16      x   17      x   18
-     1  4.3768E+00  4.0394E+00  3.6026E+00  3.0770E+00  2.4758E+00  1.8136E+00
-
-     y    x   19      x   20
-     1  1.1068E+00  3.7272E-01
-
-********************************************************************************
-
-
- ***********************************
-  Group=   6   Z Mid-Plane=    1
- ***********************************
-
-     y    x    1      x    2      x    3      x    4      x    5      x    6
-     1  4.4728E-01  1.3281E+00  2.1763E+00  2.9710E+00  3.6925E+00  4.3231E+00
-
-     y    x    7      x    8      x    9      x   10      x   11      x   12
-     1  4.8473E+00  5.2522E+00  5.5278E+00  5.6673E+00  5.6673E+00  5.5278E+00
-
-     y    x   13      x   14      x   15      x   16      x   17      x   18
-     1  5.2522E+00  4.8473E+00  4.3231E+00  3.6925E+00  2.9710E+00  2.1763E+00
-
-     y    x   19      x   20
-     1  1.3281E+00  4.4728E-01
-
-********************************************************************************
-
-
- ***********************************
-  Group=   7   Z Mid-Plane=    1
- ***********************************
-
-     y    x    1      x    2      x    3      x    4      x    5      x    6
-     1  5.2184E-01  1.5495E+00  2.5391E+00  3.4662E+00  4.3079E+00  5.0437E+00
-
-     y    x    7      x    8      x    9      x   10      x   11      x   12
-     1  5.6553E+00  6.1277E+00  6.4492E+00  6.6120E+00  6.6120E+00  6.4492E+00
-
-     y    x   13      x   14      x   15      x   16      x   17      x   18
-     1  6.1277E+00  5.6553E+00  5.0437E+00  4.3079E+00  3.4662E+00  2.5391E+00
-
-     y    x   19      x   20
-     1  1.5495E+00  5.2184E-01
-
-********************************************************************************
-
-
- ***********************************
-  Group=   8   Z Mid-Plane=    1
- ***********************************
-
-     y    x    1      x    2      x    3      x    4      x    5      x    6
-     1  5.9641E-01  1.7709E+00  2.9018E+00  3.9614E+00  4.9235E+00  5.7643E+00
-
-     y    x    7      x    8      x    9      x   10      x   11      x   12
-     1  6.4633E+00  7.0032E+00  7.3707E+00  7.5567E+00  7.5567E+00  7.3707E+00
-
-     y    x   13      x   14      x   15      x   16      x   17      x   18
-     1  7.0032E+00  6.4633E+00  5.7643E+00  4.9235E+00  3.9614E+00  2.9018E+00
-
-     y    x   19      x   20
-     1  1.7709E+00  5.9641E-01
-
-********************************************************************************
-
-
- ***********************************
-  Group=   9   Z Mid-Plane=    1
- ***********************************
-
-     y    x    1      x    2      x    3      x    4      x    5      x    6
-     1  6.7103E-01  1.9924E+00  3.2647E+00  4.4568E+00  5.5391E+00  6.4851E+00
-
-     y    x    7      x    8      x    9      x   10      x   11      x   12
-     1  7.2715E+00  7.8789E+00  8.2924E+00  8.5017E+00  8.5017E+00  8.2924E+00
-
-     y    x   13      x   14      x   15      x   16      x   17      x   18
-     1  7.8789E+00  7.2715E+00  6.4851E+00  5.5391E+00  4.4568E+00  3.2647E+00
-
-     y    x   19      x   20
-     1  1.9924E+00  6.7103E-01
-
-********************************************************************************
-
-
- ***********************************
-  Group=  10   Z Mid-Plane=    1
- ***********************************
-
-     y    x    1      x    2      x    3      x    4      x    5      x    6
-     1  7.4564E-01  2.2139E+00  3.6277E+00  4.9522E+00  6.1549E+00  7.2061E+00
-
-     y    x    7      x    8      x    9      x   10      x   11      x   12
-     1  8.0799E+00  8.7548E+00  9.2142E+00  9.4468E+00  9.4468E+00  9.2142E+00
-
-     y    x   13      x   14      x   15      x   16      x   17      x   18
-     1  8.7548E+00  8.0799E+00  7.2061E+00  6.1549E+00  4.9522E+00  3.6277E+00
-
-     y    x   19      x   20
-     1  2.2139E+00  7.4564E-01
-
-********************************************************************************
-
           MMS Verification
 ********************************************************************************
 
-    Manufactured/Computed Solutions Max Diff= 1.744792E-03
+    Manufactured/Computed Solutions Max Diff= 1.861383E-03
 
-    Manufactured/Computed Solutions Min Diff= 4.020133E-04
+    Manufactured/Computed Solutions Min Diff= 3.455138E-04
+
+    Manufactured/Computed Solutions Avg Diff= 1.468236E-03
 
 ********************************************************************************
 
-          Timing Summary
+          keyword Timing Summary
 ********************************************************************************
 
   Code Section                          Time (seconds)
  **************                        ****************
-    Parallel Setup                       7.3504E-04
-    Input                                3.6907E-04
-    Setup                                1.2310E-03
-    Solve                                7.3400E-03
-       Parameter Setup                   8.2803E-04
-       Outer Source                      6.5613E-04
-       Inner Iterations                  4.8716E-03
-          Inner Source                   3.9864E-04
-          Transport Sweeps               3.7065E-03
-          Inner Misc Ops                 7.6652E-04
-       Solution Misc Ops                 9.8419E-04
-    Output                               1.7040E-03
-  Total Execution time                   2.2889E-02
+    Parallel Setup                       7.5984E-04
+    Input                                4.4394E-04
+    Setup                                1.8020E-03
+    Solve                                6.6469E-03
+       Parameter Setup                   7.7581E-04
+       Outer Source                      7.3361E-04
+       Inner Iterations                  3.9744E-03
+          Inner Source                   5.5575E-04
+          Transport Sweeps               2.7981E-03
+          Inner Misc Ops                 6.2060E-04
+       Solution Misc Ops                 1.1630E-03
+    Output                               1.0419E-04
+  Total Execution time                   2.7884E-02
 
-  Grind Time (nanoseconds)         1.3414E+01
+  Grind Time (nanoseconds)         1.2147E+01
 
 ********************************************************************************

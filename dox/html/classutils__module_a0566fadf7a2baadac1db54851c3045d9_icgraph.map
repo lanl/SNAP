@@ -1,8 +1,0 @@
-<map id="G" name="G">
-<area shape="rect" id="node3" href="$classinput__module.html#a2be72b2b78d8f4e7fc02f147743c398c" title="input_module::read\l_input" alt="" coords="436,5,575,46"/>
-<area shape="rect" id="node5" href="$snap__main_8f90.html#a0e4b013388570acb05832fcbea808e74" title="snap_main" alt="" coords="635,151,722,177"/>
-<area shape="rect" id="node7" href="$classoutput__module.html#ac6eaa7844cc1fbf453e8774182ad6edf" title="output_module::output" alt="" coords="424,151,587,177"/>
-<area shape="rect" id="node10" href="$classoutput__module.html#aab79ee63006002c5b231a79051640d97" title="output_module::output\l_flux_file" alt="" coords="213,173,376,214"/>
-<area shape="rect" id="node13" href="$classsetup__module.html#a302c0c32f6276d487ccd246981c5a4f6" title="setup_module::setup" alt="" coords="429,205,581,232"/>
-<area shape="rect" id="node17" href="$translv_8f90.html#a94e181b3b7d3620bd6771600758c50d9" title="translv" alt="" coords="263,289,326,316"/>
-</map>

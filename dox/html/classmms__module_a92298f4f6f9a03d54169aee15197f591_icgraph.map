@@ -1,8 +1,0 @@
-<map id="G" name="G">
-<area shape="rect" id="node3" href="$classmms__module.html#a7182d71cc52a5cb7402d649bb17b0af9" title="mms_module::mms_flux_1" alt="" coords="238,5,421,32"/>
-<area shape="rect" id="node13" href="$classmms__module.html#aa571bba8b81b30ec0d1560f2d6bd4e2a" title="mms_module::mms_src_1" alt="" coords="240,56,419,83"/>
-<area shape="rect" id="node5" href="$classmms__module.html#af6e2504f62297dcb69f3939549152fef" title="mms_module::mms_setup" alt="" coords="470,31,653,57"/>
-<area shape="rect" id="node7" href="$classsetup__module.html#ab719a152a3290e747a78d8cd7a0bd9f4" title="setup_module::setup_src" alt="" coords="702,31,879,57"/>
-<area shape="rect" id="node9" href="$classsetup__module.html#a302c0c32f6276d487ccd246981c5a4f6" title="setup_module::setup" alt="" coords="928,31,1080,57"/>
-<area shape="rect" id="node11" href="$snap__main_8f90.html#a0e4b013388570acb05832fcbea808e74" title="snap_main" alt="" coords="1129,31,1215,57"/>
-</map>

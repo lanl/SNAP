@@ -53,7 +53,7 @@ MODULE dealloc_module
   END SUBROUTINE dealloc_input
 
 
-  SUBROUTINE dealloc_solve ( flg )
+  SUBROUTINE dealloc_solve ( swp_typ, flg )
 
 !-----------------------------------------------------------------------
 !
@@ -62,10 +62,10 @@ MODULE dealloc_module
 !
 !-----------------------------------------------------------------------
 
-    INTEGER(i_knd), INTENT(IN) :: flg
+    INTEGER(i_knd), INTENT(IN) :: swp_typ, flg
 !_______________________________________________________________________
 
-    CALL geom_dealloc
+    CALL geom_dealloc ( swp_typ )
 
     IF ( flg > 1 ) CALL solvar_dealloc
 

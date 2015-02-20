@@ -52,22 +52,24 @@ MODULE geom_module
 !
 ! nc       - number of i-chunks, nx/ichunk
 !
-! hi       - Spatial DD x-coefficient
-! hj(nang) - Spatial DD y-coefficient
-! hk(nang) - Spatial DD z-coefficient
+! jdim     - number of directions to sweep in j-direction: 1D=1, else=2
+! kdim     - number of directions to sweep in z-direction: 3D=2, else=1
 !
-! dinv(nang,nx,ny,nz,ng) - Sweep denominator, pre-computed/inverted
+! hi       - Spatial DD x-coefficient
+! hj       - Spatial DD y-coefficient
+! hk       - Spatial DD z-coefficient
+!
+! dinv(nang,ichunk,ny,nz,nc,ng) - Sweep denominator pre-computed
 !
 ! ndiag    - number of diagonals of mini-KBA sweeps in nested threading
 !_______________________________________________________________________
 
-  INTEGER(i_knd) :: ny_gl, nz_gl, jlb, jub, klb, kub, nc, ndiag
+  INTEGER(i_knd) :: ny_gl, nz_gl, jlb, jub, klb, kub, nc, ndiag=0,     &
+    jdim, kdim
 
-  REAL(r_knd) :: dx, dy, dz, hi
+  REAL(r_knd) :: dx, dy, dz, hi, hj, hk
 
-  REAL(r_knd), ALLOCATABLE, DIMENSION(:) :: hj, hk
-
-  REAL(r_knd), ALLOCATABLE, DIMENSION(:,:,:,:,:) :: dinv
+  REAL(r_knd), ALLOCATABLE, DIMENSION(:,:,:,:,:,:) :: dinv
 !_______________________________________________________________________
 !
 ! Derived data types for mini-KBA diagonals
@@ -96,144 +98,18 @@ MODULE geom_module
   CONTAINS
 
 
-  SUBROUTINE geom_alloc ( nang, ng, ierr )
+  SUBROUTINE geom_alloc ( nang, ng, swp_typ, ichunk, ierr )
 
 !-----------------------------------------------------------------------
 !
-! Allocate the geometry-related solution arrays. Called 
+! Allocate the geometry-related solution arrays. Setup the diag_type
+! data structures for mini-KBA if requested.
 !
 !-----------------------------------------------------------------------
 
-    INTEGER(i_knd), INTENT(IN) :: nang, ng
+    INTEGER(i_knd), INTENT(IN) :: nang, ng, swp_typ, ichunk
 
     INTEGER(i_knd), INTENT(OUT) :: ierr
-!_______________________________________________________________________
-
-    ierr = 0
-
-    ALLOCATE( hj(nang), hk(nang), dinv(nang,nx,ny,nz,ng), STAT=ierr )
-    IF ( ierr /= 0 ) RETURN
-
-    hi = zero
-    hj = zero
-    hk = zero
-    dinv = zero
-!_______________________________________________________________________
-!_______________________________________________________________________
-
-  END SUBROUTINE geom_alloc
-
-
-  SUBROUTINE geom_dealloc
-
-!-----------------------------------------------------------------------
-!
-! Deallocate the geometry-related solution arrays.
-!
-!-----------------------------------------------------------------------
-!_______________________________________________________________________
-!
-!   Local variables
-!_______________________________________________________________________
-
-    INTEGER(i_knd) :: i
-!_______________________________________________________________________
-!
-!   Deallocate the sweep parameters
-!_______________________________________________________________________
-
-    DEALLOCATE( hj, hk, dinv )
-!_______________________________________________________________________
-!
-!   Deallocate the diagonal related arrays
-!_______________________________________________________________________
-
-    DO i = 1, ndiag
-      DEALLOCATE( diag(i)%cell_id )
-    END DO
-
-    DEALLOCATE( diag )
-!_______________________________________________________________________
-!_______________________________________________________________________
-
-  END SUBROUTINE geom_dealloc
-
-
-  SUBROUTINE param_calc ( ichunk, nang, mu, eta, xi, cs, vd, d )
-
-!-----------------------------------------------------------------------
-!
-! Calculate the DD spatial coefficients hi, hj, hk for all angles at
-! the start of each time step. Compute the pre-computed/inverted dinv.
-!
-!-----------------------------------------------------------------------
-
-    INTEGER(i_knd), INTENT(IN) :: ichunk, nang
-
-    REAL(r_knd), INTENT(IN) :: vd
-
-    REAL(r_knd), DIMENSION(nang), INTENT(IN) :: mu, eta, xi
-
-    REAL(r_knd), DIMENSION(nx,ny,nz), INTENT(IN) :: cs
-
-    REAL(r_knd), DIMENSION(nang,nx,ny,nz), INTENT(OUT) :: d
-!_______________________________________________________________________
-!
-!   Local variables
-!_______________________________________________________________________
-
-    INTEGER(i_knd) :: i, j, k, m
-!_______________________________________________________________________
-!
-!   Set the number of i-chunks
-!_______________________________________________________________________
-
-    nc = nx/ichunk
-!_______________________________________________________________________
-!
-!   Set the DD coefficients
-!_______________________________________________________________________
-
-    hi = two/dx
-    IF ( ndimen > 1 ) THEN
-      hj = (two/dy)*eta
-      IF ( ndimen > 2 ) hk = (two/dz)*xi
-    END IF
-!_______________________________________________________________________
-!
-!   Compute the inverted denominator, saved for sweep
-!_______________________________________________________________________
-
-    DO k = 1, nz
-     DO j = 1, ny
-      DO i = 1, nx
-       DO m = 1, nang
-        d(m,i,j,k) = one / (cs(i,j,k) + vd + mu(m)*hi + hj(m) + hk(m))
-       END DO
-      END DO
-     END DO
-    END DO
-!_______________________________________________________________________
-!_______________________________________________________________________
-
-  END SUBROUTINE param_calc
-
-
-  SUBROUTINE diag_setup ( do_nested, ichunk, ierr )
-
-!-----------------------------------------------------------------------
-!
-! Allocate and set up the values of the derived data type 'diag' which
-! stores number of diagonals, each one's number of cells/length, and the
-! ijk indices of the cells on the diagonal.
-!
-!-----------------------------------------------------------------------
-
-    INTEGER(i_knd), INTENT(IN) :: ichunk
-
-    INTEGER(i_knd), INTENT(OUT) :: ierr
-
-    LOGICAL(l_knd), INTENT(IN) :: do_nested
 !_______________________________________________________________________
 !
 !   Local variables
@@ -243,14 +119,24 @@ MODULE geom_module
 
     INTEGER(i_knd), ALLOCATABLE, DIMENSION(:) :: indx
 !_______________________________________________________________________
-!
-!   Set up the diagonal indices according to do_nested. If 1, use
-!   mini-KBA sweeps and thus allocate many diagonals.
-!_______________________________________________________________________
 
     ierr = 0
 
-    IF ( do_nested ) THEN
+    ALLOCATE( dinv(nang,ichunk,ny,nz,nc,ng), STAT=ierr )
+    IF ( ierr /= 0 ) RETURN
+
+    hi = zero
+    hj = zero
+    hk = zero
+    dinv = zero
+!_______________________________________________________________________
+!
+!   If mini-KBA on spatial chunks is selected, set up the diagonal
+!   'diag' derived data type, allocate many diagonals, and set indices
+!   for cells. Because each chunk is same size, can create just one.
+!_______________________________________________________________________
+
+    IF ( swp_typ == 1 ) THEN
 
       ndiag = ichunk + ny + nz - 2
 
@@ -303,38 +189,113 @@ MODULE geom_module
 
       DEALLOCATE( indx )
 
-    ELSE
+    END IF
+!_______________________________________________________________________
+!_______________________________________________________________________
+
+  END SUBROUTINE geom_alloc
+
+
+  SUBROUTINE geom_dealloc ( swp_typ )
+
+!-----------------------------------------------------------------------
+!
+! Deallocate the geometry-related solution arrays.
+!
+!-----------------------------------------------------------------------
+
+    INTEGER(i_knd), INTENT(IN) :: swp_typ
 !_______________________________________________________________________
 !
-!     Otherwise, use standard sweep map. No mini-KBA. One "diagonal",
-!     which contains all the cells in typical i, then j, then k
-!     lexographical order.
+!   Local variables
 !_______________________________________________________________________
 
-      ndiag = 1
-      ALLOCATE( diag(1), STAT=ierr )
-      IF ( ierr /= 0 ) RETURN
-      ALLOCATE( diag(1)%cell_id(ichunk*ny*nz), STAT=ierr )
-      IF ( ierr /= 0 ) RETURN
+    INTEGER(i_knd) :: i
+!_______________________________________________________________________
+!
+!   Deallocate the sweep parameters
+!_______________________________________________________________________
 
-      diag(1)%len = ichunk*ny*nz
-      ing = 0
-      DO k = 1, nz
+    DEALLOCATE( dinv )
+!_______________________________________________________________________
+!
+!   Deallocate the diagonal related arrays with swp_typ
+!_______________________________________________________________________
+
+    IF ( swp_typ == 1 ) THEN
+      DO i = 1, ndiag
+        DEALLOCATE( diag(i)%cell_id )
+      END DO
+      DEALLOCATE( diag )
+    END IF
+!_______________________________________________________________________
+!_______________________________________________________________________
+
+  END SUBROUTINE geom_dealloc
+
+
+  SUBROUTINE param_calc ( nang, ichunk, mu, eta, xi, cs, vd, d )
+
+!-----------------------------------------------------------------------
+!
+! Calculate the DD spatial coefficients hi, hj, hk for all angles at
+! the start of each time step. Compute the pre-computed/inverted dinv.
+!
+!-----------------------------------------------------------------------
+
+    INTEGER(i_knd), INTENT(IN) :: nang, ichunk
+
+    REAL(r_knd), INTENT(IN) :: vd
+
+    REAL(r_knd), DIMENSION(nang), INTENT(IN) :: mu, eta, xi
+
+    REAL(r_knd), DIMENSION(nx,ny,nz), INTENT(IN) :: cs
+
+    REAL(r_knd), DIMENSION(nang,ichunk,ny,nz,nc), INTENT(OUT) :: d
+!_______________________________________________________________________
+!
+!   Local variables
+!_______________________________________________________________________
+
+    INTEGER(i_knd) :: k, j, ii, ich, i, m
+!_______________________________________________________________________
+!
+!   Set the DD coefficients
+!_______________________________________________________________________
+
+    hi = two/dx
+    IF ( ndimen > 1 ) THEN
+      hj = two/dy
+      IF ( ndimen > 2 ) THEN
+        hk = two/dz
+      END IF
+    END IF
+!_______________________________________________________________________
+!
+!   Compute the inverted denominator, saved for sweep
+!_______________________________________________________________________
+
+    DO k = 1, nz
       DO j = 1, ny
-      DO i = 1, ichunk
-        ing = ing + 1
-        diag(1)%cell_id(ing)%ic = i
-        diag(1)%cell_id(ing)%j  = j
-        diag(1)%cell_id(ing)%k  = k
+        ii = 0
+        ich = 1
+        DO i = 1, nx
+          ii = ii + 1
+          DO m = 1, nang
+            d(m,ii,j,k,ich) = one / ( cs(i,j,k) + vd + hi*mu(m) +      &
+                                      hj*eta(m) + hk*xi(m) )
+          END DO
+          IF ( ii == ichunk ) THEN
+            ii = 0
+            ich = ich + 1
+          END IF
+        END DO
       END DO
-      END DO
-      END DO
-
-    END IF        
+    END DO
 !_______________________________________________________________________
 !_______________________________________________________________________
 
-  END SUBROUTINE diag_setup
+  END SUBROUTINE param_calc
 
 
 END MODULE geom_module

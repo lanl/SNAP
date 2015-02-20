@@ -27,14 +27,20 @@ MODULE control_module
 ! tf       - final time
 ! nsteps   - number of time steps to cover the ts -> tf range
 !
+! swp_typ  - 0/1=standard order/mini-KBA sweep
+!
 ! it_det   - 0/1=no/yes full iteration details
+! soloutp  - 0/1=no/yes print single k-plane solution to output file
+! kplane   - 0/1+=default mid-plane/k-plane index to print with soloutp
+! popout   - 0/1/2=no/final only/every cycle print population data to
+!            output file
 ! fluxp    - 0/1/2=print none/scalar flux/all flux moments to file
 !
 ! fixup    - 0/1=no/yes perform flux fixup
 !_______________________________________________________________________
 
-  INTEGER(i_knd) :: iitm=5, oitm=100, timedep=0, nsteps=1, it_det=0,   &
-    fluxp=0, fixup=0
+  INTEGER(i_knd) :: iitm=5, oitm=100, timedep=0, nsteps=1, swp_typ=0,  &
+    it_det=0, soloutp=0, kplane=0, popout=0, fluxp=0, fixup=0
 
   REAL(r_knd) :: epsi=1.0E-4_r_knd, tf=zero
 !_______________________________________________________________________

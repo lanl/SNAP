@@ -1,11 +1,13 @@
  SNAP: SN (Discrete Ordinates) Application Proxy
- Version Number..  1.01 
- Version Date..  03-25-2013
- Ran on  3-25-2013 at time 13:49: 7
+ Version Number..  1.05 
+ Version Date..  02-19-2015
+ Ran on  2-19-2015 at time 13:50:22
 
 ********************************************************************************
 
-          Input Echo - Values from input or default
+          keyword Input Echo - Values from input or 
+
+default
 ********************************************************************************
 
   NML=invar
@@ -13,7 +15,7 @@
      npez=     2
      ichunk=     4
      nthreads=     2
-     nnested=   0
+     nnested=   1
      ndimen=  3
      nx=     8
      ny=     8
@@ -33,13 +35,17 @@
      timedep=  1
      tf=  1.0000E+00
      nsteps=   100
+     swp_typ=  0
      it_det=  0
+     soloutp=  0
+     kplane=    0
+     popout=  0
      fluxp=  0
      fixup=  0
 
 ********************************************************************************
 
-          Calculation Run-time Parameters Echo
+          keyword Calculation Run-time Parameters Echo
 ********************************************************************************
 
   Geometry
@@ -137,7 +143,11 @@
     iitm =   5
     oitm =  100
     timedep = 1
+    swp_typ = 0
     it_det = 0
+    soloutp = 0
+    kplane =    0
+    popout = 0
     fluxp = 0
     fixup = 0
 
@@ -155,11 +165,13 @@
     thread_level =  0
 
     .FALSE. nested threading
-      nnested =    0
+      nnested =    1
+
+    Parallel Computational Efficiency = 0.8511
 
 ********************************************************************************
 
-          Iteration Monitor
+          keyword Iteration Monitor
 ********************************************************************************
 
  ******************************
@@ -167,7 +179,7 @@
   Outer
     1    Dfmxo= 4.6035E-02    No. Inners=   36
     2    Dfmxo= 2.2507E-01    No. Inners=   26
-    3    Dfmxo= 1.1494E-03    No. Inners=   18
+    3    Dfmxo= 1.1486E-03    No. Inners=   18
 
   Cycle=   1    Time= 5.0000E-03    No. Outers=   3    No. Inners=   80
 
@@ -176,16 +188,16 @@
   Outer
     1    Dfmxo= 1.3803E-01    No. Inners=   36
     2    Dfmxo= 2.2552E-01    No. Inners=   26
-    3    Dfmxo= 1.1509E-03    No. Inners=   17
+    3    Dfmxo= 1.1502E-03    No. Inners=   17
 
   Cycle=   2    Time= 1.5000E-02    No. Outers=   3    No. Inners=   79
 
  ******************************
   Time Cycle   3
   Outer
-    1    Dfmxo= 2.2979E-01    No. Inners=   36
-    2    Dfmxo= 2.2985E-01    No. Inners=   26
-    3    Dfmxo= 1.1659E-03    No. Inners=   17
+    1    Dfmxo= 2.2980E-01    No. Inners=   36
+    2    Dfmxo= 2.2986E-01    No. Inners=   26
+    3    Dfmxo= 1.1681E-03    No. Inners=   17
 
   Cycle=   3    Time= 2.5000E-02    No. Outers=   3    No. Inners=   79
 
@@ -193,8 +205,8 @@
   Time Cycle   4
   Outer
     1    Dfmxo= 3.2126E-01    No. Inners=   36
-    2    Dfmxo= 2.3317E-01    No. Inners=   26
-    3    Dfmxo= 1.1769E-03    No. Inners=   17
+    2    Dfmxo= 2.3318E-01    No. Inners=   26
+    3    Dfmxo= 1.1819E-03    No. Inners=   17
 
   Cycle=   4    Time= 3.5000E-02    No. Outers=   3    No. Inners=   79
 
@@ -203,16 +215,16 @@
   Outer
     1    Dfmxo= 4.1242E-01    No. Inners=   36
     2    Dfmxo= 2.3365E-01    No. Inners=   26
-    3    Dfmxo= 1.1775E-03    No. Inners=   17
+    3    Dfmxo= 1.1839E-03    No. Inners=   17
 
   Cycle=   5    Time= 4.5000E-02    No. Outers=   3    No. Inners=   79
 
  ******************************
   Time Cycle   6
   Outer
-    1    Dfmxo= 5.0340E-01    No. Inners=   36
+    1    Dfmxo= 5.0341E-01    No. Inners=   36
     2    Dfmxo= 2.3454E-01    No. Inners=   26
-    3    Dfmxo= 1.1799E-03    No. Inners=   17
+    3    Dfmxo= 1.1876E-03    No. Inners=   17
 
   Cycle=   6    Time= 5.5000E-02    No. Outers=   3    No. Inners=   79
 
@@ -220,53 +232,53 @@
   Time Cycle   7
   Outer
     1    Dfmxo= 5.9433E-01    No. Inners=   36
-    2    Dfmxo= 2.3511E-01    No. Inners=   26
-    3    Dfmxo= 1.1814E-03    No. Inners=   17
+    2    Dfmxo= 2.3512E-01    No. Inners=   26
+    3    Dfmxo= 1.1900E-03    No. Inners=   17
 
   Cycle=   7    Time= 6.5000E-02    No. Outers=   3    No. Inners=   79
 
  ******************************
   Time Cycle   8
   Outer
-    1    Dfmxo= 6.8525E-01    No. Inners=   36
+    1    Dfmxo= 6.8526E-01    No. Inners=   36
     2    Dfmxo= 2.3534E-01    No. Inners=   26
-    3    Dfmxo= 1.1816E-03    No. Inners=   17
+    3    Dfmxo= 1.1910E-03    No. Inners=   17
 
   Cycle=   8    Time= 7.5000E-02    No. Outers=   3    No. Inners=   79
 
  ******************************
   Time Cycle   9
   Outer
-    1    Dfmxo= 7.7618E-01    No. Inners=   36
+    1    Dfmxo= 7.7619E-01    No. Inners=   36
     2    Dfmxo= 2.3574E-01    No. Inners=   26
-    3    Dfmxo= 1.1826E-03    No. Inners=   17
+    3    Dfmxo= 1.1927E-03    No. Inners=   18
 
-  Cycle=   9    Time= 8.5000E-02    No. Outers=   3    No. Inners=   79
+  Cycle=   9    Time= 8.5000E-02    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  10
   Outer
-    1    Dfmxo= 8.6711E-01    No. Inners=   36
-    2    Dfmxo= 2.3589E-01    No. Inners=   26
-    3    Dfmxo= 1.1828E-03    No. Inners=   17
+    1    Dfmxo= 8.6712E-01    No. Inners=   36
+    2    Dfmxo= 2.3588E-01    No. Inners=   26
+    3    Dfmxo= 1.1933E-03    No. Inners=   18
 
-  Cycle=  10    Time= 9.5000E-02    No. Outers=   3    No. Inners=   79
+  Cycle=  10    Time= 9.5000E-02    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  11
   Outer
-    1    Dfmxo= 9.5804E-01    No. Inners=   36
-    2    Dfmxo= 2.3610E-01    No. Inners=   26
-    3    Dfmxo= 1.1833E-03    No. Inners=   17
+    1    Dfmxo= 9.5805E-01    No. Inners=   36
+    2    Dfmxo= 2.3609E-01    No. Inners=   26
+    3    Dfmxo= 1.1942E-03    No. Inners=   18
 
-  Cycle=  11    Time= 1.0500E-01    No. Outers=   3    No. Inners=   79
+  Cycle=  11    Time= 1.0500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  12
   Outer
     1    Dfmxo= 1.0490E+00    No. Inners=   36
-    2    Dfmxo= 2.3625E-01    No. Inners=   26
-    3    Dfmxo= 1.1836E-03    No. Inners=   18
+    2    Dfmxo= 2.3624E-01    No. Inners=   26
+    3    Dfmxo= 1.1949E-03    No. Inners=   18
 
   Cycle=  12    Time= 1.1500E-01    No. Outers=   3    No. Inners=   80
 
@@ -274,8 +286,8 @@
   Time Cycle  13
   Outer
     1    Dfmxo= 1.1399E+00    No. Inners=   36
-    2    Dfmxo= 2.3635E-01    No. Inners=   26
-    3    Dfmxo= 1.1838E-03    No. Inners=   18
+    2    Dfmxo= 2.3634E-01    No. Inners=   26
+    3    Dfmxo= 1.1953E-03    No. Inners=   18
 
   Cycle=  13    Time= 1.2500E-01    No. Outers=   3    No. Inners=   80
 
@@ -283,17 +295,17 @@
   Time Cycle  14
   Outer
     1    Dfmxo= 1.2308E+00    No. Inners=   36
-    2    Dfmxo= 2.3649E-01    No. Inners=   26
-    3    Dfmxo= 1.1841E-03    No. Inners=   18
+    2    Dfmxo= 2.3647E-01    No. Inners=   26
+    3    Dfmxo= 1.1959E-03    No. Inners=   18
 
   Cycle=  14    Time= 1.3500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  15
   Outer
-    1    Dfmxo= 1.3217E+00    No. Inners=   36
-    2    Dfmxo= 2.3656E-01    No. Inners=   26
-    3    Dfmxo= 1.1842E-03    No. Inners=   18
+    1    Dfmxo= 1.3218E+00    No. Inners=   36
+    2    Dfmxo= 2.3654E-01    No. Inners=   26
+    3    Dfmxo= 1.1962E-03    No. Inners=   18
 
   Cycle=  15    Time= 1.4500E-01    No. Outers=   3    No. Inners=   80
 
@@ -301,8 +313,8 @@
   Time Cycle  16
   Outer
     1    Dfmxo= 1.4127E+00    No. Inners=   36
-    2    Dfmxo= 2.3665E-01    No. Inners=   26
-    3    Dfmxo= 1.1844E-03    No. Inners=   18
+    2    Dfmxo= 2.3663E-01    No. Inners=   26
+    3    Dfmxo= 1.1966E-03    No. Inners=   18
 
   Cycle=  16    Time= 1.5500E-01    No. Outers=   3    No. Inners=   80
 
@@ -310,8 +322,8 @@
   Time Cycle  17
   Outer
     1    Dfmxo= 1.5036E+00    No. Inners=   36
-    2    Dfmxo= 2.3672E-01    No. Inners=   26
-    3    Dfmxo= 1.1845E-03    No. Inners=   18
+    2    Dfmxo= 2.3669E-01    No. Inners=   26
+    3    Dfmxo= 1.1968E-03    No. Inners=   18
 
   Cycle=  17    Time= 1.6500E-01    No. Outers=   3    No. Inners=   80
 
@@ -319,8 +331,8 @@
   Time Cycle  18
   Outer
     1    Dfmxo= 1.5945E+00    No. Inners=   36
-    2    Dfmxo= 2.3679E-01    No. Inners=   26
-    3    Dfmxo= 1.1847E-03    No. Inners=   18
+    2    Dfmxo= 2.3676E-01    No. Inners=   26
+    3    Dfmxo= 1.1971E-03    No. Inners=   18
 
   Cycle=  18    Time= 1.7500E-01    No. Outers=   3    No. Inners=   80
 
@@ -328,8 +340,8 @@
   Time Cycle  19
   Outer
     1    Dfmxo= 1.6855E+00    No. Inners=   36
-    2    Dfmxo= 2.3684E-01    No. Inners=   26
-    3    Dfmxo= 1.1848E-03    No. Inners=   18
+    2    Dfmxo= 2.3681E-01    No. Inners=   26
+    3    Dfmxo= 1.1974E-03    No. Inners=   18
 
   Cycle=  19    Time= 1.8500E-01    No. Outers=   3    No. Inners=   80
 
@@ -337,8 +349,8 @@
   Time Cycle  20
   Outer
     1    Dfmxo= 1.7764E+00    No. Inners=   36
-    2    Dfmxo= 2.3689E-01    No. Inners=   26
-    3    Dfmxo= 1.1849E-03    No. Inners=   18
+    2    Dfmxo= 2.3686E-01    No. Inners=   26
+    3    Dfmxo= 1.1976E-03    No. Inners=   18
 
   Cycle=  20    Time= 1.9500E-01    No. Outers=   3    No. Inners=   80
 
@@ -346,8 +358,8 @@
   Time Cycle  21
   Outer
     1    Dfmxo= 1.8673E+00    No. Inners=   36
-    2    Dfmxo= 2.3694E-01    No. Inners=   26
-    3    Dfmxo= 1.1850E-03    No. Inners=   18
+    2    Dfmxo= 2.3691E-01    No. Inners=   26
+    3    Dfmxo= 1.1978E-03    No. Inners=   18
 
   Cycle=  21    Time= 2.0500E-01    No. Outers=   3    No. Inners=   80
 
@@ -355,8 +367,8 @@
   Time Cycle  22
   Outer
     1    Dfmxo= 1.9582E+00    No. Inners=   36
-    2    Dfmxo= 2.3698E-01    No. Inners=   26
-    3    Dfmxo= 1.1851E-03    No. Inners=   18
+    2    Dfmxo= 2.3694E-01    No. Inners=   26
+    3    Dfmxo= 1.1979E-03    No. Inners=   18
 
   Cycle=  22    Time= 2.1500E-01    No. Outers=   3    No. Inners=   80
 
@@ -364,8 +376,8 @@
   Time Cycle  23
   Outer
     1    Dfmxo= 2.0492E+00    No. Inners=   36
-    2    Dfmxo= 2.3703E-01    No. Inners=   26
-    3    Dfmxo= 1.1852E-03    No. Inners=   18
+    2    Dfmxo= 2.3698E-01    No. Inners=   26
+    3    Dfmxo= 1.1981E-03    No. Inners=   18
 
   Cycle=  23    Time= 2.2500E-01    No. Outers=   3    No. Inners=   80
 
@@ -373,8 +385,8 @@
   Time Cycle  24
   Outer
     1    Dfmxo= 2.1401E+00    No. Inners=   36
-    2    Dfmxo= 2.3706E-01    No. Inners=   26
-    3    Dfmxo= 1.1852E-03    No. Inners=   18
+    2    Dfmxo= 2.3701E-01    No. Inners=   26
+    3    Dfmxo= 1.1982E-03    No. Inners=   18
 
   Cycle=  24    Time= 2.3500E-01    No. Outers=   3    No. Inners=   80
 
@@ -382,8 +394,8 @@
   Time Cycle  25
   Outer
     1    Dfmxo= 2.2310E+00    No. Inners=   36
-    2    Dfmxo= 2.3710E-01    No. Inners=   26
-    3    Dfmxo= 1.1853E-03    No. Inners=   18
+    2    Dfmxo= 2.3705E-01    No. Inners=   26
+    3    Dfmxo= 1.1984E-03    No. Inners=   18
 
   Cycle=  25    Time= 2.4500E-01    No. Outers=   3    No. Inners=   80
 
@@ -391,8 +403,8 @@
   Time Cycle  26
   Outer
     1    Dfmxo= 2.3220E+00    No. Inners=   36
-    2    Dfmxo= 2.3713E-01    No. Inners=   26
-    3    Dfmxo= 1.1854E-03    No. Inners=   18
+    2    Dfmxo= 2.3707E-01    No. Inners=   26
+    3    Dfmxo= 1.1985E-03    No. Inners=   18
 
   Cycle=  26    Time= 2.5500E-01    No. Outers=   3    No. Inners=   80
 
@@ -400,8 +412,8 @@
   Time Cycle  27
   Outer
     1    Dfmxo= 2.4129E+00    No. Inners=   36
-    2    Dfmxo= 2.3716E-01    No. Inners=   26
-    3    Dfmxo= 1.1855E-03    No. Inners=   18
+    2    Dfmxo= 2.3710E-01    No. Inners=   26
+    3    Dfmxo= 1.1986E-03    No. Inners=   18
 
   Cycle=  27    Time= 2.6500E-01    No. Outers=   3    No. Inners=   80
 
@@ -409,17 +421,17 @@
   Time Cycle  28
   Outer
     1    Dfmxo= 2.5038E+00    No. Inners=   36
-    2    Dfmxo= 2.3719E-01    No. Inners=   26
-    3    Dfmxo= 1.1855E-03    No. Inners=   18
+    2    Dfmxo= 2.3713E-01    No. Inners=   26
+    3    Dfmxo= 1.1987E-03    No. Inners=   18
 
   Cycle=  28    Time= 2.7500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  29
   Outer
-    1    Dfmxo= 2.5948E+00    No. Inners=   36
-    2    Dfmxo= 2.3721E-01    No. Inners=   26
-    3    Dfmxo= 1.1856E-03    No. Inners=   18
+    1    Dfmxo= 2.5947E+00    No. Inners=   36
+    2    Dfmxo= 2.3715E-01    No. Inners=   26
+    3    Dfmxo= 1.1988E-03    No. Inners=   18
 
   Cycle=  29    Time= 2.8500E-01    No. Outers=   3    No. Inners=   80
 
@@ -427,8 +439,8 @@
   Time Cycle  30
   Outer
     1    Dfmxo= 2.6857E+00    No. Inners=   36
-    2    Dfmxo= 2.3724E-01    No. Inners=   26
-    3    Dfmxo= 1.1856E-03    No. Inners=   18
+    2    Dfmxo= 2.3717E-01    No. Inners=   26
+    3    Dfmxo= 1.1989E-03    No. Inners=   18
 
   Cycle=  30    Time= 2.9500E-01    No. Outers=   3    No. Inners=   80
 
@@ -436,17 +448,17 @@
   Time Cycle  31
   Outer
     1    Dfmxo= 2.7766E+00    No. Inners=   36
-    2    Dfmxo= 2.3726E-01    No. Inners=   26
-    3    Dfmxo= 1.1857E-03    No. Inners=   18
+    2    Dfmxo= 2.3719E-01    No. Inners=   26
+    3    Dfmxo= 1.1990E-03    No. Inners=   18
 
   Cycle=  31    Time= 3.0500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  32
   Outer
-    1    Dfmxo= 2.8676E+00    No. Inners=   36
-    2    Dfmxo= 2.3728E-01    No. Inners=   26
-    3    Dfmxo= 1.1857E-03    No. Inners=   18
+    1    Dfmxo= 2.8675E+00    No. Inners=   36
+    2    Dfmxo= 2.3721E-01    No. Inners=   26
+    3    Dfmxo= 1.1991E-03    No. Inners=   18
 
   Cycle=  32    Time= 3.1500E-01    No. Outers=   3    No. Inners=   80
 
@@ -454,8 +466,8 @@
   Time Cycle  33
   Outer
     1    Dfmxo= 2.9585E+00    No. Inners=   36
-    2    Dfmxo= 2.3730E-01    No. Inners=   26
-    3    Dfmxo= 1.1858E-03    No. Inners=   18
+    2    Dfmxo= 2.3722E-01    No. Inners=   26
+    3    Dfmxo= 1.1992E-03    No. Inners=   18
 
   Cycle=  33    Time= 3.2500E-01    No. Outers=   3    No. Inners=   80
 
@@ -463,8 +475,8 @@
   Time Cycle  34
   Outer
     1    Dfmxo= 3.0494E+00    No. Inners=   36
-    2    Dfmxo= 2.3732E-01    No. Inners=   26
-    3    Dfmxo= 1.1858E-03    No. Inners=   18
+    2    Dfmxo= 2.3724E-01    No. Inners=   26
+    3    Dfmxo= 1.1992E-03    No. Inners=   18
 
   Cycle=  34    Time= 3.3500E-01    No. Outers=   3    No. Inners=   80
 
@@ -472,17 +484,17 @@
   Time Cycle  35
   Outer
     1    Dfmxo= 3.1403E+00    No. Inners=   36
-    2    Dfmxo= 2.3734E-01    No. Inners=   26
-    3    Dfmxo= 1.1858E-03    No. Inners=   18
+    2    Dfmxo= 2.3726E-01    No. Inners=   26
+    3    Dfmxo= 1.1993E-03    No. Inners=   18
 
   Cycle=  35    Time= 3.4500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  36
   Outer
-    1    Dfmxo= 3.2313E+00    No. Inners=   36
-    2    Dfmxo= 2.3736E-01    No. Inners=   26
-    3    Dfmxo= 1.1859E-03    No. Inners=   18
+    1    Dfmxo= 3.2312E+00    No. Inners=   36
+    2    Dfmxo= 2.3727E-01    No. Inners=   26
+    3    Dfmxo= 1.1994E-03    No. Inners=   18
 
   Cycle=  36    Time= 3.5500E-01    No. Outers=   3    No. Inners=   80
 
@@ -490,8 +502,8 @@
   Time Cycle  37
   Outer
     1    Dfmxo= 3.3222E+00    No. Inners=   36
-    2    Dfmxo= 2.3737E-01    No. Inners=   26
-    3    Dfmxo= 1.1859E-03    No. Inners=   18
+    2    Dfmxo= 2.3729E-01    No. Inners=   26
+    3    Dfmxo= 1.1994E-03    No. Inners=   18
 
   Cycle=  37    Time= 3.6500E-01    No. Outers=   3    No. Inners=   80
 
@@ -499,26 +511,26 @@
   Time Cycle  38
   Outer
     1    Dfmxo= 3.4131E+00    No. Inners=   36
-    2    Dfmxo= 2.3739E-01    No. Inners=   26
-    3    Dfmxo= 1.1860E-03    No. Inners=   18
+    2    Dfmxo= 2.3730E-01    No. Inners=   26
+    3    Dfmxo= 1.1995E-03    No. Inners=   18
 
   Cycle=  38    Time= 3.7500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  39
   Outer
-    1    Dfmxo= 3.5041E+00    No. Inners=   36
-    2    Dfmxo= 2.3741E-01    No. Inners=   26
-    3    Dfmxo= 1.1860E-03    No. Inners=   18
+    1    Dfmxo= 3.5040E+00    No. Inners=   36
+    2    Dfmxo= 2.3731E-01    No. Inners=   26
+    3    Dfmxo= 1.1995E-03    No. Inners=   18
 
   Cycle=  39    Time= 3.8500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  40
   Outer
-    1    Dfmxo= 3.5950E+00    No. Inners=   36
-    2    Dfmxo= 2.3742E-01    No. Inners=   26
-    3    Dfmxo= 1.1860E-03    No. Inners=   18
+    1    Dfmxo= 3.5949E+00    No. Inners=   36
+    2    Dfmxo= 2.3732E-01    No. Inners=   26
+    3    Dfmxo= 1.1996E-03    No. Inners=   18
 
   Cycle=  40    Time= 3.9500E-01    No. Outers=   3    No. Inners=   80
 
@@ -526,26 +538,26 @@
   Time Cycle  41
   Outer
     1    Dfmxo= 3.6859E+00    No. Inners=   36
-    2    Dfmxo= 2.3744E-01    No. Inners=   26
-    3    Dfmxo= 1.1861E-03    No. Inners=   18
+    2    Dfmxo= 2.3733E-01    No. Inners=   26
+    3    Dfmxo= 1.1996E-03    No. Inners=   18
 
   Cycle=  41    Time= 4.0500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  42
   Outer
-    1    Dfmxo= 3.7769E+00    No. Inners=   36
-    2    Dfmxo= 2.3745E-01    No. Inners=   26
-    3    Dfmxo= 1.1861E-03    No. Inners=   18
+    1    Dfmxo= 3.7768E+00    No. Inners=   36
+    2    Dfmxo= 2.3734E-01    No. Inners=   26
+    3    Dfmxo= 1.1997E-03    No. Inners=   18
 
   Cycle=  42    Time= 4.1500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  43
   Outer
-    1    Dfmxo= 3.8678E+00    No. Inners=   36
-    2    Dfmxo= 2.3746E-01    No. Inners=   26
-    3    Dfmxo= 1.1861E-03    No. Inners=   18
+    1    Dfmxo= 3.8677E+00    No. Inners=   36
+    2    Dfmxo= 2.3735E-01    No. Inners=   26
+    3    Dfmxo= 1.1997E-03    No. Inners=   18
 
   Cycle=  43    Time= 4.2500E-01    No. Outers=   3    No. Inners=   80
 
@@ -553,820 +565,550 @@
   Time Cycle  44
   Outer
     1    Dfmxo= 3.9587E+00    No. Inners=   36
-    2    Dfmxo= 2.3748E-01    No. Inners=   26
-    3    Dfmxo= 1.1861E-03    No. Inners=   18
+    2    Dfmxo= 2.3736E-01    No. Inners=   26
+    3    Dfmxo= 1.1998E-03    No. Inners=   18
 
   Cycle=  44    Time= 4.3500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  45
   Outer
-    1    Dfmxo= 4.0497E+00    No. Inners=   36
-    2    Dfmxo= 2.3749E-01    No. Inners=   26
-    3    Dfmxo= 1.1862E-03    No. Inners=   18
+    1    Dfmxo= 4.0496E+00    No. Inners=   36
+    2    Dfmxo= 2.3737E-01    No. Inners=   26
+    3    Dfmxo= 1.1998E-03    No. Inners=   18
 
   Cycle=  45    Time= 4.4500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  46
   Outer
-    1    Dfmxo= 4.1406E+00    No. Inners=   36
-    2    Dfmxo= 2.3750E-01    No. Inners=   26
-    3    Dfmxo= 1.1862E-03    No. Inners=   18
+    1    Dfmxo= 4.1405E+00    No. Inners=   36
+    2    Dfmxo= 2.3738E-01    No. Inners=   26
+    3    Dfmxo= 1.1998E-03    No. Inners=   18
 
   Cycle=  46    Time= 4.5500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  47
   Outer
-    1    Dfmxo= 4.2315E+00    No. Inners=   36
-    2    Dfmxo= 2.3751E-01    No. Inners=   26
-    3    Dfmxo= 1.1862E-03    No. Inners=   18
+    1    Dfmxo= 4.2314E+00    No. Inners=   36
+    2    Dfmxo= 2.3739E-01    No. Inners=   26
+    3    Dfmxo= 1.1999E-03    No. Inners=   18
 
   Cycle=  47    Time= 4.6500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  48
   Outer
-    1    Dfmxo= 4.3225E+00    No. Inners=   36
-    2    Dfmxo= 2.3752E-01    No. Inners=   26
-    3    Dfmxo= 1.1862E-03    No. Inners=   18
+    1    Dfmxo= 4.3224E+00    No. Inners=   36
+    2    Dfmxo= 2.3740E-01    No. Inners=   26
+    3    Dfmxo= 1.1999E-03    No. Inners=   18
 
   Cycle=  48    Time= 4.7500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  49
   Outer
-    1    Dfmxo= 4.4134E+00    No. Inners=   36
-    2    Dfmxo= 2.3754E-01    No. Inners=   26
-    3    Dfmxo= 1.1863E-03    No. Inners=   18
+    1    Dfmxo= 4.4133E+00    No. Inners=   36
+    2    Dfmxo= 2.3741E-01    No. Inners=   26
+    3    Dfmxo= 1.1999E-03    No. Inners=   18
 
   Cycle=  49    Time= 4.8500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  50
   Outer
-    1    Dfmxo= 4.5044E+00    No. Inners=   36
-    2    Dfmxo= 2.3755E-01    No. Inners=   26
-    3    Dfmxo= 1.1863E-03    No. Inners=   18
+    1    Dfmxo= 4.5042E+00    No. Inners=   36
+    2    Dfmxo= 2.3741E-01    No. Inners=   26
+    3    Dfmxo= 1.2000E-03    No. Inners=   18
 
   Cycle=  50    Time= 4.9500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  51
   Outer
-    1    Dfmxo= 4.5953E+00    No. Inners=   36
-    2    Dfmxo= 2.3756E-01    No. Inners=   26
-    3    Dfmxo= 1.1863E-03    No. Inners=   18
+    1    Dfmxo= 4.5951E+00    No. Inners=   36
+    2    Dfmxo= 2.3742E-01    No. Inners=   26
+    3    Dfmxo= 1.2000E-03    No. Inners=   18
 
   Cycle=  51    Time= 5.0500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  52
   Outer
-    1    Dfmxo= 4.6862E+00    No. Inners=   36
-    2    Dfmxo= 2.3757E-01    No. Inners=   26
-    3    Dfmxo= 1.1863E-03    No. Inners=   18
+    1    Dfmxo= 4.6861E+00    No. Inners=   36
+    2    Dfmxo= 2.3743E-01    No. Inners=   26
+    3    Dfmxo= 1.2000E-03    No. Inners=   18
 
   Cycle=  52    Time= 5.1500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  53
   Outer
-    1    Dfmxo= 4.7772E+00    No. Inners=   36
-    2    Dfmxo= 2.3758E-01    No. Inners=   26
-    3    Dfmxo= 1.1864E-03    No. Inners=   18
+    1    Dfmxo= 4.7770E+00    No. Inners=   36
+    2    Dfmxo= 2.3743E-01    No. Inners=   26
+    3    Dfmxo= 1.2001E-03    No. Inners=   18
 
   Cycle=  53    Time= 5.2500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  54
   Outer
-    1    Dfmxo= 4.8681E+00    No. Inners=   36
-    2    Dfmxo= 2.3759E-01    No. Inners=   26
-    3    Dfmxo= 1.1864E-03    No. Inners=   18
+    1    Dfmxo= 4.8679E+00    No. Inners=   36
+    2    Dfmxo= 2.3744E-01    No. Inners=   26
+    3    Dfmxo= 1.2001E-03    No. Inners=   18
 
   Cycle=  54    Time= 5.3500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  55
   Outer
-    1    Dfmxo= 4.9590E+00    No. Inners=   36
-    2    Dfmxo= 2.3760E-01    No. Inners=   26
-    3    Dfmxo= 1.1864E-03    No. Inners=   18
+    1    Dfmxo= 4.9589E+00    No. Inners=   36
+    2    Dfmxo= 2.3745E-01    No. Inners=   26
+    3    Dfmxo= 1.2001E-03    No. Inners=   18
 
   Cycle=  55    Time= 5.4500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  56
   Outer
-    1    Dfmxo= 5.0500E+00    No. Inners=   36
-    2    Dfmxo= 2.3761E-01    No. Inners=   26
-    3    Dfmxo= 1.1864E-03    No. Inners=   18
+    1    Dfmxo= 5.0498E+00    No. Inners=   36
+    2    Dfmxo= 2.3745E-01    No. Inners=   26
+    3    Dfmxo= 1.2001E-03    No. Inners=   18
 
   Cycle=  56    Time= 5.5500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  57
   Outer
-    1    Dfmxo= 5.1409E+00    No. Inners=   36
-    2    Dfmxo= 2.3762E-01    No. Inners=   26
-    3    Dfmxo= 1.1865E-03    No. Inners=   18
+    1    Dfmxo= 5.1407E+00    No. Inners=   36
+    2    Dfmxo= 2.3746E-01    No. Inners=   26
+    3    Dfmxo= 1.2002E-03    No. Inners=   18
 
   Cycle=  57    Time= 5.6500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  58
   Outer
-    1    Dfmxo= 5.2318E+00    No. Inners=   36
-    2    Dfmxo= 2.3762E-01    No. Inners=   26
-    3    Dfmxo= 1.1865E-03    No. Inners=   18
+    1    Dfmxo= 5.2316E+00    No. Inners=   36
+    2    Dfmxo= 2.3746E-01    No. Inners=   26
+    3    Dfmxo= 1.2002E-03    No. Inners=   18
 
   Cycle=  58    Time= 5.7500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  59
   Outer
-    1    Dfmxo= 5.3228E+00    No. Inners=   36
-    2    Dfmxo= 2.3763E-01    No. Inners=   26
-    3    Dfmxo= 1.1865E-03    No. Inners=   18
+    1    Dfmxo= 5.3226E+00    No. Inners=   36
+    2    Dfmxo= 2.3747E-01    No. Inners=   26
+    3    Dfmxo= 1.2002E-03    No. Inners=   18
 
   Cycle=  59    Time= 5.8500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  60
   Outer
-    1    Dfmxo= 5.4137E+00    No. Inners=   36
-    2    Dfmxo= 2.3764E-01    No. Inners=   26
-    3    Dfmxo= 1.1865E-03    No. Inners=   18
+    1    Dfmxo= 5.4135E+00    No. Inners=   36
+    2    Dfmxo= 2.3747E-01    No. Inners=   26
+    3    Dfmxo= 1.2002E-03    No. Inners=   18
 
   Cycle=  60    Time= 5.9500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  61
   Outer
-    1    Dfmxo= 5.5047E+00    No. Inners=   36
-    2    Dfmxo= 2.3765E-01    No. Inners=   26
-    3    Dfmxo= 1.1865E-03    No. Inners=   18
+    1    Dfmxo= 5.5044E+00    No. Inners=   36
+    2    Dfmxo= 2.3748E-01    No. Inners=   26
+    3    Dfmxo= 1.2003E-03    No. Inners=   18
 
   Cycle=  61    Time= 6.0500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  62
   Outer
-    1    Dfmxo= 5.5956E+00    No. Inners=   36
-    2    Dfmxo= 2.3766E-01    No. Inners=   26
-    3    Dfmxo= 1.1865E-03    No. Inners=   18
+    1    Dfmxo= 5.5954E+00    No. Inners=   36
+    2    Dfmxo= 2.3748E-01    No. Inners=   26
+    3    Dfmxo= 1.2003E-03    No. Inners=   18
 
   Cycle=  62    Time= 6.1500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  63
   Outer
-    1    Dfmxo= 5.6865E+00    No. Inners=   36
-    2    Dfmxo= 2.3767E-01    No. Inners=   26
-    3    Dfmxo= 1.1866E-03    No. Inners=   18
+    1    Dfmxo= 5.6863E+00    No. Inners=   36
+    2    Dfmxo= 2.3749E-01    No. Inners=   26
+    3    Dfmxo= 1.2003E-03    No. Inners=   18
 
   Cycle=  63    Time= 6.2500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  64
   Outer
-    1    Dfmxo= 5.7775E+00    No. Inners=   36
-    2    Dfmxo= 2.3768E-01    No. Inners=   26
-    3    Dfmxo= 1.1866E-03    No. Inners=   18
+    1    Dfmxo= 5.7772E+00    No. Inners=   36
+    2    Dfmxo= 2.3749E-01    No. Inners=   26
+    3    Dfmxo= 1.2003E-03    No. Inners=   18
 
   Cycle=  64    Time= 6.3500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  65
   Outer
-    1    Dfmxo= 5.8684E+00    No. Inners=   36
-    2    Dfmxo= 2.3768E-01    No. Inners=   26
-    3    Dfmxo= 1.1866E-03    No. Inners=   18
+    1    Dfmxo= 5.8681E+00    No. Inners=   36
+    2    Dfmxo= 2.3750E-01    No. Inners=   26
+    3    Dfmxo= 1.2003E-03    No. Inners=   18
 
   Cycle=  65    Time= 6.4500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  66
   Outer
-    1    Dfmxo= 5.9594E+00    No. Inners=   36
-    2    Dfmxo= 2.3769E-01    No. Inners=   26
-    3    Dfmxo= 1.1866E-03    No. Inners=   18
+    1    Dfmxo= 5.9591E+00    No. Inners=   36
+    2    Dfmxo= 2.3750E-01    No. Inners=   26
+    3    Dfmxo= 1.2004E-03    No. Inners=   18
 
   Cycle=  66    Time= 6.5500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  67
   Outer
-    1    Dfmxo= 6.0503E+00    No. Inners=   36
-    2    Dfmxo= 2.3770E-01    No. Inners=   26
-    3    Dfmxo= 1.1866E-03    No. Inners=   18
+    1    Dfmxo= 6.0500E+00    No. Inners=   36
+    2    Dfmxo= 2.3751E-01    No. Inners=   26
+    3    Dfmxo= 1.2004E-03    No. Inners=   18
 
   Cycle=  67    Time= 6.6500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  68
   Outer
-    1    Dfmxo= 6.1412E+00    No. Inners=   36
-    2    Dfmxo= 2.3771E-01    No. Inners=   26
-    3    Dfmxo= 1.1867E-03    No. Inners=   18
+    1    Dfmxo= 6.1409E+00    No. Inners=   36
+    2    Dfmxo= 2.3751E-01    No. Inners=   26
+    3    Dfmxo= 1.2004E-03    No. Inners=   18
 
   Cycle=  68    Time= 6.7500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  69
   Outer
-    1    Dfmxo= 6.2322E+00    No. Inners=   36
-    2    Dfmxo= 2.3771E-01    No. Inners=   26
-    3    Dfmxo= 1.1867E-03    No. Inners=   18
+    1    Dfmxo= 6.2318E+00    No. Inners=   36
+    2    Dfmxo= 2.3751E-01    No. Inners=   26
+    3    Dfmxo= 1.2004E-03    No. Inners=   18
 
   Cycle=  69    Time= 6.8500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  70
   Outer
-    1    Dfmxo= 6.3231E+00    No. Inners=   36
-    2    Dfmxo= 2.3772E-01    No. Inners=   26
-    3    Dfmxo= 1.1867E-03    No. Inners=   18
+    1    Dfmxo= 6.3228E+00    No. Inners=   36
+    2    Dfmxo= 2.3752E-01    No. Inners=   26
+    3    Dfmxo= 1.2004E-03    No. Inners=   18
 
   Cycle=  70    Time= 6.9500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  71
   Outer
-    1    Dfmxo= 6.4141E+00    No. Inners=   36
-    2    Dfmxo= 2.3773E-01    No. Inners=   26
-    3    Dfmxo= 1.1867E-03    No. Inners=   18
+    1    Dfmxo= 6.4137E+00    No. Inners=   36
+    2    Dfmxo= 2.3752E-01    No. Inners=   26
+    3    Dfmxo= 1.2004E-03    No. Inners=   18
 
   Cycle=  71    Time= 7.0500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  72
   Outer
-    1    Dfmxo= 6.5050E+00    No. Inners=   36
-    2    Dfmxo= 2.3773E-01    No. Inners=   26
-    3    Dfmxo= 1.1867E-03    No. Inners=   18
+    1    Dfmxo= 6.5046E+00    No. Inners=   36
+    2    Dfmxo= 2.3752E-01    No. Inners=   26
+    3    Dfmxo= 1.2005E-03    No. Inners=   18
 
   Cycle=  72    Time= 7.1500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  73
   Outer
-    1    Dfmxo= 6.5959E+00    No. Inners=   36
-    2    Dfmxo= 2.3774E-01    No. Inners=   26
-    3    Dfmxo= 1.1867E-03    No. Inners=   18
+    1    Dfmxo= 6.5956E+00    No. Inners=   36
+    2    Dfmxo= 2.3753E-01    No. Inners=   26
+    3    Dfmxo= 1.2005E-03    No. Inners=   18
 
   Cycle=  73    Time= 7.2500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  74
   Outer
-    1    Dfmxo= 6.6869E+00    No. Inners=   36
-    2    Dfmxo= 2.3775E-01    No. Inners=   26
-    3    Dfmxo= 1.1868E-03    No. Inners=   18
+    1    Dfmxo= 6.6865E+00    No. Inners=   36
+    2    Dfmxo= 2.3753E-01    No. Inners=   26
+    3    Dfmxo= 1.2005E-03    No. Inners=   18
 
   Cycle=  74    Time= 7.3500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  75
   Outer
-    1    Dfmxo= 6.7778E+00    No. Inners=   36
-    2    Dfmxo= 2.3776E-01    No. Inners=   26
-    3    Dfmxo= 1.1868E-03    No. Inners=   18
+    1    Dfmxo= 6.7774E+00    No. Inners=   36
+    2    Dfmxo= 2.3753E-01    No. Inners=   26
+    3    Dfmxo= 1.2005E-03    No. Inners=   18
 
   Cycle=  75    Time= 7.4500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  76
   Outer
-    1    Dfmxo= 6.8688E+00    No. Inners=   36
-    2    Dfmxo= 2.3776E-01    No. Inners=   26
-    3    Dfmxo= 1.1868E-03    No. Inners=   18
+    1    Dfmxo= 6.8683E+00    No. Inners=   36
+    2    Dfmxo= 2.3754E-01    No. Inners=   26
+    3    Dfmxo= 1.2005E-03    No. Inners=   18
 
   Cycle=  76    Time= 7.5500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  77
   Outer
-    1    Dfmxo= 6.9597E+00    No. Inners=   36
-    2    Dfmxo= 2.3777E-01    No. Inners=   26
-    3    Dfmxo= 1.1868E-03    No. Inners=   18
+    1    Dfmxo= 6.9593E+00    No. Inners=   36
+    2    Dfmxo= 2.3754E-01    No. Inners=   26
+    3    Dfmxo= 1.2005E-03    No. Inners=   18
 
   Cycle=  77    Time= 7.6500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  78
   Outer
-    1    Dfmxo= 7.0506E+00    No. Inners=   36
-    2    Dfmxo= 2.3778E-01    No. Inners=   26
-    3    Dfmxo= 1.1868E-03    No. Inners=   18
+    1    Dfmxo= 7.0502E+00    No. Inners=   36
+    2    Dfmxo= 2.3754E-01    No. Inners=   26
+    3    Dfmxo= 1.2005E-03    No. Inners=   18
 
   Cycle=  78    Time= 7.7500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  79
   Outer
-    1    Dfmxo= 7.1416E+00    No. Inners=   36
-    2    Dfmxo= 2.3778E-01    No. Inners=   26
-    3    Dfmxo= 1.1868E-03    No. Inners=   18
+    1    Dfmxo= 7.1411E+00    No. Inners=   36
+    2    Dfmxo= 2.3755E-01    No. Inners=   26
+    3    Dfmxo= 1.2006E-03    No. Inners=   18
 
   Cycle=  79    Time= 7.8500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  80
   Outer
-    1    Dfmxo= 7.2325E+00    No. Inners=   36
-    2    Dfmxo= 2.3779E-01    No. Inners=   26
-    3    Dfmxo= 1.1869E-03    No. Inners=   18
+    1    Dfmxo= 7.2320E+00    No. Inners=   36
+    2    Dfmxo= 2.3755E-01    No. Inners=   26
+    3    Dfmxo= 1.2006E-03    No. Inners=   18
 
   Cycle=  80    Time= 7.9500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  81
   Outer
-    1    Dfmxo= 7.3235E+00    No. Inners=   36
-    2    Dfmxo= 2.3779E-01    No. Inners=   26
-    3    Dfmxo= 1.1869E-03    No. Inners=   18
+    1    Dfmxo= 7.3230E+00    No. Inners=   36
+    2    Dfmxo= 2.3755E-01    No. Inners=   26
+    3    Dfmxo= 1.2006E-03    No. Inners=   18
 
   Cycle=  81    Time= 8.0500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  82
   Outer
-    1    Dfmxo= 7.4144E+00    No. Inners=   36
-    2    Dfmxo= 2.3780E-01    No. Inners=   26
-    3    Dfmxo= 1.1869E-03    No. Inners=   18
+    1    Dfmxo= 7.4139E+00    No. Inners=   36
+    2    Dfmxo= 2.3755E-01    No. Inners=   26
+    3    Dfmxo= 1.2006E-03    No. Inners=   18
 
   Cycle=  82    Time= 8.1500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  83
   Outer
-    1    Dfmxo= 7.5054E+00    No. Inners=   36
-    2    Dfmxo= 2.3781E-01    No. Inners=   26
-    3    Dfmxo= 1.1869E-03    No. Inners=   18
+    1    Dfmxo= 7.5048E+00    No. Inners=   36
+    2    Dfmxo= 2.3756E-01    No. Inners=   26
+    3    Dfmxo= 1.2006E-03    No. Inners=   18
 
   Cycle=  83    Time= 8.2500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  84
   Outer
-    1    Dfmxo= 7.5963E+00    No. Inners=   36
-    2    Dfmxo= 2.3781E-01    No. Inners=   26
-    3    Dfmxo= 1.1869E-03    No. Inners=   18
+    1    Dfmxo= 7.5958E+00    No. Inners=   36
+    2    Dfmxo= 2.3756E-01    No. Inners=   26
+    3    Dfmxo= 1.2006E-03    No. Inners=   18
 
   Cycle=  84    Time= 8.3500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  85
   Outer
-    1    Dfmxo= 7.6872E+00    No. Inners=   36
-    2    Dfmxo= 2.3782E-01    No. Inners=   26
-    3    Dfmxo= 1.1869E-03    No. Inners=   18
+    1    Dfmxo= 7.6867E+00    No. Inners=   36
+    2    Dfmxo= 2.3756E-01    No. Inners=   26
+    3    Dfmxo= 1.2006E-03    No. Inners=   18
 
   Cycle=  85    Time= 8.4500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  86
   Outer
-    1    Dfmxo= 7.7782E+00    No. Inners=   36
-    2    Dfmxo= 2.3783E-01    No. Inners=   26
-    3    Dfmxo= 1.1869E-03    No. Inners=   18
+    1    Dfmxo= 7.7776E+00    No. Inners=   36
+    2    Dfmxo= 2.3756E-01    No. Inners=   26
+    3    Dfmxo= 1.2006E-03    No. Inners=   18
 
   Cycle=  86    Time= 8.5500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  87
   Outer
-    1    Dfmxo= 7.8691E+00    No. Inners=   36
-    2    Dfmxo= 2.3783E-01    No. Inners=   26
-    3    Dfmxo= 1.1870E-03    No. Inners=   18
+    1    Dfmxo= 7.8685E+00    No. Inners=   36
+    2    Dfmxo= 2.3757E-01    No. Inners=   26
+    3    Dfmxo= 1.2006E-03    No. Inners=   18
 
   Cycle=  87    Time= 8.6500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  88
   Outer
-    1    Dfmxo= 7.9601E+00    No. Inners=   36
-    2    Dfmxo= 2.3784E-01    No. Inners=   26
-    3    Dfmxo= 1.1870E-03    No. Inners=   18
+    1    Dfmxo= 7.9595E+00    No. Inners=   36
+    2    Dfmxo= 2.3757E-01    No. Inners=   26
+    3    Dfmxo= 1.2007E-03    No. Inners=   18
 
   Cycle=  88    Time= 8.7500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  89
   Outer
-    1    Dfmxo= 8.0510E+00    No. Inners=   36
-    2    Dfmxo= 2.3784E-01    No. Inners=   26
-    3    Dfmxo= 1.1870E-03    No. Inners=   18
+    1    Dfmxo= 8.0504E+00    No. Inners=   36
+    2    Dfmxo= 2.3757E-01    No. Inners=   26
+    3    Dfmxo= 1.2007E-03    No. Inners=   18
 
   Cycle=  89    Time= 8.8500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  90
   Outer
-    1    Dfmxo= 8.1420E+00    No. Inners=   36
-    2    Dfmxo= 2.3785E-01    No. Inners=   26
-    3    Dfmxo= 1.1870E-03    No. Inners=   18
+    1    Dfmxo= 8.1413E+00    No. Inners=   36
+    2    Dfmxo= 2.3757E-01    No. Inners=   26
+    3    Dfmxo= 1.2007E-03    No. Inners=   18
 
   Cycle=  90    Time= 8.9500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  91
   Outer
-    1    Dfmxo= 8.2329E+00    No. Inners=   36
-    2    Dfmxo= 2.3786E-01    No. Inners=   26
-    3    Dfmxo= 1.1870E-03    No. Inners=   18
+    1    Dfmxo= 8.2322E+00    No. Inners=   36
+    2    Dfmxo= 2.3758E-01    No. Inners=   26
+    3    Dfmxo= 1.2007E-03    No. Inners=   18
 
   Cycle=  91    Time= 9.0500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  92
   Outer
-    1    Dfmxo= 8.3239E+00    No. Inners=   36
-    2    Dfmxo= 2.3786E-01    No. Inners=   26
-    3    Dfmxo= 1.1870E-03    No. Inners=   18
+    1    Dfmxo= 8.3232E+00    No. Inners=   36
+    2    Dfmxo= 2.3758E-01    No. Inners=   26
+    3    Dfmxo= 1.2007E-03    No. Inners=   18
 
   Cycle=  92    Time= 9.1500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  93
   Outer
-    1    Dfmxo= 8.4148E+00    No. Inners=   36
-    2    Dfmxo= 2.3787E-01    No. Inners=   26
-    3    Dfmxo= 1.1870E-03    No. Inners=   18
+    1    Dfmxo= 8.4141E+00    No. Inners=   36
+    2    Dfmxo= 2.3758E-01    No. Inners=   26
+    3    Dfmxo= 1.2007E-03    No. Inners=   18
 
   Cycle=  93    Time= 9.2500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  94
   Outer
-    1    Dfmxo= 8.5057E+00    No. Inners=   36
-    2    Dfmxo= 2.3787E-01    No. Inners=   26
-    3    Dfmxo= 1.1871E-03    No. Inners=   18
+    1    Dfmxo= 8.5050E+00    No. Inners=   36
+    2    Dfmxo= 2.3758E-01    No. Inners=   26
+    3    Dfmxo= 1.2007E-03    No. Inners=   18
 
   Cycle=  94    Time= 9.3500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  95
   Outer
-    1    Dfmxo= 8.5967E+00    No. Inners=   36
-    2    Dfmxo= 2.3788E-01    No. Inners=   26
-    3    Dfmxo= 1.1871E-03    No. Inners=   18
+    1    Dfmxo= 8.5960E+00    No. Inners=   36
+    2    Dfmxo= 2.3758E-01    No. Inners=   26
+    3    Dfmxo= 1.2007E-03    No. Inners=   18
 
   Cycle=  95    Time= 9.4500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  96
   Outer
-    1    Dfmxo= 8.6876E+00    No. Inners=   36
-    2    Dfmxo= 2.3788E-01    No. Inners=   26
-    3    Dfmxo= 1.1871E-03    No. Inners=   18
+    1    Dfmxo= 8.6869E+00    No. Inners=   36
+    2    Dfmxo= 2.3759E-01    No. Inners=   26
+    3    Dfmxo= 1.2007E-03    No. Inners=   18
 
   Cycle=  96    Time= 9.5500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  97
   Outer
-    1    Dfmxo= 8.7786E+00    No. Inners=   36
-    2    Dfmxo= 2.3789E-01    No. Inners=   26
-    3    Dfmxo= 1.1871E-03    No. Inners=   18
+    1    Dfmxo= 8.7778E+00    No. Inners=   36
+    2    Dfmxo= 2.3759E-01    No. Inners=   26
+    3    Dfmxo= 1.2007E-03    No. Inners=   18
 
   Cycle=  97    Time= 9.6500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  98
   Outer
-    1    Dfmxo= 8.8695E+00    No. Inners=   36
-    2    Dfmxo= 2.3790E-01    No. Inners=   26
-    3    Dfmxo= 1.1871E-03    No. Inners=   18
+    1    Dfmxo= 8.8687E+00    No. Inners=   36
+    2    Dfmxo= 2.3759E-01    No. Inners=   26
+    3    Dfmxo= 1.2007E-03    No. Inners=   18
 
   Cycle=  98    Time= 9.7500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle  99
   Outer
-    1    Dfmxo= 8.9605E+00    No. Inners=   36
-    2    Dfmxo= 2.3790E-01    No. Inners=   26
-    3    Dfmxo= 1.1871E-03    No. Inners=   18
+    1    Dfmxo= 8.9597E+00    No. Inners=   36
+    2    Dfmxo= 2.3759E-01    No. Inners=   26
+    3    Dfmxo= 1.2008E-03    No. Inners=   18
 
   Cycle=  99    Time= 9.8500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
   Time Cycle 100
   Outer
-    1    Dfmxo= 9.0514E+00    No. Inners=   36
-    2    Dfmxo= 2.3791E-01    No. Inners=   26
-    3    Dfmxo= 1.1871E-03    No. Inners=   18
+    1    Dfmxo= 9.0506E+00    No. Inners=   36
+    2    Dfmxo= 2.3759E-01    No. Inners=   26
+    3    Dfmxo= 1.2008E-03    No. Inners=   18
 
   Cycle= 100    Time= 9.9500E-01    No. Outers=   3    No. Inners=   80
 
  ******************************
-  Total inners for all time steps, outers =   7990
-
-********************************************************************************
-
-          Calculation Final Scalar Flux Solution
-********************************************************************************
-
- ***********************************
-  Group=   1   Z Mid-Plane=    5
- ***********************************
-
-     y    x    1      x    2      x    3      x    4      x    5      x    6
-     8  3.5978E-02  1.0244E-01  1.5331E-01  1.8084E-01  1.8084E-01  1.5331E-01
-     7  1.0242E-01  2.9167E-01  4.3654E-01  5.1496E-01  5.1496E-01  4.3654E-01
-     6  1.5326E-01  4.3645E-01  6.5330E-01  7.7075E-01  7.7075E-01  6.5330E-01
-     5  1.8077E-01  5.1481E-01  7.7061E-01  9.0919E-01  9.0919E-01  7.7061E-01
-     4  1.8077E-01  5.1481E-01  7.7061E-01  9.0919E-01  9.0919E-01  7.7061E-01
-     3  1.5326E-01  4.3645E-01  6.5330E-01  7.7075E-01  7.7075E-01  6.5330E-01
-     2  1.0242E-01  2.9167E-01  4.3654E-01  5.1496E-01  5.1496E-01  4.3654E-01
-     1  3.5978E-02  1.0244E-01  1.5331E-01  1.8084E-01  1.8084E-01  1.5331E-01
-
-     y    x    7      x    8
-     8  1.0244E-01  3.5978E-02
-     7  2.9167E-01  1.0242E-01
-     6  4.3645E-01  1.5326E-01
-     5  5.1481E-01  1.8077E-01
-     4  5.1481E-01  1.8077E-01
-     3  4.3645E-01  1.5326E-01
-     2  2.9167E-01  1.0242E-01
-     1  1.0244E-01  3.5978E-02
-
-********************************************************************************
-
-
- ***********************************
-  Group=   2   Z Mid-Plane=    5
- ***********************************
-
-     y    x    1      x    2      x    3      x    4      x    5      x    6
-     8  7.1998E-02  2.0495E-01  3.0673E-01  3.6181E-01  3.6181E-01  3.0673E-01
-     7  2.0494E-01  5.8350E-01  8.7328E-01  1.0301E+00  1.0301E+00  8.7328E-01
-     6  3.0669E-01  8.7321E-01  1.3069E+00  1.5417E+00  1.5417E+00  1.3069E+00
-     5  3.6175E-01  1.0300E+00  1.5416E+00  1.8186E+00  1.8186E+00  1.5416E+00
-     4  3.6175E-01  1.0300E+00  1.5416E+00  1.8186E+00  1.8186E+00  1.5416E+00
-     3  3.0669E-01  8.7321E-01  1.3069E+00  1.5417E+00  1.5417E+00  1.3069E+00
-     2  2.0494E-01  5.8350E-01  8.7328E-01  1.0301E+00  1.0301E+00  8.7328E-01
-     1  7.1998E-02  2.0495E-01  3.0673E-01  3.6181E-01  3.6181E-01  3.0673E-01
-
-     y    x    7      x    8
-     8  2.0495E-01  7.1998E-02
-     7  5.8350E-01  2.0494E-01
-     6  8.7321E-01  3.0669E-01
-     5  1.0300E+00  3.6175E-01
-     4  1.0300E+00  3.6175E-01
-     3  8.7321E-01  3.0669E-01
-     2  5.8350E-01  2.0494E-01
-     1  2.0495E-01  7.1998E-02
-
-********************************************************************************
-
-
- ***********************************
-  Group=   3   Z Mid-Plane=    5
- ***********************************
-
-     y    x    1      x    2      x    3      x    4      x    5      x    6
-     8  1.0801E-01  3.0746E-01  4.6014E-01  5.4277E-01  5.4277E-01  4.6014E-01
-     7  3.0745E-01  8.7531E-01  1.3100E+00  1.5453E+00  1.5453E+00  1.3100E+00
-     6  4.6010E-01  1.3099E+00  1.9605E+00  2.3127E+00  2.3127E+00  1.9605E+00
-     5  5.4271E-01  1.5451E+00  2.3126E+00  2.7280E+00  2.7280E+00  2.3126E+00
-     4  5.4271E-01  1.5451E+00  2.3126E+00  2.7280E+00  2.7280E+00  2.3126E+00
-     3  4.6010E-01  1.3099E+00  1.9605E+00  2.3127E+00  2.3127E+00  1.9605E+00
-     2  3.0745E-01  8.7531E-01  1.3100E+00  1.5453E+00  1.5453E+00  1.3100E+00
-     1  1.0801E-01  3.0746E-01  4.6014E-01  5.4277E-01  5.4277E-01  4.6014E-01
-
-     y    x    7      x    8
-     8  3.0746E-01  1.0801E-01
-     7  8.7531E-01  3.0745E-01
-     6  1.3099E+00  4.6010E-01
-     5  1.5451E+00  5.4271E-01
-     4  1.5451E+00  5.4271E-01
-     3  1.3099E+00  4.6010E-01
-     2  8.7531E-01  3.0745E-01
-     1  3.0746E-01  1.0801E-01
-
-********************************************************************************
-
-
- ***********************************
-  Group=   4   Z Mid-Plane=    5
- ***********************************
-
-     y    x    1      x    2      x    3      x    4      x    5      x    6
-     8  1.4403E-01  4.0997E-01  6.1354E-01  7.2373E-01  7.2373E-01  6.1354E-01
-     7  4.0995E-01  1.1671E+00  1.7467E+00  2.0604E+00  2.0604E+00  1.7467E+00
-     6  6.1350E-01  1.7466E+00  2.6141E+00  3.0837E+00  3.0837E+00  2.6141E+00
-     5  7.2366E-01  2.0603E+00  3.0835E+00  3.6375E+00  3.6375E+00  3.0835E+00
-     4  7.2366E-01  2.0603E+00  3.0835E+00  3.6375E+00  3.6375E+00  3.0835E+00
-     3  6.1350E-01  1.7466E+00  2.6141E+00  3.0837E+00  3.0837E+00  2.6141E+00
-     2  4.0995E-01  1.1671E+00  1.7467E+00  2.0604E+00  2.0604E+00  1.7467E+00
-     1  1.4403E-01  4.0997E-01  6.1354E-01  7.2373E-01  7.2373E-01  6.1354E-01
-
-     y    x    7      x    8
-     8  4.0997E-01  1.4403E-01
-     7  1.1671E+00  4.0995E-01
-     6  1.7466E+00  6.1350E-01
-     5  2.0603E+00  7.2366E-01
-     4  2.0603E+00  7.2366E-01
-     3  1.7466E+00  6.1350E-01
-     2  1.1671E+00  4.0995E-01
-     1  4.0997E-01  1.4403E-01
-
-********************************************************************************
-
-
- ***********************************
-  Group=   5   Z Mid-Plane=    5
- ***********************************
-
-     y    x    1      x    2      x    3      x    4      x    5      x    6
-     8  1.8004E-01  5.1248E-01  7.6695E-01  9.0468E-01  9.0468E-01  7.6695E-01
-     7  5.1246E-01  1.4589E+00  2.1834E+00  2.5756E+00  2.5756E+00  2.1834E+00
-     6  7.6690E-01  2.1833E+00  3.2677E+00  3.8546E+00  3.8546E+00  3.2677E+00
-     5  9.0460E-01  2.5754E+00  3.8545E+00  4.5469E+00  4.5469E+00  3.8545E+00
-     4  9.0460E-01  2.5754E+00  3.8545E+00  4.5469E+00  4.5469E+00  3.8545E+00
-     3  7.6690E-01  2.1833E+00  3.2677E+00  3.8546E+00  3.8546E+00  3.2677E+00
-     2  5.1246E-01  1.4589E+00  2.1834E+00  2.5756E+00  2.5756E+00  2.1834E+00
-     1  1.8004E-01  5.1248E-01  7.6695E-01  9.0468E-01  9.0468E-01  7.6695E-01
-
-     y    x    7      x    8
-     8  5.1248E-01  1.8004E-01
-     7  1.4589E+00  5.1246E-01
-     6  2.1833E+00  7.6690E-01
-     5  2.5754E+00  9.0460E-01
-     4  2.5754E+00  9.0460E-01
-     3  2.1833E+00  7.6690E-01
-     2  1.4589E+00  5.1246E-01
-     1  5.1248E-01  1.8004E-01
-
-********************************************************************************
-
-
- ***********************************
-  Group=   6   Z Mid-Plane=    5
- ***********************************
-
-     y    x    1      x    2      x    3      x    4      x    5      x    6
-     8  2.1606E-01  6.1498E-01  9.2036E-01  1.0856E+00  1.0856E+00  9.2036E-01
-     7  6.1496E-01  1.7507E+00  2.6201E+00  3.0907E+00  3.0907E+00  2.6201E+00
-     6  9.2029E-01  2.6200E+00  3.9213E+00  4.6256E+00  4.6256E+00  3.9213E+00
-     5  1.0855E+00  3.0905E+00  4.6254E+00  5.4563E+00  5.4563E+00  4.6254E+00
-     4  1.0855E+00  3.0905E+00  4.6254E+00  5.4563E+00  5.4563E+00  4.6254E+00
-     3  9.2029E-01  2.6200E+00  3.9213E+00  4.6256E+00  4.6256E+00  3.9213E+00
-     2  6.1496E-01  1.7507E+00  2.6201E+00  3.0907E+00  3.0907E+00  2.6201E+00
-     1  2.1606E-01  6.1498E-01  9.2036E-01  1.0856E+00  1.0856E+00  9.2036E-01
-
-     y    x    7      x    8
-     8  6.1498E-01  2.1606E-01
-     7  1.7507E+00  6.1496E-01
-     6  2.6200E+00  9.2029E-01
-     5  3.0905E+00  1.0855E+00
-     4  3.0905E+00  1.0855E+00
-     3  2.6200E+00  9.2029E-01
-     2  1.7507E+00  6.1496E-01
-     1  6.1498E-01  2.1606E-01
-
-********************************************************************************
-
-
- ***********************************
-  Group=   7   Z Mid-Plane=    5
- ***********************************
-
-     y    x    1      x    2      x    3      x    4      x    5      x    6
-     8  2.5207E-01  7.1749E-01  1.0738E+00  1.2666E+00  1.2666E+00  1.0738E+00
-     7  7.1746E-01  2.0425E+00  3.0568E+00  3.6058E+00  3.6058E+00  3.0568E+00
-     6  1.0737E+00  3.0567E+00  4.5748E+00  5.3966E+00  5.3966E+00  4.5748E+00
-     5  1.2665E+00  3.6056E+00  5.3964E+00  6.3658E+00  6.3658E+00  5.3964E+00
-     4  1.2665E+00  3.6056E+00  5.3964E+00  6.3658E+00  6.3658E+00  5.3964E+00
-     3  1.0737E+00  3.0567E+00  4.5748E+00  5.3966E+00  5.3966E+00  4.5748E+00
-     2  7.1746E-01  2.0425E+00  3.0568E+00  3.6058E+00  3.6058E+00  3.0568E+00
-     1  2.5207E-01  7.1749E-01  1.0738E+00  1.2666E+00  1.2666E+00  1.0738E+00
-
-     y    x    7      x    8
-     8  7.1749E-01  2.5207E-01
-     7  2.0425E+00  7.1746E-01
-     6  3.0567E+00  1.0737E+00
-     5  3.6056E+00  1.2665E+00
-     4  3.6056E+00  1.2665E+00
-     3  3.0567E+00  1.0737E+00
-     2  2.0425E+00  7.1746E-01
-     1  7.1749E-01  2.5207E-01
-
-********************************************************************************
-
-
- ***********************************
-  Group=   8   Z Mid-Plane=    5
- ***********************************
-
-     y    x    1      x    2      x    3      x    4      x    5      x    6
-     8  2.8809E-01  8.2000E-01  1.2272E+00  1.4476E+00  1.4476E+00  1.2272E+00
-     7  8.1997E-01  2.3343E+00  3.4936E+00  4.1210E+00  4.1210E+00  3.4936E+00
-     6  1.2271E+00  3.4934E+00  5.2284E+00  6.1676E+00  6.1676E+00  5.2284E+00
-     5  1.4474E+00  4.1207E+00  6.1673E+00  7.2752E+00  7.2752E+00  6.1673E+00
-     4  1.4474E+00  4.1207E+00  6.1673E+00  7.2752E+00  7.2752E+00  6.1673E+00
-     3  1.2271E+00  3.4934E+00  5.2284E+00  6.1676E+00  6.1676E+00  5.2284E+00
-     2  8.1997E-01  2.3343E+00  3.4936E+00  4.1210E+00  4.1210E+00  3.4936E+00
-     1  2.8809E-01  8.2000E-01  1.2272E+00  1.4476E+00  1.4476E+00  1.2272E+00
-
-     y    x    7      x    8
-     8  8.2000E-01  2.8809E-01
-     7  2.3343E+00  8.1997E-01
-     6  3.4934E+00  1.2271E+00
-     5  4.1207E+00  1.4474E+00
-     4  4.1207E+00  1.4474E+00
-     3  3.4934E+00  1.2271E+00
-     2  2.3343E+00  8.1997E-01
-     1  8.2000E-01  2.8809E-01
-
-********************************************************************************
-
-
- ***********************************
-  Group=   9   Z Mid-Plane=    5
- ***********************************
-
-     y    x    1      x    2      x    3      x    4      x    5      x    6
-     8  3.2413E-01  9.2254E-01  1.3806E+00  1.6286E+00  1.6286E+00  1.3806E+00
-     7  9.2249E-01  2.6262E+00  3.9303E+00  4.6362E+00  4.6362E+00  3.9303E+00
-     6  1.3805E+00  3.9301E+00  5.8821E+00  6.9387E+00  6.9387E+00  5.8821E+00
-     5  1.6284E+00  4.6358E+00  6.9383E+00  8.1848E+00  8.1848E+00  6.9383E+00
-     4  1.6284E+00  4.6358E+00  6.9383E+00  8.1848E+00  8.1848E+00  6.9383E+00
-     3  1.3805E+00  3.9301E+00  5.8821E+00  6.9387E+00  6.9387E+00  5.8821E+00
-     2  9.2249E-01  2.6262E+00  3.9303E+00  4.6362E+00  4.6362E+00  3.9303E+00
-     1  3.2413E-01  9.2254E-01  1.3806E+00  1.6286E+00  1.6286E+00  1.3806E+00
-
-     y    x    7      x    8
-     8  9.2254E-01  3.2413E-01
-     7  2.6262E+00  9.2249E-01
-     6  3.9301E+00  1.3805E+00
-     5  4.6358E+00  1.6284E+00
-     4  4.6358E+00  1.6284E+00
-     3  3.9301E+00  1.3805E+00
-     2  2.6262E+00  9.2249E-01
-     1  9.2254E-01  3.2413E-01
-
-********************************************************************************
-
-
- ***********************************
-  Group=  10   Z Mid-Plane=    5
- ***********************************
-
-     y    x    1      x    2      x    3      x    4      x    5      x    6
-     8  3.6008E-01  1.0249E+00  1.5338E+00  1.8093E+00  1.8093E+00  1.5338E+00
-     7  1.0249E+00  2.9177E+00  4.3667E+00  5.1510E+00  5.1510E+00  4.3667E+00
-     6  1.5337E+00  4.3664E+00  6.5350E+00  7.7090E+00  7.7090E+00  6.5350E+00
-     5  1.8090E+00  5.1504E+00  7.7086E+00  9.0935E+00  9.0935E+00  7.7086E+00
-     4  1.8090E+00  5.1504E+00  7.7086E+00  9.0935E+00  9.0935E+00  7.7086E+00
-     3  1.5337E+00  4.3664E+00  6.5350E+00  7.7090E+00  7.7090E+00  6.5350E+00
-     2  1.0249E+00  2.9177E+00  4.3667E+00  5.1510E+00  5.1510E+00  4.3667E+00
-     1  3.6008E-01  1.0249E+00  1.5338E+00  1.8093E+00  1.8093E+00  1.5338E+00
-
-     y    x    7      x    8
-     8  1.0249E+00  3.6008E-01
-     7  2.9177E+00  1.0249E+00
-     6  4.3664E+00  1.5337E+00
-     5  5.1504E+00  1.8090E+00
-     4  5.1504E+00  1.8090E+00
-     3  4.3664E+00  1.5337E+00
-     2  2.9177E+00  1.0249E+00
-     1  1.0249E+00  3.6008E-01
+  Total inners for all time steps, outers =   7993
 
 ********************************************************************************
 
           MMS Verification
 ********************************************************************************
 
-    Manufactured/Computed Solutions Max Diff= 1.302360E-02
+    Manufactured/Computed Solutions Max Diff= 1.286223E-02
 
-    Manufactured/Computed Solutions Min Diff= 4.873647E-03
+    Manufactured/Computed Solutions Min Diff= 4.586406E-03
+
+    Manufactured/Computed Solutions Avg Diff= 1.193411E-02
 
 ********************************************************************************
 
-          Timing Summary
+          keyword Timing Summary
 ********************************************************************************
 
   Code Section                          Time (seconds)
  **************                        ****************
-    Parallel Setup                       1.1470E-03
-    Input                                4.2510E-04
-    Setup                                1.0804E-02
-    Solve                                1.9417E+00
-       Parameter Setup                   2.1814E-02
-       Outer Source                      3.6167E-02
-       Inner Iterations                  1.8722E+00
-          Inner Source                   1.0391E-02
-          Transport Sweeps               1.6833E+00
-          Inner Misc Ops                 1.7852E-01
-       Solution Misc Ops                 1.1467E-02
-    Output                               2.4872E-03
-  Total Execution time                   2.0576E+00
+    Parallel Setup                       1.0982E-03
+    Input                                6.0010E-04
+    Setup                                1.4356E-02
+    Solve                                1.4500E+00
+       Parameter Setup                   1.7386E-02
+       Outer Source                      4.4341E-02
+       Inner Iterations                  1.3752E+00
+          Inner Source                   1.2720E-02
+          Transport Sweeps               1.2543E+00
+          Inner Misc Ops                 1.0816E-01
+       Solution Misc Ops                 1.3128E-02
+    Output                               2.3603E-04
+  Total Execution time                   1.4901E+00
 
-  Grind Time (nanoseconds)         4.9441E+00
+  Grind Time (nanoseconds)         3.6908E+00
 
 ********************************************************************************

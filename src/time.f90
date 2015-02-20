@@ -102,7 +102,7 @@ MODULE time_module
     WRITE( ounit, 414 ) tout
 !_______________________________________________________________________
 
-    401 FORMAT( 10X, 'Timing Summary', /, 80A, / )
+    401 FORMAT( 10X, 'keyword Timing Summary', /, 80A, / )
     402 FORMAT( 2X, 'Code Section', T41, 'Time (seconds)', /,          &
                 1X, '**************', T40, '****************' )
     403 FORMAT( 4X, 'Parallel Setup', T41, ES11.4 )

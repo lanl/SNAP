@@ -17,7 +17,7 @@
   mat_opt=1
   src_opt=1
   timedep=0
-  it_det=0
+  it_det=1
   tf=0.1
   nsteps=10
   iitm=5
@@ -26,4 +26,6 @@
   fluxp=0
   scatp=0
   fixup=0
+  soloutp=1
+  kplane=3
 /

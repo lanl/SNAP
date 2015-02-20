@@ -1,6 +1,6 @@
 ! Input from namelist
 &invar
-  nthreads=2
+  nthreads=4
   nnested=2
   npey=2
   npez=2
@@ -27,4 +27,6 @@
   fluxp=0
   scatp=0
   fixup=1
+  swp_typ=1
+  soloutp=1
 /

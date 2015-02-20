@@ -1,11 +1,13 @@
  SNAP: SN (Discrete Ordinates) Application Proxy
- Version Number..  1.01 
- Version Date..  03-25-2013
- Ran on  3-25-2013 at time 13:26:18
+ Version Number..  1.05 
+ Version Date..  02-19-2015
+ Ran on  2-19-2015 at time 14:22: 3
 
 ********************************************************************************
 
-          Input Echo - Values from input or default
+          keyword Input Echo - Values from input or 
+
+default
 ********************************************************************************
 
   NML=invar
@@ -13,7 +15,7 @@
      npez=     2
      ichunk=     6
      nthreads=     3
-     nnested=   0
+     nnested=   1
      ndimen=  3
      nx=    12
      ny=    12
@@ -33,15 +35,19 @@
      timedep=  0
      tf=  1.0000E+00
      nsteps=    10
+     swp_typ=  0
      it_det=  0
+     soloutp=  1
+     kplane=    0
+     popout=  0
      fluxp=  0
      fixup=  0
 
 ********************************************************************************
 
-   ***WARNING: INPUT_CHECK: NSTEPS reset to 1 for static calc      
+   *WARNING: INPUT_CHECK: NSTEPS reset to 1 for static calc        
 
-          Calculation Run-time Parameters Echo
+          keyword Calculation Run-time Parameters Echo
 ********************************************************************************
 
   Geometry
@@ -100,7 +106,11 @@
     iitm =   5
     oitm =  100
     timedep = 0
+    swp_typ = 0
     it_det = 0
+    soloutp = 1
+    kplane =    0
+    popout = 0
     fluxp = 0
     fixup = 0
 
@@ -118,11 +128,13 @@
     thread_level =  0
 
     .FALSE. nested threading
-      nnested =    0
+      nnested =    1
+
+    Parallel Computational Efficiency = 0.7273
 
 ********************************************************************************
 
-          Iteration Monitor
+          keyword Iteration Monitor
 ********************************************************************************
   Outer
     1    Dfmxo= 3.0604E-01    No. Inners=   15
@@ -137,7 +149,7 @@
 
 ********************************************************************************
 
-          Calculation Final Scalar Flux Solution
+          keyword Scalar Flux Solution
 ********************************************************************************
 
  ***********************************
@@ -244,25 +256,25 @@
 
 ********************************************************************************
 
-          Timing Summary
+          keyword Timing Summary
 ********************************************************************************
 
   Code Section                          Time (seconds)
  **************                        ****************
-    Parallel Setup                       9.2697E-04
-    Input                                4.0889E-04
-    Setup                                6.5207E-04
-    Solve                                2.6573E-01
-       Parameter Setup                   6.0868E-04
-       Outer Source                      4.3631E-05
-       Inner Iterations                  2.6468E-01
-          Inner Source                   1.1396E-04
-          Transport Sweeps               2.4499E-01
-          Inner Misc Ops                 1.9577E-02
-       Solution Misc Ops                 3.9768E-04
-    Output                               9.8801E-04
-  Total Execution time                   2.7904E-01
+    Parallel Setup                       1.0381E-03
+    Input                                5.3406E-04
+    Setup                                7.8297E-04
+    Solve                                2.8890E-01
+       Parameter Setup                   6.5899E-04
+       Outer Source                      9.2983E-05
+       Inner Iterations                  2.8737E-01
+          Inner Source                   2.3413E-04
+          Transport Sweeps               2.5091E-01
+          Inner Misc Ops                 3.6227E-02
+       Solution Misc Ops                 7.7748E-04
+    Output                               1.0099E-03
+  Total Execution time                   3.0006E-01
 
-  Grind Time (nanoseconds)         2.1358E+01
+  Grind Time (nanoseconds)         2.3221E+01
 
 ********************************************************************************

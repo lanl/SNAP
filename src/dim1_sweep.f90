@@ -18,28 +18,19 @@ MODULE dim1_sweep_module
 
   USE control_module, ONLY: fixup, tolr
 
+  USE plib_module, ONLY: ichunk
+
   IMPLICIT NONE
 
   PUBLIC :: dim1_sweep
-
-  SAVE
-!_______________________________________________________________________
-!
-! Module variable
-!
-! fmin        - min scalar flux. Dummy for now, not used elsewhere.
-! fmax        - max scalar flux. Dummy for now, not used elsewhere.
-!
-!_______________________________________________________________________
-
-  REAL(r_knd) :: fmin=zero, fmax=zero
 
 
   CONTAINS
 
 
   SUBROUTINE dim1_sweep ( id, d1, d2, d3, d4, oct, g, psii, qtot, ec,  &
-    vdelt, ptr_in, ptr_out, dinv, flux, fluxm, wmu, flkx, t_xs )
+    vdelt, ptr_in, ptr_out, dinv, flux0, fluxm, wmu, flkx, t_xs, fmin, &
+    fmax )
 
 !-----------------------------------------------------------------------
 !
@@ -51,21 +42,25 @@ MODULE dim1_sweep_module
 
     REAL(r_knd), INTENT(IN) :: vdelt
 
+    REAL(r_knd), INTENT(INOUT) :: fmin, fmax
+
     REAL(r_knd), DIMENSION(nang), INTENT(IN) :: wmu
 
     REAL(r_knd), DIMENSION(nang), INTENT(INOUT) :: psii
 
     REAL(r_knd), DIMENSION(nx), INTENT(IN) :: t_xs
 
-    REAL(r_knd), DIMENSION(nx), INTENT(INOUT) :: flux, flkx
+    REAL(r_knd), DIMENSION(nx), INTENT(INOUT) :: flux0
 
-    REAL(r_knd), DIMENSION(cmom,nx), INTENT(IN) :: qtot
+    REAL(r_knd), DIMENSION(nx+1), INTENT(INOUT) :: flkx
+
+    REAL(r_knd), DIMENSION(cmom,ichunk), INTENT(IN) :: qtot
+
+    REAL(r_knd), DIMENSION(cmom-1,nx), INTENT(INOUT) :: fluxm
 
     REAL(r_knd), DIMENSION(nang,cmom), INTENT(IN) :: ec
 
-    REAL(r_knd), DIMENSION(nang,nx), INTENT(IN) :: dinv
-
-    REAL(r_knd), DIMENSION(cmom-1,nx), INTENT(INOUT) :: fluxm
+    REAL(r_knd), DIMENSION(nang,ichunk), INTENT(IN) :: dinv
 
     REAL(r_knd), DIMENSION(d1,d2,d3,d4), INTENT(IN) :: ptr_in
 
@@ -86,7 +81,7 @@ MODULE dim1_sweep_module
     REAL(r_knd), DIMENSION(nang,nx) :: qm
 !_______________________________________________________________________
 !
-!   Set up the mms source if necessary
+!   Set up the mms source if necessary.
 !_______________________________________________________________________
 
     qm = zero
@@ -95,7 +90,7 @@ MODULE dim1_sweep_module
 !
 !   Set up the sweep order in the i-direction. ilo here set according
 !   to direction--different than ilo in octsweep. Setup the fixup
-!   counter
+!   counter.
 !_______________________________________________________________________
 
     IF ( id == 1 ) THEN
@@ -116,6 +111,7 @@ MODULE dim1_sweep_module
 !_______________________________________________________________________
 !
 !     Compute the angular source. MMS source scales linearly with time.
+!     Note that for 1-D ichunk=nx, so i index on qtot is ok.
 !_______________________________________________________________________
 
       psi = qtot(1,i) + qm(:,i)
@@ -133,7 +129,7 @@ MODULE dim1_sweep_module
 !_______________________________________________________________________
 !
 !     Compute the solution of the center. Use DD for edges. Use fixup
-!     if requested.
+!     if requested. Note for 1-D ichunk=nx, so i index of dinv is ok.
 !_______________________________________________________________________
 
       IF ( fixup == 0 ) THEN
@@ -201,39 +197,37 @@ MODULE dim1_sweep_module
       END IF
 !_______________________________________________________________________
 !
-!     Clear the flux arrays
-!_______________________________________________________________________
-
-      IF ( id == 1 ) THEN
-        flux(i) = zero
-        fluxm(:,i) = zero
-      END IF
-!_______________________________________________________________________
-!
 !     Compute the flux moments
 !_______________________________________________________________________
 
-      flux(i) = flux(i) + SUM( w*psi )
-      DO l = 1, cmom-1
-        fluxm(l,i) = fluxm(l,i) + SUM( ec(:,l+1)*w*psi )
-      END DO
+      psi = w*psi
+
+      IF ( id == 1 ) THEN
+        flux0(i) = SUM( psi )
+        DO l = 1, cmom-1
+          fluxm(l,i) = SUM( ec(:,l+1)*psi )
+        END DO
+      ELSE
+        flux0(i) = flux0(i) + SUM( psi )
+        DO l = 1, cmom-1
+          fluxm(l,i) = fluxm(l,i) + SUM( ec(:,l+1)*psi )
+        END DO
+      END IF
 !_______________________________________________________________________
 !
 !     Calculate min and max scalar fluxes (not used elsewhere currently)
 !_______________________________________________________________________
 
       IF ( id == 2 ) THEN
-        fmin = MIN( fmin, flux(i) )
-        fmax = MAX( fmax, flux(i) )
+        fmin = MIN( fmin, flux0(i) )
+        fmax = MAX( fmax, flux0(i) )
       END IF
 !_______________________________________________________________________
 !
-!     Compute leakages (not used elsewhere currently)
+!     Compute dummy leakages (not used elsewhere currently)
 !_______________________________________________________________________
 
-      IF ( i+id-1==1 .OR. i+id-1==nx+1 ) THEN
-        flkx(i) = flkx(i) + ist*SUM( wmu*psii )
-      END IF
+      flkx(i+id-1) = flkx(i+id-1) + ist*SUM( wmu*psii )
 !_______________________________________________________________________
 !
 !     Finish the loop

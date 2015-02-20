@@ -21,7 +21,7 @@ MODULE input_module
   USE data_module, ONLY: ng, mat_opt, src_opt, scatp
 
   USE control_module, ONLY: epsi, iitm, oitm, timedep, tf, nsteps,     &
-    it_det, fluxp, fixup
+    swp_typ, it_det, fluxp, fixup, soloutp, kplane, popout
 
   USE utils_module, ONLY: print_error, stop_run
 
@@ -57,7 +57,8 @@ MODULE input_module
 
     NAMELIST / invar / npey, npez, ichunk, nthreads, ndimen, nx, ny,   &
       nz, lx, ly, lz, nmom, nang, ng, epsi, iitm, oitm, timedep, tf,   &
-      nsteps, mat_opt, src_opt, scatp, it_det, fluxp, fixup, nnested
+      nsteps, mat_opt, src_opt, scatp, swp_typ, it_det, fluxp, fixup,  &
+      nnested, soloutp, kplane, popout
 !_______________________________________________________________________
 !
 !   Read the input file. Echo to output file. Call for an input variable
@@ -74,7 +75,7 @@ MODULE input_module
       error = '***ERROR: READ_INPUT: Problem reading input file'
       CALL print_error ( 0, error )
       CALL print_error ( ounit, error )
-      CALL stop_run ( 0, 0, 0 )
+      CALL stop_run ( 0, 0, 0, 0 )
     END IF
 
     IF ( iproc == root ) THEN
@@ -86,7 +87,7 @@ MODULE input_module
     IF ( ierr /= 0 ) THEN
       error = '***ERROR: READ_INPUT: Input file errors'
       CALL print_error ( ounit, error )
-      CALL stop_run ( 0, 0, 0 )
+      CALL stop_run ( 0, 0, 0, 0 )
     END IF
 !_______________________________________________________________________
 !
@@ -128,14 +129,14 @@ MODULE input_module
     WRITE( ounit, 126 ) lx, ly, lz
     WRITE( ounit, 127 ) nmom, nang
     WRITE( ounit, 128 ) ng, mat_opt, src_opt, scatp
-    WRITE( ounit, 129 ) epsi, iitm, oitm, timedep, tf, nsteps, it_det, &
-      fluxp, fixup
+    WRITE( ounit, 129 ) epsi, iitm, oitm, timedep, tf, nsteps, swp_typ,&
+      it_det, soloutp, kplane, popout, fluxp, fixup
     WRITE( ounit, 121 ) ( star, i = 1, 80 )
 !_______________________________________________________________________
 
     121 FORMAT( /, 80A, / )
-    122 FORMAT( 10X, 'Input Echo - Values from input or default', /,   &
-                80A, / )
+    122 FORMAT( 10X, 'keyword Input Echo - Values from input or ' //   &
+                'default', /, 80A, / )
 
     123 FORMAT( 2X, 'NML=invar' )
 
@@ -168,7 +169,11 @@ MODULE input_module
                 5X, 'timedep= ', I2, /,                                &
                 5X, 'tf= ', ES11.4, /,                                 &
                 5X, 'nsteps= ', I5, /,                                 &
+                5X, 'swp_typ= ', I2, /,                                &
                 5X, 'it_det= ', I2, /,                                 &
+                5X, 'soloutp= ', I2, /,                                &
+                5X, 'kplane= ', I4, /,                                 &
+                5X, 'popout= ', I2, /,                                 &
                 5X, 'fluxp= ', I2, /,                                  &
                 5X, 'fixup= ', I2 )
 !_______________________________________________________________________
@@ -267,17 +272,10 @@ MODULE input_module
       CALL print_error ( ounit, error )
     END IF
 
-    IF ( nnested < 0 ) THEN
-      nnested = 0
-      error = '*WARNING: INPUT_CHECK: NNESTED must be ' //             &
-              'non-negative; reset to 0'
-      CALL print_error ( ounit, error )
-    END IF
-
-    IF ( nnested == 1 ) THEN
-      nnested = 0
-      error = '*WARNING: INPUT_CHECK: NNESTED=1 same as 0+overhead;' //&
-              ' reset to 0'
+    IF ( nnested < 1 ) THEN
+      nnested = 1
+      error = '*WARNING: INPUT_CHECK: NNESTED must be positive; ' //   &
+              'reset to 1'
       CALL print_error ( ounit, error )
     END IF
 !_______________________________________________________________________
@@ -442,30 +440,65 @@ MODULE input_module
 
     IF ( timedep==0 .AND. nsteps/=1 ) THEN
       nsteps = 1
-      error = '***WARNING: INPUT_CHECK: NSTEPS reset to 1 for ' //     &
+      error = '*WARNING: INPUT_CHECK: NSTEPS reset to 1 for ' //       &
               'static calc'
+      CALL print_error ( ounit, error )
+    END IF
+
+    IF ( swp_typ/=0 .AND. swp_typ/=1 ) THEN
+      swp_typ = 0
+      error = '*WARNING: INPUT_CHECK: SWP_TYP must equal 0/1; ' //     &
+              ' reset to 0'
+      CALL print_error ( ounit, error )
+    END IF
+
+    IF ( nproc>1 .AND. nnested>1 .AND. swp_typ==0 ) THEN
+      ierr = ierr + 1
+      error = '***ERROR: INPUT_CHECK: SWP_TYP=0 + NNESTED>1 ' //       &
+              'requires NPROC=1'
       CALL print_error ( ounit, error )
     END IF
 
     IF ( it_det/=0 .AND. it_det/=1 ) THEN
       it_det = 0
-      error = '***WARNING: INPUT_CHECK: IT_DET must equal 0/1; ' //    &
+      error = '*WARNING: INPUT_CHECK: IT_DET must equal 0/1; ' //      &
               'reset to 0'
       CALL print_error ( ounit, error )
     END IF
 
     IF ( fluxp<0 .OR. fluxp>2 ) THEN
       fluxp = 0
-      error = '***WARNING: INPUT_CHECK: FLUXP must equal 0/1/2; ' //   &
+      error = '*WARNING: INPUT_CHECK: FLUXP must equal 0/1/2; ' //     &
               'reset to 0'
       CALL print_error ( ounit, error )
     END IF
 
     IF ( fixup/=0 .AND. fixup/=1 ) THEN
       fixup = 0
-      error = '***WARNING: INPUT_CHECK: FIXUP must equal 0/1; '   //   &
+      error = '*WARNING: INPUT_CHECK: FIXUP must equal 0/1; '   //     &
               'reset to 0'
       CALL print_error ( ounit, error )
+    END IF
+
+    IF ( soloutp/=0 .AND. soloutp/=1 ) THEN
+      soloutp = 0
+      error = '*WARNING: INPUT_CHECK: SOLOUTP must equal 0/1; ' //     &
+              'reset to 0'
+      CALL print_error ( ounit, error )
+    END IF
+
+    IF ( kplane<0 .OR. kplane>nz ) THEN
+      kplane = 0
+      error = '*WARNING: INPUT_CHECK: KPLANE must be in the range ' // &
+              '0 to NZ; reset to 0'
+      CALL print_error ( ounit, error )
+    END IF
+
+    IF ( popout<0 .OR. popout>2 ) THEN
+      popout = 0
+      error = '*WARNING: INPUT_CHECK: POPOUT must equal 0/1/2; ' //    &
+              'reset to 0'
+      call print_error ( ounit, error )
     END IF
 !_______________________________________________________________________
 !_______________________________________________________________________
@@ -518,10 +551,14 @@ MODULE input_module
       ipak(16) = mat_opt
       ipak(17) = src_opt
       ipak(18) = scatp
-      ipak(19) = it_det
-      ipak(20) = fluxp
-      ipak(21) = fixup
-      ipak(22) = nnested
+      ipak(19) = swp_typ
+      ipak(20) = it_det
+      ipak(21) = fluxp
+      ipak(22) = fixup
+      ipak(23) = nnested
+      ipak(24) = soloutp
+      ipak(25) = kplane
+      ipak(26) = popout
 
       dpak(1) = lx
       dpak(2) = ly
@@ -564,10 +601,14 @@ MODULE input_module
       mat_opt   = ipak(16)
       src_opt   = ipak(17)
       scatp     = ipak(18)
-      it_det    = ipak(19)
-      fluxp     = ipak(20)
-      fixup     = ipak(21)
-      nnested   = ipak(22)
+      swp_typ   = ipak(19)
+      it_det    = ipak(20)
+      fluxp     = ipak(21)
+      fixup     = ipak(22)
+      nnested   = ipak(23)
+      soloutp   = ipak(24)
+      kplane    = ipak(25)
+      popout    = ipak(26)
 
       lx     = dpak(1)
       ly     = dpak(2)

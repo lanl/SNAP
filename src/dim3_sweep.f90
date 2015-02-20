@@ -8,43 +8,32 @@
 
 MODULE dim3_sweep_module
 
-  USE global_module, ONLY: i_knd, r_knd, zero, two, one, half
+  USE global_module, ONLY: i_knd, l_knd, r_knd, zero, two, one, half
 
-  USE plib_module, ONLY: ichunk, firsty, lasty, firstz, lastz,         &
-    nnested
+  USE plib_module, ONLY: ichunk, firsty, lasty, firstz, lastz
 
-  USE geom_module, ONLY: nx, hi, hj, hk, ndimen, ny, nz, ndiag, diag
+  USE geom_module, ONLY: nx, hi, hj, hk, ndimen, ny, nz, nc
 
-  USE sn_module, ONLY: cmom, nang, mu, w, noct
+  USE sn_module, ONLY: cmom, nang, mu, eta, xi, w, noct
 
   USE data_module, ONLY: src_opt, qim
 
   USE control_module, ONLY: fixup, tolr
 
+  USE thrd_comm_module, ONLY: sweep_recv_bdry, sweep_send_bdry
+
   IMPLICIT NONE
 
   PUBLIC :: dim3_sweep
-
-  SAVE
-!_______________________________________________________________________
-!
-! Module variable
-!
-! fmin        - min scalar flux. Dummy for now, not used elsewhere.
-! fmax        - max scalar flux. Dummy for now, not used elsewhere.
-!
-!_______________________________________________________________________
-
-  REAL(r_knd) :: fmin=zero, fmax=zero
 
 
   CONTAINS
 
 
-  SUBROUTINE dim3_sweep ( ich, id, d1, d2, d3, d4, jd, kd, jlo, klo,   &
-    oct, g, jhi, khi, jst, kst, psii, psij, psik, qtot, ec, vdelt,     &
-    ptr_in, ptr_out, dinv, flux, fluxm, jb_in, jb_out, kb_in, kb_out,  &
-    wmu, weta, wxi, flkx, flky, flkz, t_xs )
+  SUBROUTINE dim3_sweep ( ich, id, d1, d2, d3, d4, jd, kd, oct, g, iop,&
+    t, nthrd, reqs, szreq, psii, psij, psik, qtot, ec, vdelt, ptr_in,  &
+    ptr_out, dinv, flux0, fluxm, jb_in, jb_out, kb_in, kb_out, wmu,    &
+    weta, wxi, flkx, flky, flkz, t_xs, fmin, fmax )
 
 !-----------------------------------------------------------------------
 !
@@ -52,10 +41,14 @@ MODULE dim3_sweep_module
 !
 !-----------------------------------------------------------------------
 
-    INTEGER(i_knd), INTENT(IN) :: ich, id, d1, d2, d3, d4, jd, kd,     &
-      jlo, klo, oct, g, jhi, khi, jst, kst
+    INTEGER(i_knd), INTENT(IN) :: ich, id, d1, d2, d3, d4, jd, kd, oct,&
+      g, iop, t, nthrd, szreq
+
+    INTEGER(i_knd), DIMENSION(szreq), INTENT(INOUT) :: reqs
 
     REAL(r_knd), INTENT(IN) :: vdelt
+
+    REAL(r_knd), INTENT(INOUT) :: fmin, fmax
 
     REAL(r_knd), DIMENSION(nang), INTENT(IN) :: wmu, weta, wxi
 
@@ -63,21 +56,15 @@ MODULE dim3_sweep_module
 
     REAL(r_knd), DIMENSION(nang,ny,nz), INTENT(INOUT) :: psii
 
-    REAL(r_knd), DIMENSION(nang,ichunk,nz), INTENT(INOUT) :: psij
+    REAL(r_knd), DIMENSION(nang,ichunk,nz), INTENT(INOUT) :: psij,     &
+      jb_in, jb_out
 
-    REAL(r_knd), DIMENSION(nang,ichunk,ny), INTENT(INOUT) :: psik
+    REAL(r_knd), DIMENSION(nang,ichunk,ny), INTENT(INOUT) :: psik,     &
+      kb_in, kb_out
 
     REAL(r_knd), DIMENSION(nx,ny,nz), INTENT(IN) :: t_xs
 
-    REAL(r_knd), DIMENSION(nx,ny,nz), INTENT(INOUT) :: flux
-
-    REAL(r_knd), DIMENSION(nang,ichunk,nz), INTENT(IN) :: jb_in
-
-    REAL(r_knd), DIMENSION(nang,ichunk,nz), INTENT(OUT) :: jb_out
-
-    REAL(r_knd), DIMENSION(nang,ichunk,ny), INTENT(IN) :: kb_in
-
-    REAL(r_knd), DIMENSION(nang,ichunk,ny), INTENT(OUT) :: kb_out
+    REAL(r_knd), DIMENSION(nx,ny,nz), INTENT(INOUT) :: flux0
 
     REAL(r_knd), DIMENSION(nx+1,ny,nz), INTENT(INOUT) :: flkx
 
@@ -85,11 +72,11 @@ MODULE dim3_sweep_module
 
     REAL(r_knd), DIMENSION(nx,ny,nz+1), INTENT(INOUT) :: flkz
 
-    REAL(r_knd), DIMENSION(nang,nx,ny,nz), INTENT(IN) :: dinv
-
-    REAL(r_knd), DIMENSION(cmom,nx,ny,nz), INTENT(IN) :: qtot
+    REAL(r_knd), DIMENSION(nang,ichunk,ny,nz), INTENT(IN) :: dinv
 
     REAL(r_knd), DIMENSION(cmom-1,nx,ny,nz), INTENT(INOUT) :: fluxm
+
+    REAL(r_knd), DIMENSION(cmom,ichunk,ny,nz), INTENT(IN) :: qtot
 
     REAL(r_knd), DIMENSION(d1,d2,d3,d4), INTENT(IN) :: ptr_in
 
@@ -99,8 +86,10 @@ MODULE dim3_sweep_module
 !   Local variables
 !_______________________________________________________________________
 
-    INTEGER(i_knd) :: ist, d, n, ic, i, j, k, l, ibl, ibr, ibb, ibt,   &
-      ibf, ibk
+    INTEGER(i_knd) :: ist, iclo, ichi, jst, jlo, jhi, kst, klo, khi, k,&
+      j, ic, i, l, ibl, ibr, ibb, ibt, ibf, ibk
+
+    LOGICAL(l_knd) :: receive
 
     REAL(r_knd) :: sum_hv
 
@@ -109,285 +98,327 @@ MODULE dim3_sweep_module
     REAL(r_knd), DIMENSION(nang,4) :: hv, fxhv
 !_______________________________________________________________________
 !
-!   Set up the sweep order in the i-direction.
+!   Set the receive control flag to true. Will set to false within the
+!   loop for the first cell. Pushing the receive to this point helps
+!   overlap communication and computation.
 !_______________________________________________________________________
 
-    ist = -1
-    IF ( id == 2 ) ist = 1
+    receive = .TRUE.
 !_______________________________________________________________________
 !
-!   Zero out the outgoing boundary arrays and fixup array
+!   Set up the sweep order given octant info.
 !_______________________________________________________________________
 
-    jb_out = zero
-    kb_out = zero
+    IF ( id == 1 ) THEN
+      ist = -1; iclo = ichunk; ichi = 1
+    ELSE
+      ist = +1; iclo = 1; ichi = ichunk
+    END IF
+
+    IF ( jd == 1 ) THEN
+      jst = -1; jlo = ny; jhi = 1
+    ELSE
+      jst = +1; jlo = 1; jhi = ny
+    END IF
+
+    IF ( kd == 1 ) THEN
+      kst = -1; klo = nz; khi = 1
+    ELSE
+      kst = +1; klo = 1; khi = nz
+    END IF
+!_______________________________________________________________________
+!
+!   Initialize the fixup counter
+!_______________________________________________________________________
 
     fxhv = zero
 !_______________________________________________________________________
 !
-!   Loop over cells along the diagonals. When only 1 diagonal, it's
-!   normal sweep order. Otherwise, nested threading performs mini-KBA.
+!   Loop over the cells using bounds/stride above
 !_______________________________________________________________________
 
-  !$OMP PARALLEL NUM_THREADS(nnested) DEFAULT(SHARED) FIRSTPRIVATE(fxhv)
-
-    diagonal_loop: DO d = 1, ndiag
-
-  !$OMP DO SCHEDULE(STATIC,1) PRIVATE(n,ic,i,j,k,l,psi,pc,sum_hv,hv,den)
-      line_loop: DO n = 1, diag(d)%len
-
-        ic = diag(d)%cell_id(n)%ic
-
-        IF ( ist < 0 ) THEN
-          i = ich*ichunk - ic + 1
-        ELSE
-          i = (ich-1)*ichunk + ic
-        END IF
-
-        IF ( i > nx ) CYCLE line_loop
-
-        j = diag(d)%cell_id(n)%j
-        IF ( jst < 0 ) j = ny - j + 1
-
-        k = diag(d)%cell_id(n)%k
-        IF ( kst < 0 ) k = nz - k + 1
+    k_loop:  DO k = klo, khi, kst
+    j_loop:  DO j = jlo, jhi, jst
+    ic_loop: DO ic = iclo, ichi, ist
 !_______________________________________________________________________
 !
-!       Left/right boundary conditions, always vacuum.
+!     Index ic refers to location in current ichunk, ich. Compute the
+!     global i index for x-direction.
 !_______________________________________________________________________
 
-        ibl = 0; ibr = 0
-        IF ( i==nx .AND. ist==-1 ) THEN
-          psii(:,j,k) = zero
-        ELSE IF ( i==1 .AND. ist==1 ) THEN
-          SELECT CASE ( ibl )
+      i = (ich-1)*ichunk + ic
+!_______________________________________________________________________
+!
+!     Dummy operation to match real transport code where nx is not
+!     always evenly divided by ichunk
+!_______________________________________________________________________
+
+      IF ( i > nx ) THEN
+        jb_out(:,ic,k) = zero
+        kb_out(:,ic,j) = zero
+        CYCLE ic_loop
+      END IF
+!_______________________________________________________________________
+!
+!     Compute the angular source. Add the MMS contribution if necessary.
+!_______________________________________________________________________
+
+      psi = qtot(1,ic,j,k)
+
+      DO l = 2, cmom
+        psi = psi + ec(:,l)*qtot(l,ic,j,k)
+      END DO
+
+      IF ( src_opt == 3 ) psi = psi + qim(:,i,j,k,oct,g)
+!_______________________________________________________________________
+!
+!     Left/right boundary conditions, always vacuum. Dummy operations
+!     may be ignored.
+!_______________________________________________________________________
+
+      ibl = 0
+      ibr = 0
+      IF ( i==nx .AND. ist==-1 ) THEN
+        psii(:,j,k) = zero
+      ELSE IF ( i==1 .AND. ist==1 ) THEN
+        SELECT CASE ( ibl )
+          CASE ( 0 )
+            psii(:,j,k) = zero
+          CASE ( 1 )
+            psii(:,j,k) = zero
+        END SELECT
+      END IF
+!_______________________________________________________________________
+!
+!     Process boundaries in y- and z-directions come from preset
+!     boundary conditions (vacuum) or from upstream neighbors. Must call
+!     to receive any data. If upstream is boundary, no communication.
+!     Only do this at first cell of chunk but receive all incoming data
+!     for chunk. Resetting to .FALSE. skips unneeded communication call
+!     for all other cells.
+!_______________________________________________________________________
+
+      IF ( receive ) THEN
+        CALL sweep_recv_bdry ( g, jd, kd, iop, t, nthrd, reqs, szreq,  &
+          nc, nang, ichunk, ny, nz, jb_in, kb_in )
+        receive = .FALSE.
+      END IF
+!_______________________________________________________________________
+!
+!     Top/bottom boundary conditions for chunk. Either received from
+!     upstream neighbor or set to zero (always vacuum) if no usptream
+!     neighbor.
+!_______________________________________________________________________
+
+      ibb = 0
+      ibt = 0
+      IF ( j == jlo ) THEN
+        IF ( jd==1 .AND. lasty ) THEN
+          psij(:,ic,k) = zero
+        ELSE IF ( jd==2 .AND. firsty ) THEN
+          SELECT CASE ( ibb )
             CASE ( 0 )
-              psii(:,j,k) = zero
+              psij(:,ic,k) = zero
             CASE ( 1 )
-              psii(:,j,k) = zero
+              psij(:,ic,k) = zero
           END SELECT
-        END IF
-!_______________________________________________________________________
-!
-!       Top/bottom boundary condtions. Vacuum at global boundaries, but
-!       set to some incoming flux from neighboring proc.
-!_______________________________________________________________________
-
-        ibb = 0; ibt = 0
-        IF ( j == jlo ) THEN
-          IF ( jd==1 .AND. lasty ) THEN
-            psij(:,ic,k) = zero
-          ELSE IF ( jd==2 .AND. firsty ) THEN
-            SELECT CASE ( ibb )
-              CASE ( 0 )
-                psij(:,ic,k) = zero
-              CASE ( 1 )
-                psij(:,ic,k) = zero
-            END SELECT
-          ELSE
-            psij(:,ic,k) = jb_in(:,ic,k)
-          END IF
-        END IF
-!_______________________________________________________________________
-!
-!       Front/back boundary condtions. Vacuum at global boundaries, but
-!       set to some incoming flux from neighboring proc.
-!_______________________________________________________________________
-
-        ibf = 0; ibk = 0
-        IF ( k == klo ) THEN
-          IF ( (kd==1 .AND. lastz) .OR. ndimen<3 ) THEN
-            psik(:,ic,j) = zero
-          ELSE IF ( kd==2 .AND. firstz ) THEN
-            SELECT CASE ( ibf )
-              CASE ( 0 )
-                psik(:,ic,j) = zero
-              CASE ( 1 )
-                psik(:,ic,j) = zero
-            END SELECT
-          ELSE
-            psik(:,ic,j) = kb_in(:,ic,j)
-          END IF
-        END IF
-!_______________________________________________________________________
-!
-!       Compute the angular source
-!_______________________________________________________________________
-
-        psi = qtot(1,i,j,k)
-        IF ( src_opt == 3 ) psi = psi + qim(:,i,j,k,oct,g)
-
-        DO l = 2, cmom
-          psi = psi + ec(:,l)*qtot(l,i,j,k)
-        END DO
-!_______________________________________________________________________
-!
-!       Compute the numerator for the update formula
-!_______________________________________________________________________
-
-        pc = psi + psii(:,j,k)*mu*hi + psij(:,ic,k)*hj + psik(:,ic,j)*hk
-        IF ( vdelt /= zero ) pc = pc + vdelt*ptr_in(:,i,j,k)
-!_______________________________________________________________________
-!
-!       Compute the solution of the center. Use DD for edges. Use fixup
-!       if requested.
-!_______________________________________________________________________
-
-        IF ( fixup == 0 ) THEN
- 
-          psi = pc*dinv(:,i,j,k)
-
-          psii(:,j,k) = two*psi - psii(:,j,k)
-          psij(:,ic,k) = two*psi - psij(:,ic,k)
-          IF ( ndimen == 3 ) psik(:,ic,j) = two*psi - psik(:,ic,j)
-          IF ( vdelt /= zero )                                         &
-            ptr_out(:,i,j,k) = two*psi - ptr_in(:,i,j,k)
-
         ELSE
-!_______________________________________________________________________
-!
-!         Multi-pass set to zero + rebalance fixup. Determine angles
-!         that will need fixup first.
-!_______________________________________________________________________
-
-          hv = one; sum_hv = SUM( hv )
-
-          pc = pc * dinv(:,i,j,k)
-
-          fixup_loop: DO
-
-            fxhv(:,1) = two*pc - psii(:,j,k)
-            fxhv(:,2) = two*pc - psij(:,ic,k)
-            IF ( ndimen == 3 ) fxhv(:,3) = two*pc - psik(:,ic,j)
-            IF ( vdelt /= zero ) fxhv(:,4) = two*pc - ptr_in(:,i,j,k)
-
-            WHERE ( fxhv < zero ) hv = zero
-!_______________________________________________________________________
-!
-!           Exit loop when all angles are fixed up
-!_______________________________________________________________________
-
-            IF ( sum_hv == SUM( hv ) ) EXIT fixup_loop
-            sum_hv = SUM( hv )
-!_______________________________________________________________________
-!
-!           Recompute balance equation numerator and denominator and get
-!           new cell average flux
-!_______________________________________________________________________
-
-            pc = psii(:,j,k)*mu*hi*(one+hv(:,1)) +                     &
-              psij(:,ic,k)*hj*(one+hv(:,2)) +                          &
-              psik(:,ic,j)*hk*(one+hv(:,3))
-            IF ( vdelt /= zero )                                       &
-              pc = pc + vdelt*ptr_in(:,i,j,k)*(one+hv(:,4))
-            pc = psi + half*pc
-
-            den = t_xs(i,j,k) + mu*hi*hv(:,1) + hj*hv(:,2) +           &
-              hk*hv(:,3) + vdelt*hv(:,4)
-
-            WHERE( den > tolr )
-              pc = pc/den
-            ELSEWHERE
-              pc = zero
-            END WHERE
-
-          END DO fixup_loop
-!_______________________________________________________________________
-!
-!         Fixup done, compute edges
-!_______________________________________________________________________
-
-          psi = pc
-
-          psii(:,j,k) = fxhv(:,1) * hv(:,1)
-          psij(:,ic,k) = fxhv(:,2) * hv(:,2)
-          IF ( ndimen == 3 ) psik(:,ic,j) = fxhv(:,3) * hv(:,3)
-          IF ( vdelt /= zero ) ptr_out(:,i,j,k) = fxhv(:,4) * hv(:,4)
-
+          psij(:,ic,k) = jb_in(:,ic,k)
         END IF
+      END IF
 !_______________________________________________________________________
 !
-!       Clear the flux arrays
+!     Front/back boundary condtions. Either received from upstream
+!     neighbor or set to zero (always vacuum) if no upstream neighbor.
 !_______________________________________________________________________
 
-        IF ( oct == 1 ) THEN
-          flux(i,j,k) = zero
-          fluxm(:,i,j,k) = zero
+      ibf = 0
+      ibk = 0
+      IF ( k == klo ) THEN
+        IF ( (kd==1 .AND. lastz) .OR. ndimen<3 ) THEN
+          psik(:,ic,j) = zero
+        ELSE IF ( kd==2 .AND. firstz ) THEN
+          SELECT CASE ( ibf )
+            CASE ( 0 )
+              psik(:,ic,j) = zero
+            CASE ( 1 )
+              psik(:,ic,j) = zero
+          END SELECT
+        ELSE
+          psik(:,ic,j) = kb_in(:,ic,j)
         END IF
+      END IF
 !_______________________________________________________________________
 !
-!       Compute the flux moments
+!     Compute initial solution
 !_______________________________________________________________________
 
-        flux(i,j,k) = flux(i,j,k) + SUM( w*psi )
+      IF ( vdelt /= zero ) THEN
+        pc = ( psi + psii(:,j,k)*mu*hi + psij(:,ic,k)*eta*hj +         &
+          psik(:,ic,j)*xi*hk + ptr_in(:,i,j,k)*vdelt ) * dinv(:,ic,j,k)
+      ELSE
+        pc = ( psi + psii(:,j,k)*mu*hi + psij(:,ic,k)*eta*hj +         &
+          psik(:,ic,j)*xi*hk ) * dinv(:,ic,j,k)
+      END IF
+!_______________________________________________________________________
+!
+!     Compute outgoing edges with diamond difference, no negative flux
+!     fixup
+!_______________________________________________________________________
+
+      IF ( fixup == 0 ) THEN
+
+        psi = pc
+
+        psii(:,j,k) = two*psi - psii(:,j,k)
+        psij(:,ic,k) = two*psi - psij(:,ic,k)
+        IF ( ndimen == 3 ) psik(:,ic,j) = two*psi - psik(:,ic,j)
+        IF ( vdelt /= zero )                                           &
+          ptr_out(:,i,j,k) = two*psi - ptr_in(:,i,j,k)
+
+      ELSE
+!_______________________________________________________________________
+!
+!       Use negative flux fixup. Compute outgoing edges. If negative,
+!       set to zero and rebalance. Multi-pass until all negativities
+!       eliminated. Initialize counters and determine angles that will
+!       need fixup first.
+!_______________________________________________________________________
+
+        hv = one
+        sum_hv = SUM( hv )
+
+        fixup_loop: DO
+
+          fxhv(:,1) = two*pc - psii(:,j,k)
+          fxhv(:,2) = two*pc - psij(:,ic,k)
+          IF ( ndimen == 3 ) fxhv(:,3) = two*pc - psik(:,ic,j)
+          IF ( vdelt /= zero ) fxhv(:,4) = two*pc - ptr_in(:,i,j,k)
+
+          WHERE ( fxhv < zero ) hv = zero
+!_______________________________________________________________________
+!
+!         Exit loop when all angles are fixed up, i.e., no change in hv
+!_______________________________________________________________________
+
+          IF ( sum_hv == SUM( hv ) ) EXIT fixup_loop
+          sum_hv = SUM( hv )
+!_______________________________________________________________________
+!
+!         Recompute balance equation numerator and denominator and get
+!         new cell average flux
+!_______________________________________________________________________
+
+          IF ( vdelt /= zero ) THEN
+            pc = psi + half * ( psii(:,j,k)*mu*hi*(one+hv(:,1)) +      &
+                                psij(:,ic,k)*eta*hj*(one+hv(:,2)) +    &
+                                psik(:,ic,j)*xi*hk*(one+hv(:,3)) +     &
+                                ptr_in(:,i,j,k)*vdelt*(one+hv(:,4)) )
+            den = t_xs(i,j,k) + mu*hi*hv(:,1) + eta*hj*hv(:,2) +       &
+              xi*hk*hv(:,3) + vdelt*hv(:,4)
+          ELSE
+            pc = psi + half * ( psii(:,j,k)*mu*hi*(one+hv(:,1)) +      &
+                                psij(:,ic,k)*eta*hj*(one+hv(:,2)) +    &
+                                psik(:,ic,j)*xi*hk*(one+hv(:,3)) )
+            den = t_xs(i,j,k) + mu*hi*hv(:,1) + eta*hj*hv(:,2) +       &
+              xi*hk*hv(:,3)
+          END IF
+
+          WHERE( den > tolr )
+            pc = pc/den
+          ELSEWHERE
+            pc = zero
+          END WHERE
+
+        END DO fixup_loop
+!_______________________________________________________________________
+!
+!       Fixup done, compute edges with resolved center
+!_______________________________________________________________________
+
+        psi = pc
+
+        psii(:,j,k) = fxhv(:,1) * hv(:,1)
+        psij(:,ic,k) = fxhv(:,2) * hv(:,2)
+        IF ( ndimen == 3 ) psik(:,ic,j) = fxhv(:,3) * hv(:,3)
+        IF ( vdelt /= zero ) ptr_out(:,i,j,k) = fxhv(:,4) * hv(:,4)
+
+      END IF
+!_______________________________________________________________________
+!
+!     Save edge fluxes (dummy if checks for unused non-vacuum BCs)
+!_______________________________________________________________________
+
+      IF ( j == jhi ) THEN
+        IF ( jd==2 .AND. lasty ) THEN
+          CONTINUE
+        ELSE IF ( jd==1 .AND. firsty ) THEN
+          IF ( ibb == 1 ) CONTINUE
+        ELSE
+          jb_out(:,ic,k) = psij(:,ic,k)
+        END IF
+      END IF
+
+      IF ( k == khi ) THEN
+        IF ( kd==2 .AND. lastz ) THEN
+          CONTINUE
+        ELSE IF ( kd==1 .AND. firstz ) THEN
+          IF ( ibf == 1 ) CONTINUE
+        ELSE
+          kb_out(:,ic,j) = psik(:,ic,j)
+        END IF
+      END IF
+!_______________________________________________________________________
+!
+!     Compute dummy leakages (not used elsewhere currently)
+!_______________________________________________________________________
+
+      flkx(i+id-1,j,k) = flkx(i+id-1,j,k) + ist*SUM( wmu*psii(:,j,k) )
+      flky(i,j+jd-1,k) = flky(i,j+jd-1,k) + jst*SUM( weta*psij(:,ic,k) )
+      flkz(i,j,k+kd-1) = flkz(i,j,k+kd-1) + kst*SUM( wxi*psik(:,ic,j) )
+!_______________________________________________________________________
+!
+!     Compute the flux moments
+!_______________________________________________________________________
+
+      psi = w*psi
+
+      IF ( oct == 1 ) THEN
+        flux0(i,j,k) = SUM( psi )
         DO l = 1, cmom-1
-          fluxm(l,i,j,k) = fluxm(l,i,j,k) + SUM( ec(:,l+1)*w*psi )
+          fluxm(l,i,j,k) = SUM( ec(:,l+1)*psi )
         END DO
+      ELSE
+        flux0(i,j,k) = flux0(i,j,k) + SUM( psi )
+        DO l = 1, cmom-1
+          fluxm(l,i,j,k) = fluxm(l,i,j,k) + SUM( ec(:,l+1)*psi )
+        END DO
+      END IF
 !_______________________________________________________________________
 !
-!       Calculate min and max scalar fluxes (not used elsewhere
-!       currently)
+!     Calculate dummy min and max scalar fluxes (not used elsewhere
+!     currently)
 !_______________________________________________________________________
 
-        IF ( oct == noct ) THEN
-          fmin = MIN( fmin, flux(i,j,k) )
-          fmax = MAX( fmax, flux(i,j,k) )
-        END IF
-!_______________________________________________________________________
-!
-!       Save edge fluxes (dummy if checks for unused non-vacuum BCs)
-!_______________________________________________________________________
-
-        IF ( j == jhi ) THEN
-          IF ( jd==2 .AND. lasty ) THEN
-            CONTINUE
-          ELSE IF ( jd==1 .AND. firsty ) THEN
-            IF ( ibb == 1 ) CONTINUE
-          ELSE
-            jb_out(:,ic,k) = psij(:,ic,k)
-          END IF
-        END IF
-
-        IF ( k == khi ) THEN
-          IF ( kd==2 .AND. lastz ) THEN
-            CONTINUE
-          ELSE IF ( kd==1 .AND. firstz ) THEN
-            IF ( ibf == 1 ) CONTINUE
-          ELSE
-            kb_out(:,ic,j) = psik(:,ic,j)
-          END IF
-        END IF
+      IF ( oct == noct ) THEN
+        fmin = MIN( fmin, flux0(i,j,k) )
+        fmax = MAX( fmax, flux0(i,j,k) )
+      END IF
 !_______________________________________________________________________
 !
-!       Compute leakages (not used elsewhere currently)
+!   Finish the loops
 !_______________________________________________________________________
 
-        IF ( i+id-1==1 .OR. i+id-1==nx+1 ) THEN
-          flkx(i+id-1,j,k) = flkx(i+id-1,j,k) +                        &
-            ist*SUM( wmu*psii(:,j,k) )
-        END IF
-
-        IF ( (jd==1 .AND. firsty) .OR. (jd==2 .AND. lasty) ) THEN
-          flky(i,j+jd-1,k) = flky(i,j+jd-1,k) +                        &
-            jst*SUM( weta*psij(:,ic,k) )
-        END IF
-
-        IF ( ((kd==1 .AND. firstz) .OR. (kd==2 .AND. lastz)) .AND.     &
-             ndimen==3 ) THEN
-          flkz(i,j,k+kd-1) = flkz(i,j,k+kd-1) +                        &
-            kst*SUM( wxi*psik(:,ic,j) )
-        END IF
+    END DO ic_loop
+    END DO j_loop
+    END DO k_loop
 !_______________________________________________________________________
 !
-!       Finish the loops
+!   Send data to downstream neighbors
 !_______________________________________________________________________
 
-     END DO line_loop
-  !$OMP END DO
-
-   END DO diagonal_loop
-
-  !$OMP END PARALLEL
+    CALL sweep_send_bdry ( g, jd, kd, iop, t, nthrd, reqs, szreq, nc,  &
+      nang, ichunk, ny, nz, jb_out, kb_out )
 !_______________________________________________________________________
 !_______________________________________________________________________
 

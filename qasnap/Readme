@@ -62,3 +62,25 @@ the manufactured and computed solutions.
 
 ---03/07/2013
 
+
+Changes to regression testing since original SNAP release in 2013
+
+These updated test cases have been compared to the output of the originals.
+Differences were found due to a bug in the original SNAP. The bug has been
+corrected. It did not affect performance results, but did affect the converged
+solution.
+
+Test cases have been modified or added to test new input/output options.
+The option 'swp_typ' allows one to vary the sweep ordering for multi-dimensional
+problems. Printing a different z-plane scalar flux to file is possible with
+'kplane'. The option 'popout' will print population distribution details that
+may be used to get a sense of what kinds of information is needed for
+checkpointing and time-dependent editing.
+
+The nested threading option for swp_typ=0 currently only works for single
+process jobs. This form of nested threading is experimental, but a test case
+is provided.
+
+--02/19/2015
+
+

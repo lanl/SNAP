@@ -3,8 +3,8 @@
 ! MODULE: data_module
 !> @brief
 !> This module contains the variables and setup subroutines for the mock
-!> cross section data. It establishes the number of groups and constructs
-!> the cross section arrays.
+!> cross section data. It establishes the number of groups and
+!> constructs the cross section arrays.
 !
 !-----------------------------------------------------------------------
 

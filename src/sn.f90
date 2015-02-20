@@ -76,33 +76,28 @@ MODULE sn_module
     cmom = nmom
     noct = 2
 
-    ALLOCATE( mu(nang), w(nang), wmu(nang), STAT=istat )
+    ALLOCATE( mu(nang), w(nang), wmu(nang), eta(nang), weta(nang),     &
+      xi(nang), wxi(nang), STAT=istat )
     IF ( istat > 0 ) RETURN
+
+    w = zero
+    mu = zero; wmu = zero
+    eta = zero; weta = zero
+    xi = zero; wxi = zero
 
     IF ( ndimen > 1 ) THEN
       cmom = nmom*(nmom+1)/2
       noct = 4
-      ALLOCATE( eta(nang), weta(nang), STAT=istat )
-    ELSE
-      ALLOCATE( eta(0), weta(0), STAT=istat )
     END IF
-    IF ( istat > 0 ) RETURN
 
     IF ( ndimen > 2 ) THEN
       cmom = nmom**2
       noct = 8
-      ALLOCATE( xi(nang), wxi(nang), STAT=istat )
-    ELSE
-      ALLOCATE( xi(0), wxi(0), STAT=istat )
     END IF
-    IF ( istat > 0 ) RETURN
 
     ALLOCATE( ec(nang,cmom,noct), lma(nmom), STAT=istat )
     IF ( istat > 0 ) RETURN
 
-    wmu = zero
-    IF ( ndimen > 1 ) weta = zero
-    IF ( ndimen > 2 ) wxi = zero
     ec = zero
     lma = 0
 !_______________________________________________________________________

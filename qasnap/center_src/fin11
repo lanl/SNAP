@@ -1,7 +1,7 @@
 ! Input from namelist
 &invar
-  nthreads=2
-  nnested=2
+  nthreads=4
+  nnested=1
   npey=2
   npez=2
   ndimen=3
@@ -27,4 +27,5 @@
   fluxp=0
   scatp=0
   fixup=1
+  soloutp=1
 /

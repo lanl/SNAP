@@ -2,9 +2,10 @@
 !
 ! MODULE: plib_module
 !> @brief
-!> This module contains the variables that control parallel decomposition
-!> and the subroutines for parallel environment setup. Only module that
-!> requires MPI library interaction except for time_module (MPI_WTIME).
+!> This module contains the variables that control parallel
+!> decomposition and the subroutines for parallel environment setup.
+!> Only module that requires MPI library interaction except for
+!> time_module (MPI_WTIME).
 !
 !-----------------------------------------------------------------------
 
@@ -26,6 +27,14 @@ MODULE plib_module
     MODULE PROCEDURE glmin_i, glmin_d
   END INTERFACE glmin
 
+  INTERFACE glsum
+    MODULE PROCEDURE glsum_d
+  END INTERFACE glsum
+
+  INTERFACE rtsum
+    MODULE PROCEDURE rtsum_d_1d
+  END INTERFACE rtsum
+
   INTERFACE bcast
     MODULE PROCEDURE bcast_i_scalar, bcast_i_1d, bcast_d_scalar,       &
       bcast_d_1d
@@ -34,6 +43,10 @@ MODULE plib_module
   INTERFACE psend
     MODULE PROCEDURE psend_d_2d, psend_d_3d
   END INTERFACE psend
+
+  INTERFACE isend
+    MODULE PROCEDURE isend_d_3d
+  END INTERFACE isend
 
   INTERFACE precv
     MODULE PROCEDURE precv_d_2d, precv_d_3d
@@ -51,7 +64,7 @@ MODULE plib_module
 ! nnested  - number of nested threads
 !_______________________________________________________________________
 
-  INTEGER(i_knd) :: npey=1, npez=1, ichunk=4, nthreads=1, nnested=0
+  INTEGER(i_knd) :: npey=1, npez=1, ichunk=4, nthreads=1, nnested=1
 !_______________________________________________________________________
 !
 ! Run-time variables
@@ -81,34 +94,38 @@ MODULE plib_module
 ! zlop       - rank of preceding zproc in zcomm
 ! zhip       - rank of succeeding zproc in zcomm
 !
-! g_off      - group offset for message tags
-!
 ! thread_level       - level of MPI thread support
 ! thread_single      - MPI_THREAD_SINGLE
 ! thread_funneled    - MPI_THREAD_FUNNELED
 ! thread_serialized  - MPI_THREAD_SERIALIZED
 ! thread_multiple    - MPI_THREAD_MULTIPLE
-! lock               - OpenMP lock
+! lock(nthreads)     - OpenMP lock for each thread
 !
-! num_grth  - minimum number of nthreads and ng; used to ensure loop
-!             over groups with communications is sized properly
-! do_nested - true/false use nested threading, i.e., mini-KBA
+! do_nested - true/false use nested threading
+!
+! use_lock  - true/false apply lock to threads' MPI communications
+!             during sweep
+!
+! pce    - Parallel computational efficiency of the run
 !_______________________________________________________________________
 
-  INTEGER(i_knd), PARAMETER :: root=0, g_off = 2**14
+  INTEGER(i_knd), PARAMETER :: root=0
 
   INTEGER(i_knd) :: nproc, iproc, comm_snap, comm_space, sproc, ycomm, &
     zcomm, yproc, zproc, ylop, yhip, zlop, zhip, thread_level,         &
     thread_single, thread_funneled, thread_serialized, thread_multiple,&
-    max_threads, num_grth
+    max_threads
 
-  LOGICAL(l_knd) :: firsty, lasty, firstz, lastz, do_nested
+  LOGICAL(l_knd) :: firsty, lasty, firstz, lastz, do_nested,           &
+    use_lock=.FALSE.
+
+  REAL(r_knd) :: pce
 
   INCLUDE 'mpif.h'
 
   INCLUDE 'omp_lib.h'
 
-  INTEGER(omp_lock_kind) :: lock
+  INTEGER(OMP_LOCK_KIND), ALLOCATABLE, DIMENSION(:) :: lock
 
 
   CONTAINS
@@ -463,6 +480,70 @@ MODULE plib_module
   END SUBROUTINE glmin_d
 
 
+  SUBROUTINE glsum_d ( value, comm )
+
+!-----------------------------------------------------------------------
+!
+! All reduce global sum value (double precision float). Use specified
+! communicator.
+!
+!-----------------------------------------------------------------------
+
+    INTEGER(i_knd), INTENT(IN) :: comm
+
+    REAL(r_knd), INTENT(INOUT) :: value
+!_______________________________________________________________________
+!
+!   Local variables
+!_______________________________________________________________________
+
+    INTEGER(i_knd) :: ierr
+
+    REAL(r_knd) :: x
+!_______________________________________________________________________
+
+    IF ( comm == MPI_COMM_NULL ) RETURN
+    CALL MPI_ALLREDUCE ( value, x, 1, MPI_DOUBLE_PRECISION, MPI_SUM,   &
+      comm, ierr )
+    value = x
+!_______________________________________________________________________
+!_______________________________________________________________________
+
+  END SUBROUTINE glsum_d
+
+
+  SUBROUTINE rtsum_d_1d ( value, dlen, comm, rtproc )
+
+!-----------------------------------------------------------------------
+!
+! Normal reduce-to-root sum (double precision float) for 1-d array. Use
+! specified communicator.
+!
+!-----------------------------------------------------------------------
+
+    INTEGER(i_knd), INTENT(IN) :: dlen, comm, rtproc
+
+    REAL(r_knd), DIMENSION(dlen), INTENT(INOUT) :: value
+!_______________________________________________________________________
+!
+!   Local variables
+!_______________________________________________________________________
+
+    INTEGER(i_knd) :: ierr
+
+    REAL(r_knd), DIMENSION(dlen) :: x
+!_______________________________________________________________________
+
+    IF ( comm == MPI_COMM_NULL ) RETURN
+    CALL MPI_REDUCE ( value, x, dlen, MPI_DOUBLE_PRECISION, MPI_SUM,   &
+      rtproc, comm, ierr )
+    value = x
+!_______________________________________________________________________
+!_______________________________________________________________________
+
+  END SUBROUTINE rtsum_d_1d
+
+
   SUBROUTINE bcast_i_scalar ( value, comm, bproc )
 
 !-----------------------------------------------------------------------
@@ -647,6 +728,40 @@ MODULE plib_module
   END SUBROUTINE psend_d_3d
 
 
+  SUBROUTINE isend_d_3d ( proc, myproc, d1, d2, d3, value, comm, mtag, &
+    req )
+
+!-----------------------------------------------------------------------
+!
+! Non-blocking-send a rank-3 double precision array.
+!
+!-----------------------------------------------------------------------
+
+    INTEGER(i_knd), INTENT(IN) :: proc, myproc, d1, d2, d3, comm, mtag
+
+    INTEGER(i_knd), INTENT(INOUT) :: req
+
+    REAL(r_knd), DIMENSION(d1,d2,d3), INTENT(IN) :: value
+!_______________________________________________________________________
+!
+!   Local variables
+!_______________________________________________________________________
+
+    INTEGER(i_knd) :: dlen, ierr
+!_______________________________________________________________________
+
+    IF ( proc==myproc .OR. comm==MPI_COMM_NULL ) RETURN
+
+    dlen = d1*d2*d3
+
+    CALL MPI_ISEND ( value, dlen, MPI_DOUBLE_PRECISION, proc, mtag,     &
+      comm, req, ierr )
+!_______________________________________________________________________
+!_______________________________________________________________________
+
+  END SUBROUTINE isend_d_3d
+
+
   SUBROUTINE precv_d_2d ( proc, myproc, d1, d2, value, comm, mtag )
 
 !-----------------------------------------------------------------------
@@ -740,6 +855,55 @@ MODULE plib_module
   END SUBROUTINE cartrank
 
 
+  SUBROUTINE waitinit ( req, d1 )
+
+!-----------------------------------------------------------------------
+!
+! Initialize asynchronous communication request array to null state.
+!
+!-----------------------------------------------------------------------
+
+    INTEGER(i_knd), INTENT(IN) :: d1
+
+    INTEGER(i_knd), DIMENSION(d1), INTENT(OUT) :: req
+!_______________________________________________________________________
+
+    req = MPI_REQUEST_NULL
+!_______________________________________________________________________
+!_______________________________________________________________________
+
+  END SUBROUTINE waitinit
+
+
+  SUBROUTINE waitall ( req, d1 )
+
+!-----------------------------------------------------------------------
+!
+! Wait for all asynchronous communications encapsulated in the req array
+! to finish.
+!
+!-----------------------------------------------------------------------
+
+    INTEGER(i_knd), INTENT(IN) :: d1
+
+    INTEGER(i_knd), DIMENSION(d1), INTENT(INOUT) :: req
+!_______________________________________________________________________
+!
+!   Local variables
+!_______________________________________________________________________
+
+    INTEGER(i_knd) :: info
+
+    INTEGER(i_knd), DIMENSION(MPI_STATUS_SIZE,d1) :: stat
+!_______________________________________________________________________
+
+    CALL MPI_WAITALL ( d1, req, stat, info )
+!_______________________________________________________________________
+!_______________________________________________________________________
+
+  END SUBROUTINE waitall
+
+
   SUBROUTINE pinit_omp ( ierr, error )
 
 !-----------------------------------------------------------------------
@@ -782,15 +946,22 @@ MODULE plib_module
 !   Setup for nested threading
 !_______________________________________________________________________
 
-    do_nested = nnested > 0
+    do_nested = nnested > 1
     CALL OMP_SET_NESTED ( do_nested )
+!_______________________________________________________________________
+!
+!   Create an array of locks, one for each thread, that will be used
+!   to control threaded communications
+!_______________________________________________________________________
+
+    CALL plock_omp ( 'init', nthreads )
 !_______________________________________________________________________
 !_______________________________________________________________________
 
   END SUBROUTINE pinit_omp
 
 
-  SUBROUTINE plock_omp ( dowhat )
+  SUBROUTINE plock_omp ( dowhat, nlock )
 
 !-----------------------------------------------------------------------
 !
@@ -799,19 +970,45 @@ MODULE plib_module
 !-----------------------------------------------------------------------
 
     CHARACTER(LEN=*), INTENT(IN) :: dowhat
+
+    INTEGER(i_knd), INTENT(IN) :: nlock
+!_______________________________________________________________________
+!
+!   Local variables
+!_______________________________________________________________________
+
+    INTEGER(i_knd) :: i
 !_______________________________________________________________________
 
     SELECT CASE ( dowhat )
+
       CASE ( 'init' )
-        CALL OMP_INIT_LOCK ( lock )
+        ALLOCATE( lock(nlock) )
+        CALL OMP_INIT_LOCK ( lock(1) )
+        DO i = 2, nlock
+          CALL OMP_INIT_LOCK ( lock(i) )
+          CALL OMP_SET_LOCK ( lock(i) )
+        END DO
+        use_lock = nproc>1 .AND. nthreads>1 .AND.                      &
+                   thread_level/=thread_multiple
+
       CASE ( 'set' )
-        CALL OMP_SET_LOCK ( lock )
+        CALL OMP_SET_LOCK ( lock(nlock) )
+
       CASE ( 'unset' )
-        CALL OMP_UNSET_LOCK ( lock )
+        CALL OMP_UNSET_LOCK ( lock(nlock) )
+
       CASE ( 'destroy' )
-        CALL OMP_DESTROY_LOCK ( lock )
+        CALL OMP_DESTROY_LOCK ( lock(1) )
+        DO i = 2, nlock
+          CALL OMP_UNSET_LOCK ( lock(i) )
+          CALL OMP_DESTROY_LOCK ( lock(i) )
+        END DO
+        DEALLOCATE( lock )
+
       CASE DEFAULT
         RETURN
+
     END SELECT
 !_______________________________________________________________________
 !_______________________________________________________________________
