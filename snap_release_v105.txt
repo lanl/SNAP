@@ -1,0 +1,143 @@
+SNAP Version 1.05
+2/20/2015
+
+SNAP Version 1.05 includes major revisions to the the previous version of SNAP
+release to GitHub. The new version has been rewritten to incorporate similar
+changes made to the code for which it is a proxy, PARTISN.
+
+Summary:
+Major modifications have been made in several places in the code. The inner and
+outer source calculations have been reordered to allow nested threading over
+"i-lines" of the spatial mesh (i.e., a single value for the j and k indices).
+Further, the q2grp array that stores group-to-group source values has been
+divided into q2grp0 and q2grpm, which store the zeroth (scalar) and anisotropic
+moments, respectively. A new module thrd_comm_module was added to handle the
+distribution of tasks (group sweeps) to threads and to contain the receive and
+send routines for the sweep. Sweep communications are done at the beginning/end
+of sweep stages within the sweeper routines themselves. dim3_sweep was restored
+to set of three nested loops for three spatial dimensions. The mini-KBA sweep
+was separated to a new routine mkba_sweep. A lock pool was added to plib_module
+to control threaded communications in the absence of thread_multiple thread
+safety. The qtot and dinv arrays were resized to spatial work chunk sizes to
+be held in cache more efficiently during the sweep. The new input variables
+soloutp, kplane, popout, and swp_typ were added. The analyze_module contains
+a sample routine for data processing, computing the particle population
+spectrum. Nested threading where nested threads further parallelize group
+sweep work was made an option for single process jobs and swp_typ=0.
+
+Files:
+M sweep.f90
+Pull communication routines out of sweep_module and move to thrd_comm_module.
+Call for assigning group work to threads with call to assign_thrd_set. Simplify
+loop structure to focus on calling octsweep as the equivalent of a single KBA
+stage. Set up parallel threads for looping over the group work. Prepare for
+possibility that nested threads can be applied to groups.
+
+M version.f90
+Update date and version.
+
+M geom.f90
+Change the indexing on dinv to loop over spatial work chunks instead of global
+x-dimension. Only use ndiag if new variable swp_typ is 1. Handle ndiag setup
+within the allocation phase of the geometry directly.
+
+M dim1_sweep.f90
+Pull in flux as a module variable and interact with it that way. Reorder
+operations for better cache efficiency.
+
+M dim3_sweep.f90
+Revert to looping over all three dimensions instead of diagonals. Move the
+communication calls to here. Only call for first cell. Reorder operations for
+better cache efficiency. Use solvar_module variables.
+
+M outer.f90
+Break up q2grp into scalar and anisotropic moments (q2grp0 and q2grpm). Work
+with them independently. Fix bug where q2grpm is properly reset to zero before
+outer source update. Thread the outer source loops by group and by the k-j
+loops when nested threads are used.
+
+M utils.f90
+Use newer standard subroutine get_command_argument for retrieving file names
+from the command line. Use new variable swp_typ to pass to dealloc_module.
+
+M setup.f90
+Remove computation of num_grth. Place computation of nc to here. Store the
+number of dimensions in z and y here as kdim, jdim. Add computation of PCE.
+Echo the set values for new variables. Use the word "keyword" before the echo
+for easier output searching.
+
+M output.f90
+Move klb/kub computations up outside of soloutp option block. Use renamed flux0
+variable.
+
+A analyze.f90
+Add new module that contains the additiional edit data like computing the
+population per cycle or at end of calculation.
+
+M snap_main.f90
+Use swp_typ in call for deallocating in geom_module.
+
+M expxs.f90
+Correctly set expxs subroutines to only loop over an i-line consistent with
+their calls from modified outer/inner subroutines. Break up expxs_reg into
+an additional routine for 3D arrays.
+
+M inner.f90
+Use reindexed qtot over spatial work chunks. Use new q2grp0 and q2grpm to
+compute the qtot. Thread by group and k-j loops (i-lines).
+
+A thrd_comm.f90
+New module to hold the assignment of work to threads and communications. Do all
+prep work for messages here: figuring out sender/recipient, tag, etc. Use pool
+of locks to control threading in the case of THREAD_SERIALIZED. Switch to
+non-blocking sends and use MPI_WAITALL to ensure buffer is not overwritten.
+
+M sn.f90
+Always allocate all the angular cosine and weighted cosine data for proper use
+in debugger. Initialize to zero.
+
+M Makefile
+Clean up makefile. Add new modules. Make dependency list easier to read and
+properly ordered. Set simple options for gfortran and common ones for ifort.
+
+M control.f90
+Add new variables swp_typ, kplane, and popout. Make soloutp default off.
+
+M plib.f90
+Use lock pool for controlling thread communications. Clean up thread
+initialization. Add pce variable to store the value of computed PCE. Add the
+non-blocking send calls needed and the MPI_WAITALL calls needed.
+
+M translv.f90
+Fix how frequently pop_calc is called. Remove diag_setup call. Move the data
+setup outside of the outer loop. Move flux initialization into threaded loop.
+Clean up output at end of outers and use "keyword" for searching.
+
+M octsweep.f90
+Add dummy operations for controlling locks in threaded communications when
+threads have no groups to sweep. Clean up calls to sweepers.
+
+M time.f90
+Use "keyword" for easier output searching.
+
+M input.f90
+Read, check, broadcast, echo new input variables. Use "keyword" for faster
+searching.
+
+M dealloc.f90
+Pass swp_typ to geom_dealloc for proper deallocation of ndiag information.
+
+M solvar.f90
+Resize qtot. Rename flux to flux0. Break up q2grp into q2grp0 and q2grpm.
+Rename the previous flux data flux0pi/o as well. Size fluxm and q2grpm to dummy
+sizes if nmom=1 for proper array handling in subroutine dummy argument lists.
+
+A mkba_sweep.f90
+Move old mini-KBA sweep logic (old dim3_sweep.f90) to here and reorder to have
+as close consistency as possible with dim3_sweep.f90. Loop over the diagonals.
+Perform communications within the sweeper at the first cell and after last cell.
+Only arrive here if swp_typ is 1.
+
+A analyze_module.f90
+Add module to contain sample routines for data processing.
+
