@@ -1,0 +1,28 @@
+
+# No Fixup
+mpirun -cpus-per-proc 3 -np 4 $1 in01 out01 
+mpirun -cpus-per-proc 2 -np 6 $1 in02 out02
+mpirun -cpus-per-proc 2 -np 6 $1 in03 out03
+mpirun -cpus-per-proc 2 -np 4 $1 in04 out04
+mpirun -cpus-per-proc 4 -np 4 $1 in05 out05
+mpirun -cpus-per-proc 4 -np 4 $1 in06 out06
+mpirun -cpus-per-proc 2 -np 8 $1 in07 out07
+mpirun -cpus-per-proc 2 -np 8 $1 in08 out08
+mpirun -cpus-per-proc 4 -np 4 $1 in09 out09
+mpirun -cpus-per-proc 4 -np 4 $1 in10 out10
+mpirun -cpus-per-proc 4 -np 4 $1 in11 out11
+mpirun -cpus-per-proc 4 -np 4 $1 in12 out12
+
+# Fixup
+mpirun -cpus-per-proc 3 -np 4 $1 fin01 fout01 
+mpirun -cpus-per-proc 2 -np 6 $1 fin02 fout02
+mpirun -cpus-per-proc 2 -np 6 $1 fin03 fout03
+mpirun -cpus-per-proc 2 -np 4 $1 fin04 fout04
+mpirun -cpus-per-proc 4 -np 4 $1 fin05 fout05
+mpirun -cpus-per-proc 4 -np 4 $1 fin06 fout06
+mpirun -cpus-per-proc 2 -np 8 $1 fin07 fout07
+mpirun -cpus-per-proc 2 -np 8 $1 fin08 fout08
+mpirun -cpus-per-proc 4 -np 4 $1 fin09 fout09
+mpirun -cpus-per-proc 4 -np 4 $1 fin10 fout10
+mpirun -cpus-per-proc 4 -np 4 $1 fin11 fout11
+mpirun -cpus-per-proc 4 -np 4 $1 fin12 fout12

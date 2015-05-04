@@ -1,0 +1,6 @@
+# Add up the number of lines
+BEGIN { LC = 0 }
+
+// { LC = LC + $5 }
+
+END { print "Total line count is: " LC }
