@@ -1,0 +1,15 @@
+language: c
+
+env:
+  - OPT=yes COMPILER=gfortran #OPT=no broken on gfortran
+
+before_install:
+ - sudo apt-get update 
+ - sudo apt-get install gfortran libopenmpi-dev openmpi-bin
+
+script: 
+ - make -C src -j2 OPT="${OPT}" COMPILER="${COMPILER}" && make -C src count
+ - make -C ports/snap-c -j2 CC=mpicc CFLAGS="-O3 -std=c99 -fopenmp" LIBS="-lm"
+
+compiler:
+  - gcc
