@@ -20,11 +20,11 @@ MODULE version_module
 ! SNAP release number and release date.
 !_______________________________________________________________________
 
-  INTEGER(i_knd) :: version = 105
+  INTEGER(i_knd) :: version = 106
 
-  CHARACTER(LEN=8) :: cvers = '1.05'
+  CHARACTER(LEN=8) :: cvers = '1.06'
 
-  CHARACTER(LEN=10) :: vdate = '02-19-2015'
+  CHARACTER(LEN=10) :: vdate = '06-25-2015'
 !_______________________________________________________________________
 !_______________________________________________________________________
 

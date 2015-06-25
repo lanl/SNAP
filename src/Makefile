@@ -4,44 +4,72 @@
 OPT = yes
 FFLAGS =
 FFLAG2 =
+DEFS =
+PP =
+
+MPI = yes
+OPENMP = yes
 
 FORTRAN = mpif90
-#COMPILER = gfortran
-COMPILER = ifort
+COMPILER = gfortran
+#COMPILER = ifort
+
+ifeq ($(MPI),yes)
+  DEFS := $(DEFS) MPI
+else
+  FORTRAN = $(COMPILER)
+endif
+
+ifeq ($(OPENMP),yes)
+  DEFS := $(DEFS) OPENMP
+  ifeq ($(COMPILER),gfortran)
+    OMPFLAG = -fopenmp
+  endif
+  ifeq ($(COMPILER),ifort)
+    # Assuming Intel 15, if 14, use -openmp
+    OMPFLAG = -qopenmp
+  endif
+else
+  OMPFLAG =
+endif
+
+PPFLAGS = $(foreach def,$(DEFS),-D$(def))
 
 ifeq ($(COMPILER),gfortran)
   TARGET = snap
-  FFLAGS = -O3 -fopenmp
+  FFLAGS = -O3 $(OMPFLAG)
   FFLAG2 =
+  PP = cpp
   ifeq ($(OPT),no)
     TARGET = snap_db
-    FFLAGS = -O0 -fopenmp -g -fbounds-check -fbacktrace
+    FFLAGS = -O0 $(OMPFLAG) -g -fbounds-check -fbacktrace
     FFLAG2 =
   endif
 endif
 
 ifeq ($(COMPILER),ifort)
   TARGET = isnap
-  FFLAGS = -O3 -qopenmp -align array32byte -fp-model fast -fp-speculation fast -xHost
+  FFLAGS = -O3 $(OMPFLAG) -align array32byte -fp-model fast -fp-speculation fast -xHost
   FFLAG2 =
+  PP = fpp
   ifeq ($(OPT),no)
     TARGET = isnap_db
-    FFLAGS = -O0 -qopenmp -g -check bounds -traceback -warn unused
+    FFLAGS = -O0 $(OMPFLAG) -g -check bounds -traceback -warn unused
     FFLAG2 =
   endif
 endif
 
-.SUFFIXES:	.f90 .o
+.SUFFIXES:	.F90 .f90 .o
 
 OBJS = global.o snap_main.o utils.o version.o plib.o geom.o sn.o \
        data.o control.o input.o setup.o dealloc.o translv.o solvar.o \
        outer.o expxs.o inner.o sweep.o octsweep.o dim1_sweep.o dim3_sweep.o \
        output.o time.o mms.o analyze.o thrd_comm.o mkba_sweep.o
 
-SRCS = global.f90 snap_main.f90 utils.f90 version.f90 plib.f90 geom.f90 \
+SRCS = global.f90 snap_main.f90 utils.f90 version.f90 plib.F90 geom.f90 \
        sn.f90 data.f90 control.f90 input.f90 setup.f90 dealloc.f90 \
        translv.f90 solvar.f90 outer.f90 expxs.f90 inner.f90 sweep.f90 \
-       octsweep.f90 dim1_sweep.f90 dim3_sweep.f90 output.f90 time.f90 mms.f90 \
+       octsweep.f90 dim1_sweep.f90 dim3_sweep.f90 output.f90 time.F90 mms.f90 \
        analyze.f90 thrd_comm.f90 mkba_sweep.f90
 
 $(TARGET) :	$(OBJS)
@@ -83,8 +111,12 @@ translv.o :	global.o plib.o geom.o sn.o data.o control.o utils.o \
 		solvar.o expxs.o outer.o time.o analyze.o
 
 #
-# Fortran rule
+# Fortran rules
 #
+%.o:	%.F90
+	$(PP) -P $(PPFLAGS) $< >$*.f90
+	$(FORTRAN) $(FFLAGS) -c $<
+
 %.o:	%.f90
 	$(FORTRAN) $(FFLAGS) -c $<
 
