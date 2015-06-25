@@ -2,7 +2,7 @@
 !
 ! MODULE: time_module
 !> @brief
-!> This module contains the variables that measure SNAP's execution
+!> This module contains the variables that measure SNAP execution
 !> times for different pieces of code and the subroutine used to get the
 !> time. It also has the timing summary print.
 !
@@ -41,8 +41,9 @@ MODULE time_module
     tslv=zero, tparam=zero, totrsrc=zero, tinners=zero, tinrsrc=zero,  &
     tsweeps=zero, tinrmisc=zero, tslvmisc=zero, tout=zero, tgrind=zero
 
-
+#ifdef MPI
   INCLUDE 'mpif.h'
+#endif
 
 
   CONTAINS
@@ -59,7 +60,11 @@ MODULE time_module
     REAL(r_knd), INTENT(OUT) :: time
 !_______________________________________________________________________
 
+#ifdef MPI
     time = MPI_WTIME()
+#else
+    CALL CPU_TIME ( time )
+#endif
 !_______________________________________________________________________
 !_______________________________________________________________________
 
