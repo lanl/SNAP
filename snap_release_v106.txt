@@ -1,0 +1,40 @@
+SNAP Version 1.06
+6/25/2015
+
+SNAP Version 1.06 includes minor revisions to allow SNAP to be pre-processable
+for inclusion/exclusion of MPI and OPENMP.
+
+Summary:
+The SNAP files time.f90 and plib.f90 have been renamed time.F90 and plib.F90.
+Each file includes pre-processing directives depending on the definitions in
+the make system 'MPI' and 'OPENMP'. The Makefile has been modified to set
+the definitions and use a pre-processor to analyze the *.F90 files, convert
+them to *.f90 files, and compile.
+
+To build without MPI and/or OPENMP:
+gmake MPI=no OPENMP=no
+
+The default build assumes MPI=yes and OPENMP=yes.
+
+Files:
+R plib.f90
+A plib.F90
+
+Add dummy routines that perform little or no operations in place of the
+normal "wrapper" routines around calls to MPI and/or OPENMP. Add preprocessing
+definition to evaluate at compile time.
+
+R time.f90
+A time.F90
+
+Add preprocessing definition within the wtime subroutine for case with/without
+MPI.
+
+M Makefile
+
+Include preprocessing DEFS. Set FORTRAN and OMPFLAGS based on conditions
+specified to make command.
+
+M version.f90
+
+Update version and date.
