@@ -51,6 +51,10 @@ on the command line. The unoptimized, debugging version of SNAP features bounds 
 
 The values for these compilation variables have been modified for various Fortran compilers and the Makefile provides details of what has been used previously. These lines are commented out for clarity at this time and to ensure that changes to the build system are made carefully before attempting to rebuild with a different compiler.
 
+The user may alternatively build without MPI and/or OpenMP. Preprocessing definitions in the Makefile have been added as 'MPI' and 'OPENMP', respectively. The default sets both of these to yes. To build a completely serialized version of SNAP, type
+
+    make MPI=no OPENMP=no
+
 The SNAP directory can be cleaned up of its module and object files if the user desires with:
 
     make clean
