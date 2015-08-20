@@ -1106,8 +1106,7 @@ MODULE plib_module
 
     CALL glmax ( ierr, comm_snap )
     IF ( ierr /= 0 ) THEN
-      error = '*WARNING: PINIT_OMP: NTHREADS>MAX_THREADS; reset to' // &
-              ' MAX_THREADS'
+      error = '*WARNING: PINIT_OMP: NTHREADS>MAX_THREADS; reset to MAX_THREADS'
     END IF
 
     CALL OMP_SET_NUM_THREADS ( nthreads )
