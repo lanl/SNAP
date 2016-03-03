@@ -11,21 +11,31 @@ MPI = yes
 OPENMP = yes
 
 FORTRAN = mpif90
-COMPILER = gfortran
-#COMPILER = ifort
+#FORTRAN = mpifort
+#FORTRAN = ftn
+#FORTRAN = mpiifort
+
+TARGET = gsnap
+#TARGET = isnap
+#TARGET = ksnap
+
+#HASWELL = yes
 
 ifeq ($(MPI),yes)
   DEFS := $(DEFS) MPI
 else
-  FORTRAN = $(COMPILER)
+  ifeq ($(TARGET),gsnap)
+    FORTRAN = gfortran
+  else
+    FORTRAN = ifort
+  endif
 endif
 
 ifeq ($(OPENMP),yes)
   DEFS := $(DEFS) OPENMP
-  ifeq ($(COMPILER),gfortran)
+  ifeq ($(TARGET),gsnap)
     OMPFLAG = -fopenmp
-  endif
-  ifeq ($(COMPILER),ifort)
+  else
     # Assuming Intel 15, if 14, use -openmp
     OMPFLAG = -qopenmp
   endif
@@ -35,25 +45,39 @@ endif
 
 PPFLAGS = $(foreach def,$(DEFS),-D$(def))
 
-ifeq ($(COMPILER),gfortran)
-  TARGET = snap
+ifeq ($(TARGET),gsnap)
   FFLAGS = -O3 $(OMPFLAG)
   FFLAG2 =
   PP = cpp
   ifeq ($(OPT),no)
-    TARGET = snap_db
+    TARGET = gsnap_db
     FFLAGS = -O0 $(OMPFLAG) -g -fbounds-check -fbacktrace
     FFLAG2 =
   endif
 endif
 
-ifeq ($(COMPILER),ifort)
-  TARGET = isnap
-  FFLAGS = -O3 $(OMPFLAG) -align array32byte -fp-model fast -fp-speculation fast -xHost
+ifeq ($(TARGET),isnap)
+  FFLAGS = -O3 $(OMPFLAG) -ip -align array32byte -qno-opt-dynamic-align -fno-fnalias -fp-model fast -fp-speculation fast
+  ifeq ($(HASWELL),yes)
+    FFLAGS := $(FFLAGS) -xcore-avx2
+  else
+    FFLAGS := $(FFLAGS) -xHost
+  endif
   FFLAG2 =
   PP = fpp
   ifeq ($(OPT),no)
     TARGET = isnap_db
+    FFLAGS = -O0 $(OMPFLAG) -g -check bounds -traceback -warn unused
+    FFLAG2 =
+  endif
+endif
+
+ifeq ($(TARGET),ksnap)
+  FFLAGS = -O3 $(OMPFLAG) -xmic-avx512 -ip -align array64byte -qopt-streaming-stores always -qopt-streaming-cache-evict=0 -qno-opt-dynamic-align -fp-model fast -fp-speculation fast -fno-alias -fno-fnalias
+  FFLAG2 =
+  PP = fpp
+  ifeq ($(OPT),no)
+    TARGET = ksnap_db
     FFLAGS = -O0 $(OMPFLAG) -g -check bounds -traceback -warn unused
     FFLAG2 =
   endif
@@ -101,14 +125,14 @@ dim3_sweep.o :	global.o plib.o geom.o sn.o data.o control.o thrd_comm.o
 mkba_sweep.o :	global.o plib.o geom.o sn.o data.o control.o thrd_comm.o
 octsweep.o :	global.o geom.o sn.o data.o control.o solvar.o \
 		thrd_comm.o dim1_sweep.o dim3_sweep.o mkba_sweep.o
-sweep.o :	global.o geom.o data.o control.o octsweep.o solvar.o plib.o \
+sweep.o :	global.o data.o geom.o control.o octsweep.o solvar.o plib.o \
 		thrd_comm.o
 inner.o :	global.o geom.o sn.o data.o control.o solvar.o sweep.o \
 		time.o plib.o thrd_comm.o
 outer.o :	global.o geom.o sn.o data.o solvar.o control.o inner.o \
 		time.o plib.o expxs.o thrd_comm.o
 translv.o :	global.o plib.o geom.o sn.o data.o control.o utils.o \
-		solvar.o expxs.o outer.o time.o analyze.o
+		solvar.o expxs.o outer.o time.o thrd_comm.o analyze.o
 
 #
 # Fortran rules

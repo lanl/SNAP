@@ -16,7 +16,7 @@ MODULE output_module
 
   USE data_module, ONLY: ng, src_opt
 
-  USE control_module, ONLY: fluxp, otrdone, soloutp, kplane
+  USE control_module, ONLY: fluxp, soloutp, kplane
 
   USE utils_module, ONLY: open_file, close_file, print_error, stop_run
 
@@ -26,7 +26,7 @@ MODULE output_module
 
   USE time_module, ONLY: tout, wtime
 
-  USE plib_module, ONLY: iproc, root, yproc, zproc, bcast, comm_snap,  &
+  USE plib_module, ONLY: iproc, root, zproc, bcast, comm_snap,         &
     comm_space, sproc, cartrank, npey, psend, precv, barrier
 
   IMPLICIT NONE
@@ -93,7 +93,7 @@ MODULE output_module
       IF ( ierr /= 0 ) THEN
         error = '***ERROR: OUTPUT: Allocation error'
         CALL print_error ( ounit, error )
-        CALL stop_run ( 1, 3, 3, 0 )
+        CALL stop_run ( 1, 4, 2, 0 )
       END IF
 !_______________________________________________________________________
 !
@@ -277,7 +277,7 @@ MODULE output_module
     CALL bcast ( ierr, comm_snap, root )
     IF ( ierr /= 0 ) THEN
       CALL print_error (ounit, error )
-      CALL stop_run ( 1, 3, 3, 0 )
+      CALL stop_run ( 1, 4, 2, 0 )
     END IF
 
     IF ( iproc == root ) THEN
@@ -288,7 +288,7 @@ MODULE output_module
     IF ( ierr /= 0 ) THEN
       error = '***ERROR: OUTPUT_FLUX_FILE: Allocation error'
       CALL print_error ( ounit, error )
-      CALL stop_run ( 1, 3, 3, 0 )
+      CALL stop_run ( 1, 4, 2, 0 )
     END IF
 !_______________________________________________________________________
 !
@@ -356,7 +356,7 @@ MODULE output_module
     CALL bcast ( ierr, comm_snap, root )
     IF ( ierr /= 0 ) THEN
       CALL print_error ( ounit, error )
-      CALL stop_run ( 1, 3, 3, 0 )
+      CALL stop_run ( 1, 4, 2, 0 )
     END IF
 !_______________________________________________________________________
 

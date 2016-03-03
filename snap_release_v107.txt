@@ -1,0 +1,144 @@
+SNAP Version 1.07
+3/3/2016
+
+SNAP Version 1.07 includes major revisions to the previous minor version of
+SNAP released to GitHub. The new version has been rewritten to incorporate
+similar changes mad to the cod for which it is a proxy, PARTISN.
+
+Summary:
+SNAP 1.07 includes two major modifications and several minor modifications.
+The major revisions are (1) the addition of an option to store only a single
+copy of time-edge angular flux (the largest memory cost of the code) at the
+expense of additional work and (2) spawning only a single main-level thread
+region for the transport solution. Major revision (1) allows the user to set the
+input variable ANGCPY to 1 or 2, where 1 (now default) stores only a single
+copy of the large angular flux array, saving nearly 50% of memory at the
+expense of an additional outer iteration. The previous mode is captured by
+the option ANGCPY=2. Users are recommended to use ANGCPY=1 for any large
+scaling studies due to the expectation that production calculations will also
+employ this approach. No changes must be made by the user to run with the new
+threading model. A single main-level thread region is formed at the beginning of
+the transport solution each time cycle. Several nested thread regions are
+used in called sub-routines. A single array is used to store the tasks (groups)
+associated with each main level thread. OpenMP master regions and barriers are
+used to serialize (per rank) necessary portions of the code and prevent
+race conditions.
+
+Several more minor modifications are described below.
+
+A minor change to SNAP includes a new sweep scheduling policy for 3-D problems.
+The user does not need to take any action to employ the new schedule. Mesh
+sweeps start from four starting points and pipeline octant pairs. The four
+starting points are fixed, but their order is selected according to the values
+of NPEY and NPEZ to reduce the number of idle stages during the sweep. Change
+the computation of the Parallel Computational Efficiency (PCE) value,
+accordingly.
+
+The loop over the spatial work chunks has been removed from sweep.f90 and placed
+in octsweep.f90 for dim1_sweep and dim3_sweep sub-routines and in mkba_sweep for
+the mini-KBA sweep sub-routine.
+
+Several sub-routines have been renamed to adhere to a stricter naming
+convention. Most subroutines now take the name of their own module.
+
+WHERE-ELSEWHERE blocks that include a potential division by zero have been
+rewritten to avoid this division. This is a potential problem in the presence
+of vectorization, where some operations are performed within the vector
+infrastructure and repaired after the fact.
+
+The Makefile has been slightly reorganized. Several MPI wrappers have been
+listed in the Makefile for users to select. Users now select a target, which
+yields a specified Fortran compiler and list of options. The list of compiler
+options has been expanded for usage of the 'ifort' compiler. Makefile
+dependencies have been corrected. Unused variables have been removed in
+several modules.
+
+Please recall pre-processing capabilities for MPI and OpenMP were added in
+version 1.06, a minor revision to version 1.05.
+
+Modified files:
+version.f90
+Update version number and date.
+
+snap_main.f90
+Minor edits for naming convention changes and changes to allocation/deallocation
+logic.
+
+plib.F90
+Switch to "USE mpi" instead of "INCLUDE". Change the way locks are created and
+destroyed.
+
+time.F90
+Switch to "USE mpi" instead of "INCLUDE".
+
+input.f90
+Add new input variable "ANGCPY". Change naming convention. Modify input check
+to clarify input rules.
+
+setup.f90
+Minor edits for naming convention. Set the new sweep schedule. Modify the PCE
+computation. Relocate some allocation for new sweep schedule.
+
+geom.f90
+Minor edits for naming convention, unused variables.
+
+analyze.f90
+output.f90
+Minor edits for unused variables.
+
+mms.f90
+Change WHERE-ELSEWHERE block.
+
+control.f90
+Add new input and module variables for ANGCPY and controlling the sweep
+schedule.
+
+sn.f90
+Minor edits for naming convention.
+
+dealloc.f90
+Edits for naming convention and order of allocation/deallocation of different
+module variables.
+
+solvar.f90
+Minor edits for naming convention. Add fmin/fmax arrays. Modify the way
+the time-edge angular flux arrays (ptr_in and ptr_out) are allocated.
+
+thrd_comm.f90
+Use nthreads module variable and no longer pass in the number of threads that
+will be used for communication, because we'll always just use the number of
+threads provided when thread region is spawned. The task_act array is given
+fixed size, so remove allocation and remove the destroy subroutine that
+deallocated the array.
+
+translv.f90
+Make changes for the new single main-level thread region and multiple
+nested regions. Establish each main level thread, create the array that holds
+the task list for each thread. Call for an extra outer iteration as necessary
+according to the "update_ptr" variable. Other minor edits for unused variables.
+
+outer.f90
+inner.f90
+Replace main level threading logic with nested threading logic. Replace
+WHERE-ELSEWHERE blocks. Minor edits for naming convention.
+
+sweep.f90
+Use new sweep schedule array. Spawn nested threads used by mkba_sweep.f90.
+Remove loop over spatial work chunks.
+
+octsweep.f90
+Add loop over spatial work chunks for dim1_sweep and dim3_sweep. Minor changes
+to subroutine call lists.
+
+dim1_sweep.f90
+dim3_sweep.f90
+Replace WHERE-ELSEWHERE blocks. Use update_ptr to determine when to modify the
+single time-edge angular flux array when ANGCPY=1.
+
+mkba_sweep.f90
+Replace WHERE-ELSEWHERE blocks. Use update_ptr to determine when to modify the
+single time-edge angular flux array when ANGCPY=1. Add loop over all spatial
+work chunks. Remove OpenMP directives to fork/join threads. Use OpenMP to
+update cells on same diagonal in parallel with nested threads. Serialize (per
+main level thread) the communication.
+

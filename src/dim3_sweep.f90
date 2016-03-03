@@ -14,11 +14,11 @@ MODULE dim3_sweep_module
 
   USE geom_module, ONLY: nx, hi, hj, hk, ndimen, ny, nz, nc
 
-  USE sn_module, ONLY: cmom, nang, mu, eta, xi, w, noct
+  USE sn_module, ONLY: cmom, nang, mu, eta, xi, w
 
   USE data_module, ONLY: src_opt, qim
 
-  USE control_module, ONLY: fixup, tolr
+  USE control_module, ONLY: fixup, tolr, last_oct, update_ptr
 
   USE thrd_comm_module, ONLY: sweep_recv_bdry, sweep_send_bdry
 
@@ -30,8 +30,8 @@ MODULE dim3_sweep_module
   CONTAINS
 
 
-  SUBROUTINE dim3_sweep ( ich, id, d1, d2, d3, d4, jd, kd, oct, g, iop,&
-    t, nthrd, reqs, szreq, psii, psij, psik, qtot, ec, vdelt, ptr_in,  &
+  SUBROUTINE dim3_sweep ( ich, id, d1, d2, d3, d4, jd, kd, oct, g, t,  &
+    iop, reqs, szreq, psii, psij, psik, qtot, ec, vdelt, ptr_in,       &
     ptr_out, dinv, flux0, fluxm, jb_in, jb_out, kb_in, kb_out, wmu,    &
     weta, wxi, flkx, flky, flkz, t_xs, fmin, fmax )
 
@@ -42,7 +42,7 @@ MODULE dim3_sweep_module
 !-----------------------------------------------------------------------
 
     INTEGER(i_knd), INTENT(IN) :: ich, id, d1, d2, d3, d4, jd, kd, oct,&
-      g, iop, t, nthrd, szreq
+      g, t, iop, szreq
 
     INTEGER(i_knd), DIMENSION(szreq), INTENT(INOUT) :: reqs
 
@@ -199,8 +199,8 @@ MODULE dim3_sweep_module
 !_______________________________________________________________________
 
       IF ( receive ) THEN
-        CALL sweep_recv_bdry ( g, jd, kd, iop, t, nthrd, reqs, szreq,  &
-          nc, nang, ichunk, ny, nz, jb_in, kb_in )
+        CALL sweep_recv_bdry ( g, jd, kd, iop, t, reqs, szreq, nc,     &
+          nang, ichunk, ny, nz, jb_in, kb_in )
         receive = .FALSE.
       END IF
 !_______________________________________________________________________
@@ -273,7 +273,7 @@ MODULE dim3_sweep_module
         psii(:,j,k) = two*psi - psii(:,j,k)
         psij(:,ic,k) = two*psi - psij(:,ic,k)
         IF ( ndimen == 3 ) psik(:,ic,j) = two*psi - psik(:,ic,j)
-        IF ( vdelt /= zero )                                           &
+        IF ( vdelt/=zero .AND. update_ptr )                            &
           ptr_out(:,i,j,k) = two*psi - ptr_in(:,i,j,k)
 
       ELSE
@@ -324,11 +324,14 @@ MODULE dim3_sweep_module
               xi*hk*hv(:,3)
           END IF
 
-          WHERE( den > tolr )
-            pc = pc/den
-          ELSEWHERE
+          WHERE( pc <= zero ) den = zero
+
+          WHERE( den < tolr )
             pc = zero
+            den = one
           END WHERE
+
+          pc = pc / den
 
         END DO fixup_loop
 !_______________________________________________________________________
@@ -341,7 +344,8 @@ MODULE dim3_sweep_module
         psii(:,j,k) = fxhv(:,1) * hv(:,1)
         psij(:,ic,k) = fxhv(:,2) * hv(:,2)
         IF ( ndimen == 3 ) psik(:,ic,j) = fxhv(:,3) * hv(:,3)
-        IF ( vdelt /= zero ) ptr_out(:,i,j,k) = fxhv(:,4) * hv(:,4)
+        IF ( vdelt/=zero .AND. update_ptr )                            &
+          ptr_out(:,i,j,k) = fxhv(:,4) * hv(:,4)
 
       END IF
 !_______________________________________________________________________
@@ -400,7 +404,7 @@ MODULE dim3_sweep_module
 !     currently)
 !_______________________________________________________________________
 
-      IF ( oct == noct ) THEN
+      IF ( oct == last_oct ) THEN
         fmin = MIN( fmin, flux0(i,j,k) )
         fmax = MAX( fmax, flux0(i,j,k) )
       END IF
@@ -417,8 +421,8 @@ MODULE dim3_sweep_module
 !   Send data to downstream neighbors
 !_______________________________________________________________________
 
-    CALL sweep_send_bdry ( g, jd, kd, iop, t, nthrd, reqs, szreq, nc,  &
-      nang, ichunk, ny, nz, jb_out, kb_out )
+    CALL sweep_send_bdry ( g, jd, kd, iop, t, reqs, szreq, nc, nang,   &
+      ichunk, ny, nz, jb_out, kb_out )
 !_______________________________________________________________________
 !_______________________________________________________________________
 

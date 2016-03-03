@@ -15,6 +15,10 @@ MODULE plib_module
 
   USE time_module, ONLY: wtime
 
+#ifdef MPI
+  USE mpi
+#endif
+
   IMPLICIT NONE
 
   PUBLIC
@@ -121,10 +125,6 @@ MODULE plib_module
 
   REAL(r_knd) :: pce
 
-#ifdef MPI
-  INCLUDE 'mpif.h'
-#endif
-
 #ifdef OPENMP
   INCLUDE 'omp_lib.h'
 
@@ -172,7 +172,7 @@ MODULE plib_module
 
     CALL MPI_INIT_THREAD ( thread_serialized, thread_level, ierr )
 
-    CALL WTIME ( t1 )
+    CALL wtime ( t1 )
 
     CALL MPI_COMM_DUP ( MPI_COMM_WORLD, comm_snap, ierr )
 !_______________________________________________________________________
@@ -914,7 +914,7 @@ MODULE plib_module
   SUBROUTINE pinit ( t1 )
     REAL(r_knd), INTENT(OUT) :: t1
     INTEGER(i_knd) :: ierr
-    CALL WTIME ( t1 )
+    CALL wtime ( t1 )
     thread_single     = 0
     thread_funneled   = 0
     thread_serialized = 0
@@ -1108,8 +1108,6 @@ MODULE plib_module
     IF ( ierr /= 0 ) THEN
       error = '*WARNING: PINIT_OMP: NTHREADS>MAX_THREADS; reset to MAX_THREADS'
     END IF
-
-    CALL OMP_SET_NUM_THREADS ( nthreads )
 !_______________________________________________________________________
 !
 !   Setup for nested threading
@@ -1164,10 +1162,8 @@ MODULE plib_module
 
       CASE ( 'init' )
         ALLOCATE( lock(nlock) )
-        CALL OMP_INIT_LOCK ( lock(1) )
-        DO i = 2, nlock
+        DO i = 1, nlock
           CALL OMP_INIT_LOCK ( lock(i) )
-          CALL OMP_SET_LOCK ( lock(i) )
         END DO
         use_lock = nproc>1 .AND. nthreads>1 .AND.                      &
                    thread_level/=thread_multiple
@@ -1179,9 +1175,7 @@ MODULE plib_module
         CALL OMP_UNSET_LOCK ( lock(nlock) )
 
       CASE ( 'destroy' )
-        CALL OMP_DESTROY_LOCK ( lock(1) )
-        DO i = 2, nlock
-          CALL OMP_UNSET_LOCK ( lock(i) )
+        DO i = 1, nlock
           CALL OMP_DESTROY_LOCK ( lock(i) )
         END DO
         DEALLOCATE( lock )

@@ -528,11 +528,12 @@ MODULE mms_module
     REAL(r_knd), DIMENSION(nx,ny,nz,ng) :: df
 !_______________________________________________________________________
 
-    WHERE( ABS( ref_flux ) > tolr )
-      df = ABS( flux/ref_flux - one )
-    ELSEWHERE
-      df = ABS( flux - ref_flux )
+    df = one
+    WHERE( ABS( ref_flux ) < tolr )
+      ref_flux = one
+      df = zero
     END WHERE
+    df = ABS( flux/ref_flux - df )
 
     dfmx = MAXVAL( df )
     CALL glmax ( dfmx, comm_snap )

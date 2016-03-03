@@ -21,7 +21,8 @@ MODULE input_module
   USE data_module, ONLY: ng, mat_opt, src_opt, scatp
 
   USE control_module, ONLY: epsi, iitm, oitm, timedep, tf, nsteps,     &
-    swp_typ, it_det, fluxp, fixup, soloutp, kplane, popout
+    swp_typ, cor_swp, angcpy, it_det, fluxp, fixup, soloutp, kplane,   &
+    popout
 
   USE utils_module, ONLY: print_error, stop_run
 
@@ -31,13 +32,13 @@ MODULE input_module
 
   PRIVATE
 
-  PUBLIC :: read_input
+  PUBLIC :: input_read
 
 
   CONTAINS
 
 
-  SUBROUTINE read_input
+  SUBROUTINE input_read
 
 !-----------------------------------------------------------------------
 !
@@ -57,8 +58,8 @@ MODULE input_module
 
     NAMELIST / invar / npey, npez, ichunk, nthreads, ndimen, nx, ny,   &
       nz, lx, ly, lz, nmom, nang, ng, epsi, iitm, oitm, timedep, tf,   &
-      nsteps, mat_opt, src_opt, scatp, swp_typ, it_det, fluxp, fixup,  &
-      nnested, soloutp, kplane, popout
+      nsteps, mat_opt, src_opt, scatp, swp_typ, cor_swp, it_det, fluxp,&
+      fixup, nnested, soloutp, kplane, popout, angcpy
 !_______________________________________________________________________
 !
 !   Read the input file. Echo to output file. Call for an input variable
@@ -94,14 +95,14 @@ MODULE input_module
 !   Broadcast the data to all processes.
 !_______________________________________________________________________
 
-    CALL var_bcast
+    CALL input_var_bcast
 
     CALL wtime ( t2 )
     tinp = t2 - t1
 !_______________________________________________________________________
 !_______________________________________________________________________
 
-  END SUBROUTINE read_input
+  END SUBROUTINE input_read
 
 
   SUBROUTINE input_echo
@@ -130,13 +131,14 @@ MODULE input_module
     WRITE( ounit, 127 ) nmom, nang
     WRITE( ounit, 128 ) ng, mat_opt, src_opt, scatp
     WRITE( ounit, 129 ) epsi, iitm, oitm, timedep, tf, nsteps, swp_typ,&
-      it_det, soloutp, kplane, popout, fluxp, fixup
+      cor_swp, angcpy, it_det, soloutp, kplane, popout, fluxp, fixup
     WRITE( ounit, 121 ) ( star, i = 1, 80 )
 !_______________________________________________________________________
 
     121 FORMAT( /, 80A, / )
-    122 FORMAT( 10X, 'keyword Input Echo - Values from input or ' //   &
-                'default', /, 80A, / )
+    122 FORMAT( 10X,                                                   &
+                'keyword Input Echo - Values from input or default', /,&
+                80A, / )
 
     123 FORMAT( 2X, 'NML=invar' )
 
@@ -170,6 +172,8 @@ MODULE input_module
                 5X, 'tf= ', ES11.4, /,                                 &
                 5X, 'nsteps= ', I5, /,                                 &
                 5X, 'swp_typ= ', I2, /,                                &
+                5X, 'cor_swp= ', I2, /,                                &
+                5X, 'angcpy= ', I2, /                                  &
                 5X, 'it_det= ', I2, /,                                 &
                 5X, 'soloutp= ', I2, /,                                &
                 5X, 'kplane= ', I4, /,                                 &
@@ -448,14 +452,49 @@ MODULE input_module
     IF ( swp_typ/=0 .AND. swp_typ/=1 ) THEN
       swp_typ = 0
       error = '*WARNING: INPUT_CHECK: SWP_TYP must equal 0/1; ' //     &
+              'reset to 0'
+      CALL print_error ( ounit, error )
+    END IF
+
+    IF ( swp_typ/=0 .AND. ndimen==1 ) THEN
+      swp_typ = 0
+      error = '*WARNING: INPUT_CHECK: SWP_TYP must be 0 for 1-D; ' //  &
+              'reset to 0'
+      CALL print_error ( ounit, error )
+    END IF
+
+    IF ( nnested>1 .AND. swp_typ==0 ) THEN
+      ierr = ierr + 1
+      error = '***ERROR: INPUT_CHECK: SWP_TYP must be 1 for nested' // &
+              ' threading'
+      CALL print_error ( ounit, error )
+    END IF
+
+!    IF ( nproc>1 .AND. nnested>1 .AND. swp_typ==0 ) THEN
+!      ierr = ierr + 1
+!      error = '***ERROR: INPUT_CHECK: SWP_TYP=0 + NNESTED>1 ' //       &
+!              'requires NPROC=1'
+!      CALL print_error ( ounit, error )
+!    END IF
+
+    IF ( cor_swp/=0 .AND. cor_swp/=1 ) THEN
+      cor_swp = 0
+      error = '*WARNING: INPUT_CHECK: COR_SWP must equal 0/1; ' //     &
+              'reset to 0'
+      CALL print_error ( ounit, error )
+    END IF
+
+    IF ( ndimen==1 .AND. cor_swp==1 ) THEN
+      cor_swp = 0
+      error = '*WARNING: INPUT_CHECK: COR_SWP must equal 0 in 1D; ' // &
               ' reset to 0'
       CALL print_error ( ounit, error )
     END IF
 
-    IF ( nproc>1 .AND. nnested>1 .AND. swp_typ==0 ) THEN
-      ierr = ierr + 1
-      error = '***ERROR: INPUT_CHECK: SWP_TYP=0 + NNESTED>1 ' //       &
-              'requires NPROC=1'
+    IF ( angcpy/=1 .AND. angcpy/=2 ) THEN
+      angcpy = 1
+      error = '*WARNING: INPUT_CHECK: ANGCPY must be 1 or 2; ' //      &
+              'reset to 1'
       CALL print_error ( ounit, error )
     END IF
 
@@ -506,7 +545,7 @@ MODULE input_module
   END SUBROUTINE input_check
 
 
-  SUBROUTINE var_bcast
+  SUBROUTINE input_var_bcast
 
 !-----------------------------------------------------------------------
 !
@@ -552,13 +591,15 @@ MODULE input_module
       ipak(17) = src_opt
       ipak(18) = scatp
       ipak(19) = swp_typ
-      ipak(20) = it_det
-      ipak(21) = fluxp
-      ipak(22) = fixup
-      ipak(23) = nnested
-      ipak(24) = soloutp
-      ipak(25) = kplane
-      ipak(26) = popout
+      ipak(20) = cor_swp
+      ipak(21) = angcpy
+      ipak(22) = it_det
+      ipak(23) = fluxp
+      ipak(24) = fixup
+      ipak(25) = nnested
+      ipak(26) = soloutp
+      ipak(27) = kplane
+      ipak(28) = popout
 
       dpak(1) = lx
       dpak(2) = ly
@@ -602,13 +643,15 @@ MODULE input_module
       src_opt   = ipak(17)
       scatp     = ipak(18)
       swp_typ   = ipak(19)
-      it_det    = ipak(20)
-      fluxp     = ipak(21)
-      fixup     = ipak(22)
-      nnested   = ipak(23)
-      soloutp   = ipak(24)
-      kplane    = ipak(25)
-      popout    = ipak(26)
+      cor_swp   = ipak(20)
+      angcpy    = ipak(21)
+      it_det    = ipak(22)
+      fluxp     = ipak(23)
+      fixup     = ipak(24)
+      nnested   = ipak(25)
+      soloutp   = ipak(26)
+      kplane    = ipak(27)
+      popout    = ipak(28)
 
       lx     = dpak(1)
       ly     = dpak(2)
@@ -622,7 +665,7 @@ MODULE input_module
 !_______________________________________________________________________
 !_______________________________________________________________________
 
-  END SUBROUTINE var_bcast
+  END SUBROUTINE input_var_bcast
 
 
 END MODULE input_module

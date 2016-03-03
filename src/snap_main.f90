@@ -66,7 +66,7 @@ PROGRAM snap_main
 
   USE version_module, ONLY: version_print
 
-  USE input_module, ONLY: read_input
+  USE input_module, ONLY: input_read
 
   USE setup_module, ONLY: setup
 
@@ -144,7 +144,7 @@ PROGRAM snap_main
 ! Read input
 !_______________________________________________________________________
 
-  CALL read_input
+  CALL input_read
 
   CALL close_file ( iunit, ierr, error )
   CALL bcast ( ierr, comm_snap, root )
@@ -191,8 +191,8 @@ PROGRAM snap_main
 ! Final cleanup: deallocate, close output file, end the program
 !_______________________________________________________________________
 
-  CALL dealloc_input ( 3 )
-  CALL dealloc_solve ( swp_typ, 3 )
+  CALL dealloc_input ( 4 )
+  CALL dealloc_solve ( swp_typ, 2 )
 
   CALL wtime ( t5 )
   tsnap = t5 - t1

@@ -8,7 +8,7 @@
 
 MODULE analyze_module
 
-  USE global_module, ONLY: i_knd, r_knd, zero, ounit
+  USE global_module, ONLY: i_knd, r_knd, ounit
 
   USE control_module, ONLY: timedep
 
@@ -30,7 +30,7 @@ MODULE analyze_module
   CONTAINS
 
 
-  SUBROUTINE pop_calc ( cy, time )
+  SUBROUTINE analyze_pop_calc ( cy, time )
 
 !-----------------------------------------------------------------------
 !
@@ -106,7 +106,7 @@ MODULE analyze_module
 !_______________________________________________________________________
 !_______________________________________________________________________
 
-  END SUBROUTINE pop_calc
+  END SUBROUTINE analyze_pop_calc
 
 
 END MODULE analyze_module

@@ -28,4 +28,6 @@
   scatp=0
   fixup=0
   soloutp=1
+  swp_typ=1
+  angcpy=1
 /

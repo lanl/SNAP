@@ -12,6 +12,10 @@ MODULE time_module
 
   USE global_module, ONLY: r_knd, i_knd, zero, ounit
 
+#ifdef MPI
+  USE mpi
+#endif
+
   IMPLICIT NONE
 
   PUBLIC
@@ -40,10 +44,6 @@ MODULE time_module
   REAL(r_knd) :: tsnap=zero, tparset=zero, tinp=zero, tset=zero,       &
     tslv=zero, tparam=zero, totrsrc=zero, tinners=zero, tinrsrc=zero,  &
     tsweeps=zero, tinrmisc=zero, tslvmisc=zero, tout=zero, tgrind=zero
-
-#ifdef MPI
-  INCLUDE 'mpif.h'
-#endif
 
 
   CONTAINS

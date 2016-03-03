@@ -11,7 +11,7 @@
 
 MODULE inner_module
 
-  USE global_module, ONLY: i_knd, r_knd, one, ounit
+  USE global_module, ONLY: i_knd, r_knd, one, ounit, zero
 
   USE geom_module, ONLY: nx, ny, nz, nc
 
@@ -28,9 +28,9 @@ MODULE inner_module
 
   USE time_module, ONLY: tinrsrc, tsweeps, wtime
 
-  USE plib_module, ONLY: glmax, comm_snap, iproc, root, ichunk
+  USE plib_module, ONLY: nthreads, glmax, comm_snap, iproc, root, ichunk
 
-  USE thrd_comm_module, ONLY: assign_thrd_set, destroy_task_set
+  USE thrd_comm_module, ONLY: assign_thrd_set
 
   IMPLICIT NONE
 
@@ -42,7 +42,8 @@ MODULE inner_module
   CONTAINS
 
 
-  SUBROUTINE inner ( inno, iits )
+  SUBROUTINE inner ( inno, iits, t, do_grp, ng_per_thrd, nnstd_used,   &
+    grp_act )
 
 !-----------------------------------------------------------------------
 !
@@ -52,36 +53,58 @@ MODULE inner_module
 !
 !-----------------------------------------------------------------------
 
-    INTEGER(i_knd), INTENT(IN) :: inno
+    INTEGER(i_knd), INTENT(IN) :: inno, t
+
+    INTEGER(i_knd), INTENT(INOUT) :: ng_per_thrd, nnstd_used
 
     INTEGER(i_knd), DIMENSION(ng), INTENT(OUT) :: iits
+
+    INTEGER(i_knd), DIMENSION(ng), INTENT(INOUT) :: do_grp
+
+    INTEGER(i_knd), DIMENSION(ng,nthreads), INTENT(INOUT) :: grp_act
 !_______________________________________________________________________
 !
 !   Local variables
 !_______________________________________________________________________
 
-    INTEGER(i_knd) :: g
+    INTEGER(i_knd) :: n, g
 
     REAL(r_knd) :: t1, t2, t3, t4
 !_______________________________________________________________________
 !
-!   Compute the inner source and add it to fixed + out-of-group sources
+!   Compute the inner source and add it to fixed + out-of-group sources.
+!   No need to do inner operations if the group's inners are converged.
 !_______________________________________________________________________
+
+  !$OMP MASTER
 
     CALL wtime ( t1 )
 
-    CALL inr_src
+    do_grp = 1
+    WHERE( inrdone ) do_grp = 0
 
+    CALL assign_thrd_set ( do_grp, ng, ng_per_thrd, ny*nz, nnstd_used, &
+      grp_act )
+
+  !$OMP END MASTER
+  !$OMP BARRIER
+
+    CALL inner_src ( ng_per_thrd, nnstd_used, grp_act(:,t) )
+  !$OMP BARRIER
+
+  !$OMP MASTER
     CALL wtime ( t2 )
     tinrsrc = tinrsrc + t2 - t1
+  !$OMP END MASTER
 !_______________________________________________________________________
 !
 !   With source computed, set previous copy of flux; new flux moments
 !   iterates computed during sweep.
 !_______________________________________________________________________
 
-    DO g = 1, ng
-      IF ( inrdone(g) ) CYCLE
+    DO n = 1, ng_per_thrd
+      g = grp_act(n,t)
+      IF ( g == 0 ) EXIT
       flux0pi(:,:,:,g) = flux0(:,:,:,g)
     END DO
 !_______________________________________________________________________
@@ -89,21 +112,42 @@ MODULE inner_module
 !   Call for the transport sweep. Check convergence, using threads.
 !_______________________________________________________________________
 
+  !$OMP MASTER
     CALL wtime ( t3 )
+  !$OMP END MASTER
 
-    CALL sweep
+  !$OMP BARRIER
+
+    CALL sweep ( t, do_grp, ng_per_thrd, nnstd_used, grp_act )
+  !$OMP BARRIER
+
+  !$OMP MASTER
 
     CALL wtime ( t4 )
     tsweeps = tsweeps + t4 - t3
+!_______________________________________________________________________
+!
+!   Check inner convergence. Apply nested threads to group sets.
+!_______________________________________________________________________
 
-    CALL inr_conv ( inno, iits )
+    do_grp = 1
+    WHERE( inrdone ) do_grp = 0
+
+    CALL assign_thrd_set ( do_grp, ng, ng_per_thrd, 0, nnstd_used,     &
+      grp_act )
+
+  !$OMP END MASTER
+  !$OMP BARRIER
+
+    CALL inner_conv ( inno, iits, ng_per_thrd, nnstd_used,             &
+      grp_act(:,t) )
 !_______________________________________________________________________
 !_______________________________________________________________________
 
   END SUBROUTINE inner
 
 
-  SUBROUTINE inr_src
+  SUBROUTINE inner_src ( ng_per_thrd, nnstd_used, grp_act )
 
 !-----------------------------------------------------------------------
 !
@@ -111,75 +155,47 @@ MODULE inner_module
 ! Thread over groups and use nested threads on i-lines when available.
 !
 !-----------------------------------------------------------------------
+
+    INTEGER(i_knd), INTENT(IN) :: ng_per_thrd, nnstd_used
+
+    INTEGER(i_knd), DIMENSION(ng), INTENT(IN) :: grp_act
 !_______________________________________________________________________
 !
 !   Local variables
 !_______________________________________________________________________
 
-    INTEGER(i_knd) :: ng_per_thrd, nthrd_used, nnstd_used, t, n, g, k, j
-
-    INTEGER(i_knd), DIMENSION(ng) :: do_grp
-
-    INTEGER(i_knd), DIMENSION(:,:), POINTER :: grp_act
+    INTEGER(i_knd) :: n, g, k, j
 !_______________________________________________________________________
 !
-!   Will use threads to parallelize the source computation. Establish
-!   the amount of work and assign to threads and nested threads if
-!   available. Skip any group already done.
+!   Loop over each set of groups. Use nested threads if available.
 !_______________________________________________________________________
-
-    do_grp = 1
-    WHERE( inrdone ) do_grp = 0
-
-    CALL assign_thrd_set ( do_grp, ng, ng_per_thrd, nthrd_used, ny*nz, &
-      nnstd_used, grp_act )
-!_______________________________________________________________________
-!
-!   Loop over the number of threads available. Use nested threads over
-!   the k-j loops if available. Exit the loops if the thread has run out
-!   of work, i.e., some groups were converged and had less to do than
-!   full ng_per_thrd.
-!_______________________________________________________________________
-
-  !$OMP PARALLEL DO NUM_THREADS(nthrd_used) IF(nthrd_used>1)           &
-  !$OMP& SCHEDULE(STATIC,1), DEFAULT(SHARED), PRIVATE(t,n,g,k,j)
-    DO t = 1, nthrd_used
 
   !$OMP PARALLEL NUM_THREADS(nnstd_used) IF(nnstd_used>1)              &
-  !$OMP& PRIVATE(n,g,k,j)
-      DO n = 1, ng_per_thrd
+  !$OMP& DEFAULT(SHARED) PRIVATE(n,g,k,j) PROC_BIND(CLOSE)
+    DO n = 1, ng_per_thrd
 
-        g = grp_act(n,t)
-        IF ( g == 0 ) EXIT
+      g = grp_act(n)
+      IF ( g == 0 ) EXIT
 
   !$OMP DO SCHEDULE(STATIC,1) COLLAPSE(2)
-        DO k = 1, nz
-        DO j = 1, ny
-          CALL inr_src_calc ( j, k, s_xs(:,:,:,:,g), flux0(:,j,k,g),   &
-            fluxm(:,:,j,k,g), q2grp0(:,j,k,g), q2grpm(:,:,j,k,g),      &
-            qtot(:,:,:,:,:,g) )
-        END DO
-        END DO
+      DO k = 1, nz
+      DO j = 1, ny
+        CALL inner_src_calc ( j, k, s_xs(:,:,:,:,g), flux0(:,j,k,g),   &
+          fluxm(:,:,j,k,g), q2grp0(:,j,k,g), q2grpm(:,:,j,k,g),        &
+          qtot(:,:,:,:,:,g) )
+      END DO
+      END DO
   !$OMP END DO NOWAIT
 
-      END DO
-  !$OMP END PARALLEL
-
     END DO
-  !$OMP END PARALLEL DO
-!_______________________________________________________________________
-!
-!   Deallocate the grp_act pointer
-!_______________________________________________________________________
-
-    CALL destroy_task_set ( grp_act )
+  !$OMP END PARALLEL
 !_______________________________________________________________________
 !_______________________________________________________________________
 
-  END SUBROUTINE inr_src
+  END SUBROUTINE inner_src
 
 
-  SUBROUTINE inr_src_calc ( j, k, sxs_g, f0, fm, qo0, qom, q )
+  SUBROUTINE inner_src_calc ( j, k, sxs_g, f0, fm, qo0, qom, q )
 
 !-----------------------------------------------------------------------
 !
@@ -235,10 +251,10 @@ MODULE inner_module
 !_______________________________________________________________________
 !_______________________________________________________________________
 
-  END SUBROUTINE inr_src_calc
+  END SUBROUTINE inner_src_calc
 
 
-  SUBROUTINE inr_conv ( inno, iits )
+  SUBROUTINE inner_conv ( inno, iits, ng_per_thrd, nnstd_used, grp_act )
 
 !-----------------------------------------------------------------------
 !
@@ -246,40 +262,55 @@ MODULE inner_module
 !
 !-----------------------------------------------------------------------
 
-    INTEGER(i_knd), INTENT(IN) :: inno
+    INTEGER(i_knd), INTENT(IN) :: inno, ng_per_thrd, nnstd_used
 
     INTEGER(i_knd), DIMENSION(ng), INTENT(OUT) :: iits
+
+    INTEGER(i_knd), DIMENSION(ng), INTENT(IN) :: grp_act
 !_______________________________________________________________________
 !
 !   Local variables
 !_______________________________________________________________________
 
-    INTEGER(i_knd) :: g
+    INTEGER(i_knd) :: n, g
 
-    REAL(r_knd), DIMENSION(nx,ny,nz,ng) :: df
+    REAL(r_knd), DIMENSION(nx,ny,nz,ng_per_thrd) :: df
 !_______________________________________________________________________
 !
 !   Thread group loops for computing local difference (df) array.
-!   compute max for that group.
+!   compute max for that group. Need a barrier for the main threads.
 !_______________________________________________________________________
 
-  !$OMP PARALLEL DO SCHEDULE(STATIC,1) DEFAULT(SHARED) PRIVATE(g)
-    DO g = 1, ng
-      IF ( inrdone(g) ) CYCLE
+  !$OMP PARALLEL DO NUM_THREADS(nnstd_used) IF(nnstd_used>1)           &
+  !$OMP& SCHEDULE(STATIC,1) DEFAULT(SHARED) PRIVATE(n,g)               &
+  !$OMP& PROC_BIND(CLOSE)
+    DO n = 1, ng_per_thrd
+
+
+      g = grp_act(n)
+      IF ( g == 0 ) CYCLE
+
       iits(g) = inno
-      WHERE( ABS( flux0pi(:,:,:,g) ) > tolr )
-        df(:,:,:,g) = ABS( flux0(:,:,:,g)/flux0pi(:,:,:,g) - one )
-      ELSEWHERE
-        df(:,:,:,g) = ABS( flux0(:,:,:,g) - flux0pi(:,:,:,g) )
+
+      df(:,:,:,n) = one
+      WHERE( ABS( flux0pi(:,:,:,g) ) < tolr )
+        flux0pi(:,:,:,g) = one
+        df(:,:,:,n) = zero
       END WHERE
-      dfmxi(g) = MAXVAL( df(:,:,:,g) )
+      df(:,:,:,n) = ABS( flux0(:,:,:,g)/flux0pi(:,:,:,g) - df(:,:,:,n) )
+
+      dfmxi(g) = MAXVAL( df(:,:,:,n) )
+
     END DO
   !$OMP END PARALLEL DO
+  !$OMP BARRIER
 !_______________________________________________________________________
 !
 !   All procs then reduce dfmxi for all groups, determine which groups
 !   are converged and print requested info
 !_______________________________________________________________________
+
+  !$OMP MASTER
 
     CALL glmax ( dfmxi, ng, comm_snap )
     WHERE( dfmxi <= epsi ) inrdone = .TRUE.
@@ -289,6 +320,8 @@ MODULE inner_module
         WRITE( ounit, 221 ) g, iits(g), dfmxi(g)
       END DO
     END IF
+
+  !$OMP END MASTER
 !_______________________________________________________________________
 
     221 FORMAT( 4X, 'Group ', I3, 4X, ' Inner ', I5, 4X, ' Dfmxi ',    &
@@ -296,7 +329,7 @@ MODULE inner_module
 !_______________________________________________________________________
 !_______________________________________________________________________
 
-  END SUBROUTINE inr_conv
+  END SUBROUTINE inner_conv
 
 
 END MODULE inner_module

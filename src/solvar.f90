@@ -20,7 +20,7 @@ MODULE solvar_module
 
   USE data_module, ONLY: ng
 
-  USE control_module, ONLY: timedep
+  USE control_module, ONLY: timedep, angcpy
 
   IMPLICIT NONE
 
@@ -61,11 +61,14 @@ MODULE solvar_module
 ! flky(nx,ny+1,nz,ng)     - y-dir leakage array
 ! flkz(nx,ny,nz+1,ng)     - z-dir leakage array
 !
+! fmin(ng)       - dummy flux min
+! fmax(ng)       - dummy flux max
+!
 ! pop(ng)        - particle population spectrum
 !
 !_______________________________________________________________________
 
-  REAL(r_knd), ALLOCATABLE, DIMENSION(:) :: pop
+  REAL(r_knd), ALLOCATABLE, DIMENSION(:) :: fmin, fmax, pop
 
   REAL(r_knd), ALLOCATABLE, DIMENSION(:,:,:,:) :: flux0, flux0po,      &
     flux0pi, q2grp0, t_xs, a_xs, psii, psij, psik, jb_in, jb_out,      &
@@ -81,7 +84,7 @@ MODULE solvar_module
   CONTAINS
 
 
-  SUBROUTINE solvar_alloc ( ierr )
+  SUBROUTINE solvar_allocate ( ierr )
 
 !-----------------------------------------------------------------------
 !
@@ -92,15 +95,23 @@ MODULE solvar_module
     INTEGER(i_knd), INTENT(OUT) :: ierr
 !_______________________________________________________________________
 !
-!   Allocate ptr_in/out if needed. Provide an initial condition of zero
-!   This may be changed in the future if necessary.
+!   Allocate ptr_in/out if needed. If angcpy=1, only allocate for one
+!   copy and point the other pointer at it. If angcpy=2, allocate for
+!   two copies. Provide an initial condition of zero. This may be
+!   changed in the future if necessary.
 !_______________________________________________________________________
 
     ierr = 0
 
+    NULLIFY( ptr_in, ptr_out )
+
     IF ( timedep == 1 ) THEN
-      ALLOCATE( ptr_in(nang,nx,ny,nz,noct,ng),                         &
-        ptr_out(nang,nx,ny,nz,noct,ng), STAT=ierr )
+      IF ( angcpy == 1 ) THEN
+        ALLOCATE( ptr_in(nang,nx,ny,nz,noct,ng), STAT=ierr )
+      ELSE
+        ALLOCATE( ptr_in(nang,nx,ny,nz,noct,ng),                       &
+          ptr_out(nang,nx,ny,nz,noct,ng), STAT=ierr )
+      END IF
     ELSE
       ALLOCATE( ptr_in(0,0,0,0,0,0), ptr_out(0,0,0,0,0,0), STAT=ierr )
     END IF
@@ -108,7 +119,11 @@ MODULE solvar_module
 
     IF ( timedep == 1 ) THEN
       ptr_in = zero
-      ptr_out = zero
+      IF ( angcpy == 1 ) THEN
+        ptr_out => ptr_in
+      ELSE
+        ptr_out = zero
+      END IF
     END IF
 !_______________________________________________________________________
 !
@@ -207,20 +222,22 @@ MODULE solvar_module
     flkz = zero
 !_______________________________________________________________________
 !
-!   Particle population spectrum
+!   Flux extremes and particle population spectrum
 !_______________________________________________________________________
 
-    ALLOCATE( pop(ng), STAT=ierr )
+    ALLOCATE( fmin(ng), fmax(ng), pop(ng), STAT=ierr )
     IF ( ierr /= 0 ) RETURN
 
+    fmin = zero
+    fmax = zero
     pop = zero
 !_______________________________________________________________________
 !_______________________________________________________________________
 
-  END SUBROUTINE solvar_alloc
+  END SUBROUTINE solvar_allocate
 
 
-  SUBROUTINE solvar_dealloc
+  SUBROUTINE solvar_deallocate
 
 !-----------------------------------------------------------------------
 !
@@ -229,18 +246,19 @@ MODULE solvar_module
 !-----------------------------------------------------------------------
 !_______________________________________________________________________
 
-    DEALLOCATE( ptr_in, ptr_out )
+    DEALLOCATE( ptr_in )
+    IF ( angcpy==2 .OR. timedep==0 ) DEALLOCATE( ptr_out )
     DEALLOCATE( flux0, flux0po, flux0pi, fluxm )
     DEALLOCATE( q2grp0, q2grpm, qtot )
     DEALLOCATE( t_xs, a_xs, s_xs )
     DEALLOCATE( psii, psij, psik )
     DEALLOCATE( jb_in, jb_out, kb_in, kb_out )
     DEALLOCATE( flkx, flky, flkz )
-    DEALLOCATE( pop )
+    DEALLOCATE( fmin, fmax, pop )
 !_______________________________________________________________________
 !_______________________________________________________________________
 
-  END SUBROUTINE solvar_dealloc
+  END SUBROUTINE solvar_deallocate
 
 
 END MODULE solvar_module

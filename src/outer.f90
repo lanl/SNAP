@@ -15,24 +15,23 @@ MODULE outer_module
 
   USE geom_module, ONLY: nx, ny, nz
 
-  USE sn_module, ONLY: nmom, cmom, lma
+  USE sn_module, ONLY: nmom, cmom
 
-  USE data_module, ONLY: ng, mat, slgg, qi, nmat, src_opt
+  USE data_module, ONLY: ng, mat, slgg, qi, nmat
 
   USE solvar_module, ONLY: q2grp0, q2grpm, flux0, fluxm, flux0po
 
-  USE control_module, ONLY: iitm, timedep, inrdone, tolr, dfmxo, epsi, &
-    otrdone
+  USE control_module, ONLY: iitm, inrdone, tolr, dfmxo, epsi, otrdone
 
   USE inner_module, ONLY: inner
 
-  USE time_module, ONLY: totrsrc, tinners, tinrmisc, wtime
+  USE time_module, ONLY: totrsrc, tinners, wtime
 
-  USE plib_module, ONLY: glmax, comm_snap
+  USE plib_module, ONLY: nthreads, glmax, comm_snap
 
   USE expxs_module, ONLY: expxs_reg, expxs_slgg
 
-  USE thrd_comm_module, ONLY: assign_thrd_set, destroy_task_set
+  USE thrd_comm_module, ONLY: assign_thrd_set
 
   IMPLICIT NONE
 
@@ -44,7 +43,8 @@ MODULE outer_module
   CONTAINS
 
 
-  SUBROUTINE outer ( sum_iits )
+  SUBROUTINE outer ( iits, otno, t, do_grp, ng_per_thrd, nnstd_used,   &
+    grp_act )
 
 !-----------------------------------------------------------------------
 !
@@ -53,147 +53,157 @@ MODULE outer_module
 !
 !-----------------------------------------------------------------------
 
-    INTEGER(i_knd), INTENT(OUT) :: sum_iits
+    INTEGER(i_knd), INTENT(IN) :: otno, t
+
+    INTEGER(i_knd), INTENT(INOUT) :: ng_per_thrd, nnstd_used
+
+    INTEGER(i_knd), DIMENSION(ng), INTENT(OUT) :: iits
+
+    INTEGER(i_knd), DIMENSION(ng), INTENT(INOUT) :: do_grp
+
+    INTEGER(i_knd), DIMENSION(ng,nthreads), INTENT(INOUT) :: grp_act
 !_______________________________________________________________________
 !
 !   Local variables
 !_______________________________________________________________________
 
-    INTEGER(i_knd) :: inno
-
-    INTEGER(i_knd), DIMENSION(ng) :: iits
+    INTEGER(i_knd) :: inno, g, n
 
     REAL(r_knd) :: t1, t2, t3, t4
 !_______________________________________________________________________
 !
-!   Compute the outer source: sum of fixed + out-of-group sources
+!   Compute the outer source: sum of fixed + out-of-group sources.
+!   Each thread t will do a set of energy groups. Nested threads will
+!   work over local ny*nz span. In many instances, changing do_grp
+!   will not change grp_act, but the action better resembles production.
 !_______________________________________________________________________
+
+  !$OMP MASTER
 
     CALL wtime ( t1 )
 
-    CALL otr_src
+    inrdone = .FALSE.
+    iits = 0
 
+    DO g = 1, ng
+      do_grp(g) = ng - g + 1
+    END DO
+
+    CALL assign_thrd_set ( do_grp, ng, ng_per_thrd, ny*nz, nnstd_used, &
+      grp_act )
+
+  !$OMP END MASTER
+  !$OMP BARRIER
+
+    CALL outer_src ( ng_per_thrd, nnstd_used, grp_act(:,t) )
+  !$OMP BARRIER
+
+  !$OMP MASTER
     CALL wtime ( t2 )
     totrsrc = totrsrc + t2 - t1
+  !$OMP END MASTER
 !_______________________________________________________________________
 !
 !   Zero out the inner iterations group count. Save the flux for
-!   comparison.
+!   comparison. Initialize inrdone.
 !_______________________________________________________________________
 
-    iits = 0
-    flux0po = flux0
+    DO n = 1, ng_per_thrd
+      g = grp_act(n,t)
+      IF ( g == 0 ) EXIT
+      flux0po(:,:,:,g) = flux0(:,:,:,g)
+    END DO
 !_______________________________________________________________________
 !
 !   Start the inner iterations
 !_______________________________________________________________________
 
+  !$OMP MASTER
     CALL wtime ( t3 )
+  !$OMP END MASTER
 
-    inrdone = .FALSE.
+  !$OMP BARRIER
 
     inner_loop: DO inno = 1, iitm
 
-      CALL inner ( inno, iits )
+      CALL inner ( inno, iits, t, do_grp, ng_per_thrd, nnstd_used,     &
+        grp_act )
+  !$OMP BARRIER
 
       IF ( ALL( inrdone ) ) EXIT inner_loop
 
     END DO inner_loop
 
-    sum_iits = SUM( iits )
+  !$OMP MASTER
 
     CALL wtime ( t4 )
     tinners = tinners + t4 - t3
 !_______________________________________________________________________
 !
-!   Check outer convergence
+!   Check outer convergence. Apply nested threads to group sets.
 !_______________________________________________________________________
 
-    CALL otr_conv
+    do_grp = 1
+    CALL assign_thrd_set ( do_grp, ng, ng_per_thrd, 0, nnstd_used,     &
+      grp_act )
+
+  !$OMP END MASTER
+  !$OMP BARRIER
+
+    CALL outer_conv ( otno, ng_per_thrd, nnstd_used, grp_act(:,t) )
 !_______________________________________________________________________
 !_______________________________________________________________________
 
   END SUBROUTINE outer
 
 
-  SUBROUTINE otr_src
+  SUBROUTINE outer_src ( ng_per_thrd, nnstd_used, grp_act )
 
 !-----------------------------------------------------------------------
 !
 ! Loop over groups to compute each one's outer loop source.
 !
 !-----------------------------------------------------------------------
+
+    INTEGER(i_knd), INTENT(IN) :: ng_per_thrd, nnstd_used
+
+    INTEGER(i_knd), DIMENSION(ng), INTENT(IN) :: grp_act
 !_______________________________________________________________________
 !
 !   Local Variables
 !_______________________________________________________________________
 
-    INTEGER(i_knd) :: ng_per_thrd, nthrd_used, nnstd_used, g, t, n, k, j
-
-    INTEGER(i_knd), DIMENSION(ng) :: do_grp
-
-    INTEGER(i_knd), DIMENSION(:,:), POINTER :: grp_act
+    INTEGER(i_knd) :: n, g, k, j
 !_______________________________________________________________________
 !
-!   Use assign_grp_set subroutine to make group sets and apply them to
-!   the threads
+!   Loop over each set of groups. Use nested threads if available.
 !_______________________________________________________________________
-
-    NULLIFY( grp_act )
-
-    DO g = 1, ng
-      do_grp(g) = ng - g + 1
-    END DO
-
-    CALL assign_thrd_set ( do_grp, ng, ng_per_thrd, nthrd_used, ny*nz, &
-      nnstd_used, grp_act )
-!_______________________________________________________________________
-!
-!   Parallelize outer source calculation with threads over group loop.
-!   If nested threads are available, further parallelize over the k-j
-!   loops (via OpenMP 'collapse'). Each thread loops over ng_per_thrd
-!   groups and updates group sources according to grp_act.
-!_______________________________________________________________________
-
-  !$OMP PARALLEL DO NUM_THREADS(nthrd_used) IF(nthrd_used>1)           &
-  !$OMP& SCHEDULE(STATIC,1), DEFAULT(SHARED), PRIVATE(t,n,g,k,j)
-    DO t = 1, nthrd_used
 
   !$OMP PARALLEL NUM_THREADS(nnstd_used) IF(nnstd_used>1)              &
-  !$OMP& PRIVATE(n,g,k,j)
-      DO n = 1, ng_per_thrd
+  !$OMP& DEFAULT(SHARED) PRIVATE(n,g,k,j) PROC_BIND(CLOSE)
+    DO n = 1, ng_per_thrd
 
-        g = grp_act(n,t)
-        IF ( g == 0 ) EXIT
+      g = grp_act(n)
+      IF ( g == 0 ) EXIT
 
   !$OMP DO SCHEDULE(STATIC,1) COLLAPSE(2)
-        DO k = 1, nz
-        DO j = 1, ny
-          CALL otr_src_calc ( g, j, k, qi(:,j,k,g), slgg(:,:,:,g),     &
-            mat(:,j,k), flux0, fluxm, q2grp0(:,j,k,g),                 &
-            q2grpm(:,:,j,k,g) )
-        END DO
-        END DO
+      DO k = 1, nz
+      DO j = 1, ny
+        CALL outer_src_calc ( g, j, k, qi(:,j,k,g), slgg(:,:,:,g),     &
+          mat(:,j,k), q2grp0(:,j,k,g), q2grpm(:,:,j,k,g) )
+      END DO
+      END DO
   !$OMP END DO NOWAIT
 
-      END DO
-  !$OMP END PARALLEL
-
     END DO
-  !$OMP END PARALLEL DO
-!_______________________________________________________________________
-!
-!   Deallocate the grp_act pointer
-!_______________________________________________________________________
-
-    CALL destroy_task_set ( grp_act )
+  !$OMP END PARALLEL
 !_______________________________________________________________________
 !_______________________________________________________________________
 
-  END SUBROUTINE otr_src
+  END SUBROUTINE outer_src
 
 
-  SUBROUTINE otr_src_calc ( g, j, k, qi0, sxs_g, map, f0, fm, qo0, qom )
+  SUBROUTINE outer_src_calc ( g, j, k, qi0, sxs_g, map, qo0, qom )
 
 !-----------------------------------------------------------------------
 !
@@ -215,10 +225,6 @@ MODULE outer_module
     REAL(r_knd), DIMENSION(cmom-1,nx), INTENT(OUT) :: qom
 
     REAL(r_knd), DIMENSION(nmat,nmom,ng), INTENT(IN) :: sxs_g
-
-    REAL(r_knd), DIMENSION(nx,ny,nz,ng), INTENT(IN) :: f0
-
-    REAL(r_knd), DIMENSION(cmom-1,nx,ny,nz,ng), INTENT(IN) :: fm
 !_______________________________________________________________________
 !
 !   Local variables
@@ -252,7 +258,7 @@ MODULE outer_module
 
       CALL expxs_reg ( sxs_g(:,1,gp), map, cs0 )
 
-      qo0 = qo0 + cs0*f0(:,j,k,gp)
+      qo0 = qo0 + cs0*flux0(:,j,k,gp)
 !_______________________________________________________________________
 !
 !     Expand anisotropic cross sections to fine mesh for gp->g. Add
@@ -263,16 +269,16 @@ MODULE outer_module
 
       CALL expxs_slgg ( sxs_g(:,:,gp), map, csm )
 
-      qom = qom + csm*fm(:,:,j,k,gp)
+      qom = qom + csm*fluxm(:,:,j,k,gp)
 
     END DO
 !_______________________________________________________________________
 !_______________________________________________________________________
 
-  END SUBROUTINE otr_src_calc
+  END SUBROUTINE outer_src_calc
 
 
-  SUBROUTINE otr_conv
+  SUBROUTINE outer_conv ( otno, ng_per_thrd, nnstd_used, grp_act )
 
 !-----------------------------------------------------------------------
 !
@@ -280,38 +286,71 @@ MODULE outer_module
 ! data (flux0/flux0po).
 !
 !-----------------------------------------------------------------------
+
+    INTEGER(i_knd), INTENT(IN) :: otno, ng_per_thrd, nnstd_used
+
+    INTEGER(i_knd), DIMENSION(ng), INTENT(IN) :: grp_act
 !_______________________________________________________________________
 !
 !   Local variables
 !_______________________________________________________________________
 
-    INTEGER(i_knd) :: g
+    INTEGER(i_knd) :: n, g
 
-    REAL(r_knd), DIMENSION(nx,ny,nz,ng) :: df
+    REAL(r_knd) :: dft
+
+    REAL(r_knd), DIMENSION(nx,ny,nz,ng_per_thrd) :: df
 !_______________________________________________________________________
 !
 !   Thread to speed up computation of df by looping over groups. Rejoin
 !   threads and then determine max error.
 !_______________________________________________________________________
 
-  !$OMP PARALLEL DO SCHEDULE(STATIC,1) DEFAULT(SHARED) PRIVATE(g)
-    DO g = 1, ng
-      WHERE( ABS( flux0po(:,:,:,g) ) > tolr )
-        df(:,:,:,g) = ABS( flux0(:,:,:,g)/flux0po(:,:,:,g) - one )
-      ELSEWHERE
-        df(:,:,:,g) = ABS( flux0(:,:,:,g) - flux0po(:,:,:,g) )
+  !$OMP PARALLEL DO NUM_THREADS(nnstd_used) IF(nnstd_used>1)           &
+  !$OMP& SCHEDULE(STATIC,1) DEFAULT(SHARED) PRIVATE(n,g)               &
+  !$OMP& PROC_BIND(CLOSE)
+    DO n = 1, ng_per_thrd
+
+      g = grp_act(n)
+      IF ( g == 0 ) THEN
+        df(:,:,:,n) = -one
+        CYCLE
+      END IF
+
+      df(:,:,:,n) = one
+      WHERE( ABS( flux0po(:,:,:,g) ) < tolr )
+        flux0po(:,:,:,g) = one
+        df(:,:,:,n) = zero
       END WHERE
+      df(:,:,:,n) = ABS( flux0(:,:,:,g)/flux0po(:,:,:,g) - df(:,:,:,n) )
+
     END DO
   !$OMP END PARALLEL DO
 
-    dfmxo = MAXVAL( df )
+    dft = MAXVAL( df )
+
+  !$OMP MASTER
+    dfmxo = -HUGE( one )
+  !$OMP END MASTER
+  !$OMP BARRIER
+
+  !$OMP CRITICAL
+    dfmxo = MAX( dfmxo, dft )
+  !$OMP END CRITICAL
+  !$OMP BARRIER
+
+  !$OMP MASTER
+
     CALL glmax ( dfmxo, comm_snap )
 
-    IF ( dfmxo<=100.0_r_knd*epsi .AND. ALL( inrdone ) ) otrdone = .TRUE.
+    IF ( dfmxo<=100.0_r_knd*epsi .AND. ALL( inrdone ) .AND. otno/=1 )  &
+      otrdone = .TRUE.
+
+  !$OMP END MASTER
 !_______________________________________________________________________
 !_______________________________________________________________________
 
-  END SUBROUTINE otr_conv
+  END SUBROUTINE outer_conv
 
 
 END MODULE outer_module

@@ -22,8 +22,8 @@ MODULE thrd_comm_module
 
   PRIVATE
 
-  PUBLIC :: assign_thrd_set, destroy_task_set, no_op_lock_control,     &
-    sweep_recv_bdry, sweep_send_bdry
+  PUBLIC :: assign_thrd_set, no_op_lock_control, sweep_recv_bdry,      &
+    sweep_send_bdry
 
   SAVE
 !_______________________________________________________________________
@@ -39,14 +39,13 @@ MODULE thrd_comm_module
   CONTAINS
 
 
-  SUBROUTINE assign_thrd_set ( do_task, tlen, tasks_per_thrd,          &
-    thrd_set_size, nlen, nstd_set_size, task_act )
+  SUBROUTINE assign_thrd_set ( do_task, tlen, tasks_per_thrd, nlen,    &
+    nstd_set_size, task_act )
 
 !-----------------------------------------------------------------------
 !
 ! Set up thread sets and assign tasks (i.e., groups) to threads.
 !  tasks_per_thrd: number of tasks each thread will perform
-!  thrd_set_size:  number of threads that will be spawned
 !  nstd_set_size:  number of nested threads that will be spawned
 !  task_act: the array that tells each thread what to do
 !
@@ -54,25 +53,23 @@ MODULE thrd_comm_module
 
     INTEGER(i_knd), INTENT(IN) :: tlen, nlen
 
-    INTEGER(i_knd), INTENT(OUT) :: tasks_per_thrd, thrd_set_size,      &
-      nstd_set_size
+    INTEGER(i_knd), INTENT(OUT) :: tasks_per_thrd, nstd_set_size
 
     INTEGER(i_knd), DIMENSION(tlen), INTENT(INOUT) :: do_task
 
-    INTEGER(i_knd), DIMENSION(:,:), POINTER :: task_act
+    INTEGER(i_knd), DIMENSION(tlen,nthreads), INTENT(OUT) :: task_act
 !_______________________________________________________________________
 !
 !   Local variables
 !_______________________________________________________________________
 
-    INTEGER(i_knd) :: ntasks, n, t, next
+    INTEGER(i_knd) :: thrd_set_size, ntasks, n, t, next
 !_______________________________________________________________________
 !
 !   Initialize outgoing variables. Set thread set size and number of
 !   groups per set. Return if no tasks.
 !_______________________________________________________________________
 
-    thrd_set_size  = 0
     nstd_set_size  = 0
     tasks_per_thrd = 0
 
@@ -80,7 +77,6 @@ MODULE thrd_comm_module
     thrd_set_size = MIN( ntasks, nthreads )
 
     IF ( thrd_set_size == 0 ) THEN
-      ALLOCATE( task_act(0,0) )
       tasks_per_thrd = 0
       nstd_set_size  = 0
       RETURN
@@ -88,7 +84,6 @@ MODULE thrd_comm_module
 
     tasks_per_thrd = (ntasks-1)/thrd_set_size + 1
 
-    ALLOCATE( task_act(tasks_per_thrd,thrd_set_size) )
     task_act = 0
 !_______________________________________________________________________
 !
@@ -121,30 +116,7 @@ MODULE thrd_comm_module
   END SUBROUTINE assign_thrd_set
 
 
-  SUBROUTINE destroy_task_set ( task_act )
-
-!-----------------------------------------------------------------------
-!
-! Destroy the task_act array allocated in assign_thrd_set. Nullify and
-! deallocate the incoming pointer.
-!
-!-----------------------------------------------------------------------
-
-    INTEGER(i_knd), DIMENSION(:,:), POINTER :: task_act
-!_______________________________________________________________________
-!
-!   Local variables
-!_______________________________________________________________________
-!_______________________________________________________________________
-
-    DEALLOCATE( task_act )
-!_______________________________________________________________________
-!_______________________________________________________________________
-
-  END SUBROUTINE destroy_task_set
-
-
-  SUBROUTINE no_op_lock_control ( t, nthrd )
+  SUBROUTINE no_op_lock_control ( t )
 
 !-----------------------------------------------------------------------
 !
@@ -154,7 +126,7 @@ MODULE thrd_comm_module
 !
 !-----------------------------------------------------------------------
 
-    INTEGER(i_knd), INTENT(IN) :: t, nthrd
+    INTEGER(i_knd), INTENT(IN) :: t
 !_______________________________________________________________________
 !
 !   Local variables
@@ -178,7 +150,7 @@ MODULE thrd_comm_module
     CALL plock_omp ( 'set', t )
 
     nxt = t + 1
-    IF ( nxt > nthrd ) nxt = 1
+    IF ( nxt > nthreads ) nxt = 1
     CALL plock_omp ( 'unset', nxt )
 !_______________________________________________________________________
 !_______________________________________________________________________
@@ -186,8 +158,8 @@ MODULE thrd_comm_module
   END SUBROUTINE no_op_lock_control
 
 
-  SUBROUTINE sweep_recv_bdry ( g, jd, kd, iop, t, nthrd, reqs, szreq,  &
-    nc, nang, ichunk, ny, nz, jb_in, kb_in )
+  SUBROUTINE sweep_recv_bdry ( g, jd, kd, iop, t, reqs, szreq, nc,     &
+    nang, ichunk, ny, nz, jb_in, kb_in )
 
 !-----------------------------------------------------------------------
 !
@@ -195,8 +167,8 @@ MODULE thrd_comm_module
 !
 !-----------------------------------------------------------------------
 
-    INTEGER(i_knd), INTENT(IN) :: g, jd, kd, iop, t, nthrd, szreq, nc, &
-      nang, ichunk, ny, nz
+    INTEGER(i_knd), INTENT(IN) :: g, jd, kd, iop, t, szreq, nc, nang,  &
+      ichunk, ny, nz
 
     INTEGER(i_knd), DIMENSION(szreq), INTENT(INOUT) :: reqs
 
@@ -267,7 +239,7 @@ MODULE thrd_comm_module
 
     IF ( use_lock ) THEN
       nxt = t + 1
-      IF ( nxt > nthrd ) nxt = 1
+      IF ( nxt > nthreads ) nxt = 1
       CALL plock_omp ( 'unset', nxt )
     END IF
 !_______________________________________________________________________
@@ -276,8 +248,8 @@ MODULE thrd_comm_module
   END SUBROUTINE sweep_recv_bdry
 
 
-  SUBROUTINE sweep_send_bdry ( g, jd, kd, iop, t, nthrd, reqs, szreq,  &
-    nc, nang, ichunk, ny, nz, jb_out, kb_out )
+  SUBROUTINE sweep_send_bdry ( g, jd, kd, iop, t, reqs, szreq, nc,     &
+    nang, ichunk, ny, nz, jb_out, kb_out )
 
 !-----------------------------------------------------------------------
 !
@@ -285,8 +257,8 @@ MODULE thrd_comm_module
 !
 !-----------------------------------------------------------------------
 
-    INTEGER(i_knd), INTENT(IN) :: g, jd, kd, iop, t, nthrd, szreq, nc, &
-      nang, ichunk, ny, nz
+    INTEGER(i_knd), INTENT(IN) :: g, jd, kd, iop, t, szreq, nc, nang,  &
+      ichunk, ny, nz
 
     INTEGER(i_knd), DIMENSION(szreq), INTENT(INOUT) :: reqs
 
@@ -350,7 +322,7 @@ MODULE thrd_comm_module
 
     IF ( use_lock ) THEN
       nxt = t + 1
-      IF ( nxt > nthrd ) nxt = 1
+      IF ( nxt > nthreads ) nxt = 1
       CALL plock_omp ( 'unset', nxt )
     END IF
 !_______________________________________________________________________

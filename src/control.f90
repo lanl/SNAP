@@ -3,7 +3,8 @@
 ! MODULE: control_module
 !> @brief
 !> This module contains the variables that control SNAP's solver
-!> routines. This includes the time-dependent variables.
+!> routines. This includes the time-dependent variables. It also
+!> includes some KBA scheduling variables.
 !
 !-----------------------------------------------------------------------
 
@@ -28,6 +29,9 @@ MODULE control_module
 ! nsteps   - number of time steps to cover the ts -> tf range
 !
 ! swp_typ  - 0/1=standard order/mini-KBA sweep
+! cor_swp  - 0/1=no/yes concurrent octant mesh sweeps (corner starts)
+!
+! angcpy   - 1/2 copies of the time-edge angular flux
 !
 ! it_det   - 0/1=no/yes full iteration details
 ! soloutp  - 0/1=no/yes print single k-plane solution to output file
@@ -40,7 +44,8 @@ MODULE control_module
 !_______________________________________________________________________
 
   INTEGER(i_knd) :: iitm=5, oitm=100, timedep=0, nsteps=1, swp_typ=0,  &
-    it_det=0, soloutp=0, kplane=0, popout=0, fluxp=0, fixup=0
+    cor_swp=0, angcpy=1, it_det=0, soloutp=0, kplane=0, popout=0,      &
+    fluxp=0, fixup=1
 
   REAL(r_knd) :: epsi=1.0E-4_r_knd, tf=zero
 !_______________________________________________________________________
@@ -56,11 +61,21 @@ MODULE control_module
 !
 ! inrdone(ng)  - logical for inners being complete
 ! otrdone      - logical for outers being complete
+! update_ptr   - true/false update the ptr_out array
+!
+! ncor             - number of corners from which sweeps begin
+! last_oct         - last octant to be swept
+! corner_sch(2,4)  - corner scheduling control array
+! yzstg(ncor)      - KBA stage in yz plane per starting corner
 !_______________________________________________________________________
 
-  LOGICAL(l_knd) :: otrdone
+  LOGICAL(l_knd) :: otrdone, update_ptr
 
   LOGICAL(l_knd), ALLOCATABLE, DIMENSION(:) :: inrdone
+
+  INTEGER(i_knd) :: ncor, last_oct, corner_sch(2,4)
+
+  INTEGER(i_knd), ALLOCATABLE, DIMENSION(:) :: yzstg
 
   REAL(r_knd) :: dt, dfmxo
 
@@ -72,7 +87,7 @@ MODULE control_module
   CONTAINS
 
 
-  SUBROUTINE control_alloc ( ng, ierr )
+  SUBROUTINE control_allocate ( ng, ierr )
 
 !-----------------------------------------------------------------------
 !
@@ -86,20 +101,23 @@ MODULE control_module
 !_______________________________________________________________________
 
     ierr = 0
-    ALLOCATE( dfmxi(ng), inrdone(ng), STAT=ierr )
+    ALLOCATE( yzstg(ncor), dfmxi(ng), inrdone(ng), STAT=ierr )
     IF ( ierr /= 0 ) RETURN
+
+    yzstg = 0
 
     dfmxi = -one
     inrdone = .FALSE.
     dfmxo = -one
     otrdone = .FALSE.
+    update_ptr = .FALSE.
 !_______________________________________________________________________
 !_______________________________________________________________________
 
-  END SUBROUTINE control_alloc
+  END SUBROUTINE control_allocate
 
 
-  SUBROUTINE control_dealloc
+  SUBROUTINE control_deallocate
 
 !-----------------------------------------------------------------------
 !
@@ -108,11 +126,11 @@ MODULE control_module
 !-----------------------------------------------------------------------
 !_______________________________________________________________________
 
-    DEALLOCATE( dfmxi, inrdone )
+    DEALLOCATE( yzstg, dfmxi, inrdone )
 !_______________________________________________________________________
 !_______________________________________________________________________
 
-  END SUBROUTINE control_dealloc
+  END SUBROUTINE control_deallocate
 
 
 END MODULE control_module

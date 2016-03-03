@@ -1,13 +1,11 @@
  SNAP: SN (Discrete Ordinates) Application Proxy
- Version Number..  1.05 
- Version Date..  02-19-2015
- Ran on  2-19-2015 at time 13:50: 3
+ Version Number..  1.07 
+ Version Date..  03-03-2016
+ Ran on  3- 3-2016 at time 10:30:56
 
 ********************************************************************************
 
-          keyword Input Echo - Values from input or 
-
-default
+          keyword Input Echo - Values from input or default
 ********************************************************************************
 
   NML=invar
@@ -36,6 +34,8 @@ default
      tf=  1.0000E+00
      nsteps=   100
      swp_typ=  0
+     cor_swp=  0
+     angcpy=  2
      it_det=  0
      soloutp=  0
      kplane=    0
@@ -1079,20 +1079,20 @@ default
 
   Code Section                          Time (seconds)
  **************                        ****************
-    Parallel Setup                       1.1013E-03
-    Input                                4.3607E-04
-    Setup                                1.2504E-02
-    Solve                                2.7960E-01
-       Parameter Setup                   2.5877E-02
-       Outer Source                      2.8237E-02
-       Inner Iterations                  2.0235E-01
-          Inner Source                   6.3704E-02
-          Transport Sweeps               6.7758E-02
-          Inner Misc Ops                 7.0888E-02
-       Solution Misc Ops                 2.3140E-02
-    Output                               1.1110E-04
-  Total Execution time                   3.0264E-01
+    Parallel Setup                       1.5581E-03
+    Input                                2.3722E-02
+    Setup                                1.8740E-02
+    Solve                                3.6565E-01
+       Parameter Setup                   1.4040E-02
+       Outer Source                      3.1305E-02
+       Inner Iterations                  2.7459E-01
+          Inner Source                   6.3871E-02
+          Transport Sweeps               1.1523E-01
+          Inner Misc Ops                 9.5488E-02
+       Solution Misc Ops                 4.5711E-02
+    Output                               2.9302E-04
+  Total Execution time                   4.4899E-01
 
-  Grind Time (nanoseconds)         8.6941E+01
+  Grind Time (nanoseconds)         1.1370E+02
 
 ********************************************************************************

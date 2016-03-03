@@ -1,13 +1,11 @@
  SNAP: SN (Discrete Ordinates) Application Proxy
- Version Number..  1.05 
- Version Date..  02-19-2015
- Ran on  2-19-2015 at time 13:50:19
+ Version Number..  1.07 
+ Version Date..  03-03-2016
+ Ran on  3- 3-2016 at time 10:31:11
 
 ********************************************************************************
 
-          keyword Input Echo - Values from input or 
-
-default
+          keyword Input Echo - Values from input or default
 ********************************************************************************
 
   NML=invar
@@ -36,6 +34,8 @@ default
      tf=  1.0000E+00
      nsteps=    10
      swp_typ=  0
+     cor_swp=  0
+     angcpy=  1
      it_det=  1
      soloutp=  0
      kplane=    0
@@ -136,7 +136,7 @@ default
     .FALSE. nested threading
       nnested =    1
 
-    Parallel Computational Efficiency = 0.8696
+    Parallel Computational Efficiency = 0.7547
 
 ********************************************************************************
 
@@ -271,19 +271,32 @@ default
     Group   9     Inner     2     Dfmxi  1.0610E-05
     Group  10     Inner     3     Dfmxi  1.9318E-06
     3    Dfmxo= 5.8187E-03    No. Inners=   21
+ ********************
+  Outer   4
+    Group   1     Inner     1     Dfmxi  4.7395E-05
+    Group   2     Inner     1     Dfmxi  2.2734E-05
+    Group   3     Inner     1     Dfmxi  1.6056E-05
+    Group   4     Inner     1     Dfmxi  1.3392E-05
+    Group   5     Inner     1     Dfmxi  1.2381E-05
+    Group   6     Inner     1     Dfmxi  1.2422E-05
+    Group   7     Inner     1     Dfmxi  1.3559E-05
+    Group   8     Inner     1     Dfmxi  1.6573E-05
+    Group   9     Inner     1     Dfmxi  2.4490E-05
+    Group  10     Inner     1     Dfmxi  5.4492E-05
+    4    Dfmxo= 5.4492E-05    No. Inners=   10
 
-  No. Outers=   3    No. Inners=   93
+  No. Outers=   4    No. Inners=  103
 
 ********************************************************************************
 
           MMS Verification
 ********************************************************************************
 
-    Manufactured/Computed Solutions Max Diff= 1.365272E-02
+    Manufactured/Computed Solutions Max Diff= 1.359897E-02
 
-    Manufactured/Computed Solutions Min Diff= 7.469774E-03
+    Manufactured/Computed Solutions Min Diff= 7.457486E-03
 
-    Manufactured/Computed Solutions Avg Diff= 1.231338E-02
+    Manufactured/Computed Solutions Avg Diff= 1.231028E-02
 
 ********************************************************************************
 
@@ -292,20 +305,20 @@ default
 
   Code Section                          Time (seconds)
  **************                        ****************
-    Parallel Setup                       1.1849E-03
-    Input                                5.6005E-04
-    Setup                                3.6354E-02
-    Solve                                1.9544E-02
-       Parameter Setup                   1.0190E-03
-       Outer Source                      5.8103E-04
-       Inner Iterations                  1.7659E-02
-          Inner Source                   4.1914E-04
-          Transport Sweeps               1.5219E-02
-          Inner Misc Ops                 2.0208E-03
-       Solution Misc Ops                 2.8515E-04
-    Output                               3.3813E-01
-  Total Execution time                   4.1002E-01
+    Parallel Setup                       1.5872E-03
+    Input                                2.1729E-02
+    Setup                                6.4970E-02
+    Solve                                2.3939E-02
+       Parameter Setup                   1.0612E-03
+       Outer Source                      7.9513E-04
+       Inner Iterations                  2.1294E-02
+          Inner Source                   3.7003E-04
+          Transport Sweeps               1.7221E-02
+          Inner Misc Ops                 3.7029E-03
+       Solution Misc Ops                 7.8893E-04
+    Output                               4.6383E-01
+  Total Execution time                   6.6126E-01
 
-  Grind Time (nanoseconds)         4.2756E+00
+  Grind Time (nanoseconds)         4.7285E+00
 
 ********************************************************************************

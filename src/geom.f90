@@ -10,7 +10,7 @@
 
 MODULE geom_module
 
-  USE global_module, ONLY: i_knd, r_knd, zero, one, two, l_knd
+  USE global_module, ONLY: i_knd, r_knd, zero, one, two
 
   IMPLICIT NONE
 
@@ -98,7 +98,7 @@ MODULE geom_module
   CONTAINS
 
 
-  SUBROUTINE geom_alloc ( nang, ng, swp_typ, ichunk, ierr )
+  SUBROUTINE geom_allocate ( nang, ng, swp_typ, ichunk, ierr )
 
 !-----------------------------------------------------------------------
 !
@@ -193,10 +193,10 @@ MODULE geom_module
 !_______________________________________________________________________
 !_______________________________________________________________________
 
-  END SUBROUTINE geom_alloc
+  END SUBROUTINE geom_allocate
 
 
-  SUBROUTINE geom_dealloc ( swp_typ )
+  SUBROUTINE geom_deallocate ( swp_typ )
 
 !-----------------------------------------------------------------------
 !
@@ -231,10 +231,10 @@ MODULE geom_module
 !_______________________________________________________________________
 !_______________________________________________________________________
 
-  END SUBROUTINE geom_dealloc
+  END SUBROUTINE geom_deallocate
 
 
-  SUBROUTINE param_calc ( nang, ichunk, mu, eta, xi, cs, vd, d )
+  SUBROUTINE geom_param_calc ( nang, ichunk, mu, eta, xi, cs, vd, d )
 
 !-----------------------------------------------------------------------
 !
@@ -295,7 +295,7 @@ MODULE geom_module
 !_______________________________________________________________________
 !_______________________________________________________________________
 
-  END SUBROUTINE param_calc
+  END SUBROUTINE geom_param_calc
 
 
 END MODULE geom_module

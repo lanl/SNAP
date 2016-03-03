@@ -16,11 +16,11 @@ MODULE dealloc_module
 
   USE mms_module, ONLY: mms_deallocate
 
-  USE geom_module, ONLY: geom_dealloc
+  USE geom_module, ONLY: geom_deallocate
 
-  USE solvar_module, ONLY: solvar_dealloc
+  USE solvar_module, ONLY: solvar_deallocate
 
-  USE control_module, ONLY: control_dealloc
+  USE control_module, ONLY: control_deallocate
 
   IMPLICIT NONE
 
@@ -46,7 +46,9 @@ MODULE dealloc_module
 
     IF ( flg > 1 ) CALL data_deallocate
 
-    IF ( flg > 2 ) CALL mms_deallocate
+    IF ( flg > 2 ) CALL control_deallocate
+
+    IF ( flg > 3 ) CALL mms_deallocate
 !_______________________________________________________________________
 !_______________________________________________________________________
 
@@ -65,11 +67,9 @@ MODULE dealloc_module
     INTEGER(i_knd), INTENT(IN) :: swp_typ, flg
 !_______________________________________________________________________
 
-    CALL geom_dealloc ( swp_typ )
+    CALL geom_deallocate ( swp_typ )
 
-    IF ( flg > 1 ) CALL solvar_dealloc
-
-    IF ( flg > 2 ) CALL control_dealloc
+    IF ( flg > 1 ) CALL solvar_deallocate
 !_______________________________________________________________________
 !_______________________________________________________________________
 

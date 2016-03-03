@@ -16,7 +16,7 @@ MODULE dim1_sweep_module
 
   USE data_module, ONLY: src_opt, qim
 
-  USE control_module, ONLY: fixup, tolr
+  USE control_module, ONLY: fixup, tolr, last_oct, update_ptr
 
   USE plib_module, ONLY: ichunk
 
@@ -137,8 +137,8 @@ MODULE dim1_sweep_module
         psi = pc*dinv(:,i)
 
         psii = two*psi - psii
-        IF ( vdelt /= zero ) ptr_out(:,i,1,1) = two*psi -              &
-          ptr_in(:,i,1,1)
+        IF ( vdelt/=zero .AND. update_ptr )                            &
+          ptr_out(:,i,1,1) = two*psi - ptr_in(:,i,1,1)
 
       ELSE
 !_______________________________________________________________________
@@ -176,12 +176,15 @@ MODULE dim1_sweep_module
           pc = psi + half*pc
 
           den = t_xs(i) + mu*hi*hv(:,1) + vdelt*hv(:,2)
-          
-          WHERE( den > tolr )
-            pc = pc/den
-          ELSEWHERE
+
+          WHERE( pc <= zero ) den = zero
+
+          WHERE( den < tolr )
             pc = zero
+            den = one
           END WHERE
+
+          pc = pc / den
 
         END DO fixup_loop
 !_______________________________________________________________________
@@ -192,7 +195,8 @@ MODULE dim1_sweep_module
         psi = pc
 
         psii = fxhv(:,1) * hv(:,1)
-        IF ( vdelt /= zero ) ptr_out(:,i,1,1) = fxhv(:,2) * hv(:,2)
+        IF ( vdelt/=zero .AND. update_ptr )                            &
+          ptr_out(:,i,1,1) = fxhv(:,2) * hv(:,2)
 
       END IF
 !_______________________________________________________________________
@@ -218,7 +222,7 @@ MODULE dim1_sweep_module
 !     Calculate min and max scalar fluxes (not used elsewhere currently)
 !_______________________________________________________________________
 
-      IF ( id == 2 ) THEN
+      IF ( oct == last_oct ) THEN
         fmin = MIN( fmin, flux0(i) )
         fmax = MAX( fmax, flux0(i) )
       END IF

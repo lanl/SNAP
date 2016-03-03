@@ -17,14 +17,14 @@ Compilation
 
 SNAP has been written to the Fortran 90/95 standard primarily. The retrieval of command line arguments, which contain file names, is handled with a standard Fortran 2003 intrinsic subroutine. It has been successfully built with, but not necessarily limited to, gfortran and ifort. Moreover, the code has been built with the profiling tool [Byfl](https://github.com/losalamos/byfl). The accompanying Makefile provides sample build options for gfortran and ifort. The build system depends on the availability of MPI. Both example builds assume the usage of mpif90 from an MPI installation. Builds may be selected by switching the COMPILER option in the Makefile or choosing one with the "make COMPILER=[]" command. The builds also assume the availability of OpenMP. Compiling SNAP without MPI or OpenMP will require modification to the source code to remove related subroutine calls and directives.
 
-MPI implementations typically suggest using a "wrapper" compiler to compile the code. SNAP has been built and tested with OpenMPI. OpenMPI allows one to set the underlying Fortran compiler with the environment variable OMPI_FC, where the variable is set to the (path and) compiler of choice, e.g., ifort, gfortran, etc.
+MPI implementations typically suggest using a "wrapper" compiler to compile the code. SNAP has been built and tested with OpenMPI and MPICH. OpenMPI allows one to set the underlying Fortran compiler with the environment variable OMPI_FC, where the variable is set to the (path and) compiler of choice, e.g., ifort, gfortran, etc.
 
-The makefile currently uses:
+The makefile currently is set up for several build options using different MPI wrappers and Fortran compilers. One example uses:
 
     FORTRAN = mpif90
     COMPILER = ifort
 
-and all testing has been performed with
+and testing has been performed with
 
     OMPI_FC = [path]/ifort
 
@@ -51,15 +51,19 @@ on the command line. The unoptimized, debugging version of SNAP features bounds 
 
 The values for these compilation variables have been modified for various Fortran compilers and the Makefile provides details of what has been used previously. These lines are commented out for clarity at this time and to ensure that changes to the build system are made carefully before attempting to rebuild with a different compiler.
 
-The user may alternatively build without MPI and/or OpenMP. Preprocessing definitions in the Makefile have been added as 'MPI' and 'OPENMP', respectively. The default sets both of these to yes. To build a completely serialized version of SNAP, type
-
-    make MPI=no OPENMP=no
-
 The SNAP directory can be cleaned up of its module and object files if the user desires with:
 
     make clean
 
 This removes all the `*.mod` and `*.o` files, as well as `*.bc` files from Byfl builds. Moreover, it will enforce complete recompilation of all files upon the next instance of `make` or `make OPT=no`. Currently, there is no separate directory for the compilation files of separate optimized and unoptimized builds. The user must do a `make clean` before building the code if the previous build used the opposite command.
+
+Pre-processing has been added for the inclusion/exclusion of MPI and OpenMP. To build without MPI, OpenMP, or both, use the command lines, respectively:
+
+    make MPI=no
+    make OPENMP=no
+    MAKE MPI=no OPENMP=no
+
+Default make settings will build with MPI and OpenMP included. These options are further available with unpotimized settings, OPT=no.
 
 Lastly, a line count report is generated with:
 
@@ -70,15 +74,17 @@ The line count report excludes blank lines and comments. It counts the number of
 Usage
 -----
 
-Because SNAP currently requires building with MPI, to execute SNAP, use the following command:
+When SNAP is built with MPI, to execute SNAP, use the following command:
 
-    mpirun -np [#] [path]/snap [infile] [outfile]
+    mpirun -n [#] [path]/snap [infile] [outfile]
 
 This command will automatically run with the number of threads specified by the input file, which is used to set the number of OpenMP threads, overwriting any environment variable to set the number of threads. Testing has shown that to ensure proper concurrency of work, the above command can be modified to
 
     mpirun -cpus-per-proc [#threads] -np [#procs] [path]/snap [infile] [outfile]
 
 The command line is read for the input/output file names. If one of the names is missing, the code will not execute. Moreover, the output file overwrites any pre-existing files of the same name.
+
+The specific command to invoke a run with MPI and the corresponding options may be dependent on the specific machine used to execute. Most notably, the "aprun" command is used on Cray systems.
 
 Sample Input
 ------------
@@ -377,11 +383,6 @@ Additionally, redistribution and use in source and binary forms, with or without
 
 THIS SOFTWARE IS PROVIDED BY LOS ALAMOS NATIONAL SECURITY, LLC AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL LOS ALAMOS NATIONAL SECURITY, LLC OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-Snap-C Attribution
-------------------
-
-SNAP-C has been translated from the original FORTRAN into C by Intel Corporation and contributed back to the public community. Its functionality and results are identical to the original FORTRAN version.
-
 
 Classification
 --------------
@@ -392,15 +393,18 @@ Authors
 -------
 
 Joe Zerr, rzerr _ at _ lanl.gov
+
 Randal Baker, rsb _ at _ lanl.gov
 
-Additional Contact
-------------------
+Additional Contacts
+-------------------
 
-Al McPherson, mcpherson _ at _ lanl.gov
+Mike Lang, mlang _ at _ lanl.gov
+
+Josip Loncaric, josip _ at _ lanl.gov
 
 Last Modification to this Readme
 --------------------------------
     
-02/20/2015
+03/03/2016
 

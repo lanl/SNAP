@@ -16,13 +16,14 @@ MODULE setup_module
     ny_gl, nz_gl, jlb, jub, klb, kub, nc, jdim, kdim
 
   USE sn_module, ONLY: nang, mu, eta, xi, w, nmom, noct, sn_allocate,  &
-    expcoeff
+    sn_expcoeff
 
   USE data_module, ONLY: ng, v, mat_opt, mat, src_opt, scatp, qi, nmat,&
     sigt, siga, sigs, slgg, data_allocate
 
   USE control_module, ONLY: epsi, iitm, oitm, timedep, tf, nsteps, dt, &
-    swp_typ, it_det, fluxp, fixup, soloutp, kplane, popout
+    swp_typ, it_det, fluxp, fixup, soloutp, kplane, popout, ncor,      &
+    last_oct, corner_sch, cor_swp, yzstg, control_allocate
 
   USE mms_module, ONLY: mms_setup
 
@@ -59,8 +60,8 @@ MODULE setup_module
 
     CHARACTER(LEN=64) :: error
 
-    INTEGER(i_knd) :: flg, ierr, mis, mie, mjs, mje, mks, mke, qis,    &
-      qie, qjs, qje, qks, qke
+    INTEGER(i_knd) :: flg, ierr, i, idle, hnpy, hnpz, mgpt, stgs, mis, &
+      mie, mjs, mje, mks, mke, qis, qie, qjs, qje, qks, qke
 
     REAL(r_knd) :: t1, t2
 !_______________________________________________________________________
@@ -84,16 +85,6 @@ MODULE setup_module
     kub = (zproc+1) * nz
 
     nc = nx/ichunk
-
-    jdim = MIN( ndimen, 2 )
-    kdim = MAX( ndimen-1, 1 )
-!_______________________________________________________________________
-!
-!   Compute PCE
-!_______________________________________________________________________
-
-    pce = one / ( one + ( nthreads*(two*npey+npez-3.0_r_knd) ) /       &
-                        ( 4.0_r_knd*nc*ng ) )
 !_______________________________________________________________________
 !
 !   Allocate needed arrays
@@ -106,10 +97,84 @@ MODULE setup_module
     END IF
 !_______________________________________________________________________
 !
+!   Set up the corner schedule for 3-D problems. Choose the order that
+!   minimizes the number of stages based on npey and npez.
+!_______________________________________________________________________
+
+    jdim = MIN( ndimen, 2 )
+    kdim = MAX( ndimen-1, 1 )
+    ncor = jdim*kdim
+
+    corner_sch = 0
+    IF ( ndimen == 3 ) THEN
+      IF ( npey <= npez ) THEN
+        last_oct = 8
+        corner_sch(:,1) = (/ 1, 1 /)
+        corner_sch(:,2) = (/ 2, 1 /)
+        corner_sch(:,3) = (/ 2, 2 /)
+        corner_sch(:,4) = (/ 1, 2 /)
+      ELSE
+        last_oct = 4
+        corner_sch(:,1) = (/ 1, 1 /)
+        corner_sch(:,2) = (/ 1, 2 /)
+        corner_sch(:,3) = (/ 2, 2 /)
+        corner_sch(:,4) = (/ 2, 1 /)
+      END IF
+    ELSE
+      last_oct = 2**ndimen
+      corner_sch(:,1) = (/ 1, 1 /)
+      corner_sch(:,2) = (/ 2, 1 /)
+    END IF
+!_______________________________________________________________________
+!
+!   Set up the concurrent octant mesh sweeps control information.
+!   Compute an array that determines each KBA stage's relative position
+!   in the full sweep, yzstg.
+!_______________________________________________________________________
+
+    IF ( cor_swp == 1 ) THEN
+      DO i = 1, ncor
+        IF ( i==1 .OR. i==3 ) THEN
+          yzstg(i) = npey - yproc
+        ELSE
+          yzstg(i) = yproc + 1
+        END IF
+        IF ( i <= 2 ) THEN
+          yzstg(i) = yzstg(i) + npez - zproc - 1
+        ELSE
+          yzstg(i) = yzstg(i) + zproc
+        END IF
+      END DO
+    END IF
+!_______________________________________________________________________
+!
+!   Compute PCE. The corner sweeps PCE is a guess as to the best-case
+!   scenario: effectively that additional corner starts a dimension
+!   compared to a single corner start.
+!_______________________________________________________________________
+
+    IF ( cor_swp == 0 ) THEN
+      IF ( npey <= npez ) THEN
+        idle = 3*(npey-1) + 2*(npez-1)
+      ELSE
+        idle = 2*(npey-1) + 3*(npez-1)
+      END IF
+    ELSE
+      hnpy = CEILING( REAL( npey, r_knd ) / two )
+      hnpz = CEILING( REAL( npez, r_knd ) / two )
+      idle = (ncor/2) * (2*(hnpy-1) + hnpz-1)
+    END IF
+
+    mgpt = CEILING( REAL( ng, r_knd ) / REAL( nthreads, r_knd ) )
+    stgs = nc*noct*mgpt + idle
+
+    pce = REAL( nc*noct*ng, r_knd ) / REAL( nthreads*stgs, r_knd )
+!_______________________________________________________________________
+!
 !   Progress through setups. _delta sets cell and step sizes, _vel sets
 !   velocity array, _angle sets the ordinates/weights, _mat sets the
 !   material identifiers, _src sets fixed source, _data sets the
-!   mock cross section arrays, and expcoeff sets up the scattering
+!   mock cross section arrays, and sn_expcoeff sets up the scattering
 !   expansion basis function array.
 !_______________________________________________________________________
 
@@ -123,12 +188,12 @@ MODULE setup_module
 
     CALL setup_data
 
-    CALL expcoeff ( ndimen )
+    CALL sn_expcoeff ( ndimen )
 
     CALL setup_src ( qis, qie, qjs, qje, qks, qke, ierr, error )
     IF ( ierr /= 0 ) THEN
       CALL print_error ( ounit, error )
-      CALL stop_run ( 1, 2, 0, 0 )
+      CALL stop_run ( 1, 3, 0, 0 )
     END IF
 !_______________________________________________________________________
 !
@@ -145,7 +210,7 @@ MODULE setup_module
     CALL glmax ( ierr, comm_snap )
     IF ( ierr /= 0 ) THEN
       CALL print_error ( ounit, error )
-      CALL stop_run ( 1, 3, 0, 0 )
+      CALL stop_run ( 1, 4, 0, 0 )
     END IF
 
     CALL wtime ( t2 )
@@ -187,6 +252,16 @@ MODULE setup_module
       error = '***ERROR: SETUP_ALLOC: Allocation error in DATA_ALLOCATE'
       RETURN
     END IF
+
+    CALL control_allocate ( ng, ierr )
+    CALL glmax ( ierr, comm_snap )
+    IF ( ierr /= 0 ) THEN
+      flg = 2
+      error = '***ERROR: CONTROL_ALLOC: Allocation error of control ' // &
+              'arrays'
+      RETURN
+    END IF
+
 !_______________________________________________________________________
 !_______________________________________________________________________
 

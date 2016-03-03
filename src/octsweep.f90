@@ -10,18 +10,19 @@
 
 MODULE octsweep_module
 
-  USE global_module, ONLY: i_knd, r_knd, zero
+  USE global_module, ONLY: i_knd
 
   USE geom_module, ONLY: nc, ndimen, dinv, nx, ny, nz
 
-  USE sn_module, ONLY: ec, nang, wmu, weta, wxi, cmom
+  USE sn_module, ONLY: ec, nang, wmu, weta, wxi, noct
 
   USE data_module, ONLY: vdelt, ng
 
   USE control_module, ONLY: timedep, swp_typ
 
   USE solvar_module, ONLY: psii, qtot, ptr_in, ptr_out, psij, psik,    &
-    flux0, fluxm, jb_in, jb_out, kb_in, kb_out, flkx, flky, flkz, t_xs
+    flux0, fluxm, jb_in, jb_out, kb_in, kb_out, flkx, flky, flkz, t_xs,&
+    fmin, fmax
 
   USE thrd_comm_module, ONLY: no_op_lock_control
 
@@ -39,8 +40,7 @@ MODULE octsweep_module
   CONTAINS
 
 
-  SUBROUTINE octsweep ( g, jd, kd, iop, t, nthrd_used, reqs, szreq,    &
-    fmin, fmax )
+  SUBROUTINE octsweep ( g, jd, kd, t, reqs, szreq )
 
 !-----------------------------------------------------------------------
 !
@@ -49,86 +49,108 @@ MODULE octsweep_module
 !
 !-----------------------------------------------------------------------
 
-    INTEGER(i_knd), INTENT(IN) :: g, jd, kd, iop, t, nthrd_used, szreq
+    INTEGER(i_knd), INTENT(IN) :: g, jd, kd, t, szreq
 
     INTEGER(i_knd), DIMENSION(szreq), INTENT(INOUT) :: reqs
-
-    REAL(r_knd), DIMENSION(ng), INTENT(INOUT) :: fmin, fmax
 !_______________________________________________________________________
 !
 !   Local variables
 !_______________________________________________________________________
 
-    INTEGER(i_knd) :: id, oct, ich, d1, d2, d3, d4, i1, i2
+    INTEGER(i_knd) :: iop, d1, d2, d3, d4, d5, d6, id, oct, ich
 !_______________________________________________________________________
 !
 !   If g=0, this thread has no work to do, but it cannot exit sweeps
 !   immediately, because it must properly set it's own lock and unset
-!   the subsequent thread's lock. Call for both recv ops and send ops.
+!   the subsequent thread's lock. Call for no-op controls. Note that
+!   this is a nested threaded region, so master refers to the nested
+!   threads. All main level threads will do this.
 !_______________________________________________________________________
 
     IF ( g == 0 ) THEN
-      CALL no_op_lock_control ( t, nthrd_used )
-      CALL no_op_lock_control ( t, nthrd_used )
+  !$OMP MASTER
+      DO iop = 1, 2*nc
+        CALL no_op_lock_control ( t )
+        CALL no_op_lock_control ( t )
+      END DO
+  !$OMP END MASTER
+  !$OMP BARRIER
       RETURN
     END IF
 !_______________________________________________________________________
 !
-!   Determine octant and chunk index.
+!   Set ptr_in and ptr_out dimensions dependent on timedep because they
+!   are not allocated if static problem.
 !_______________________________________________________________________
 
-    id = 1 + (iop-1)/nc
-    oct = id + 2*(jd - 1) + 4*(kd - 1)
-
-    IF ( id == 1 ) THEN
-      ich = nc - iop + 1
-    ELSE
-      ich = iop - nc
-    END IF
-!_______________________________________________________________________
-!
-!   Send ptr_in and ptr_out dimensions dependent on timedep because they
-!   are not allocated if static problem
-!_______________________________________________________________________
-
-    d1 = 0; d2 = 0; d3 = 0; d4 = 0
-    i1 = 0; i2 = 0
+    d1 = 0; d2 = 0; d3 = 0; d4 = 0; d5 = 0; d6 = 0
     IF ( timedep == 1 ) THEN
-      d1 = nang; d2 = nx; d3 = ny; d4 = nz
-      i1 = oct; i2 = g
+      d1 = nang; d2 = nx; d3 = ny; d4 = nz; d5 = noct; d6 = g
     END IF
 !_______________________________________________________________________
 !
-!   Call for the actual sweeper. Ensure proper size/bounds of time-dep
-!   arrays is given to avoid errors.
+!   For swp_typ=0 order, set the iop here and call for the sweep of that
+!   chunk. Loop contains twice the number of chunks: half for negative
+!   x-dir sweep, half for positive x-dir sweep.
 !_______________________________________________________________________
 
-    IF ( ndimen == 1 ) THEN
+    IF ( swp_typ == 0 ) THEN
 
-      CALL dim1_sweep ( id, d1, d2, d3, d4, oct, g, psii(:,1,1,g),     &
-        qtot(:,:,1,1,ich,g), ec(:,:,oct), vdelt(g),                    &
-        ptr_in(:,:,:,:,i1,i2), ptr_out(:,:,:,:,i1,i2),                 &
-        dinv(:,:,1,1,ich,g), flux0(:,1,1,g), fluxm(:,:,1,1,g), wmu,    &
-        flkx(:,1,1,g), t_xs(:,1,1,g), fmin(g), fmax(g) )
+      iop_loop: DO iop = 1, 2*nc
+!_______________________________________________________________________
+!
+!       Determine octant and chunk index.
+!_______________________________________________________________________
 
-    ELSE IF ( swp_typ == 0 ) THEN
+        id = 1 + (iop-1)/nc
+        oct = id + 2*(jd - 1) + 4*(kd - 1)
 
-      CALL dim3_sweep ( ich, id, d1, d2, d3, d4, jd, kd, oct, g, iop,  &
-        t, nthrd_used, reqs, szreq, psii(:,:,:,g), psij(:,:,:,g),      &
-        psik(:,:,:,g), qtot(:,:,:,:,ich,g), ec(:,:,oct), vdelt(g),     &
-        ptr_in(:,:,:,:,i1,i2), ptr_out(:,:,:,:,i1,i2),                 &
-        dinv(:,:,:,:,ich,g), flux0(:,:,:,g), fluxm(:,:,:,:,g),         &
-        jb_in(:,:,:,g), jb_out(:,:,:,g), kb_in(:,:,:,g),               &
-        kb_out(:,:,:,g), wmu, weta, wxi, flkx(:,:,:,g), flky(:,:,:,g), &
-        flkz(:,:,:,g), t_xs(:,:,:,g), fmin(g), fmax(g) )
+        IF ( id == 1 ) THEN
+          ich = nc - iop + 1
+        ELSE
+          ich = iop - nc
+        END IF
+
+        IF ( timedep == 1 ) d5 = oct
+!_______________________________________________________________________
+!
+!       Call 1-D or multi-D sweeper.
+!_______________________________________________________________________
+
+        IF ( ndimen == 1 ) THEN
+
+          CALL dim1_sweep ( id, d1, d2, d3, d4, oct, g, psii(:,1,1,g), &
+            qtot(:,:,1,1,ich,g), ec(:,:,oct), vdelt(g),                &
+            ptr_in(:,:,:,:,d5,d6), ptr_out(:,:,:,:,d5,d6),             &
+            dinv(:,:,1,1,ich,g), flux0(:,1,1,g), fluxm(:,:,1,1,g), wmu,&
+            flkx(:,1,1,g), t_xs(:,1,1,g), fmin(g), fmax(g) )
+
+        ELSE
+
+          CALL dim3_sweep ( ich, id, d1, d2, d3, d4, jd, kd, oct, g, t,&
+            iop, reqs, szreq, psii(:,:,:,g), psij(:,:,:,g),            &
+            psik(:,:,:,g), qtot(:,:,:,:,ich,g), ec(:,:,oct), vdelt(g), &
+            ptr_in(:,:,:,:,d5,d6), ptr_out(:,:,:,:,d5,d6),             &
+            dinv(:,:,:,:,ich,g), flux0(:,:,:,g), fluxm(:,:,:,:,g),     &
+            jb_in(:,:,:,g), jb_out(:,:,:,g), kb_in(:,:,:,g),           &
+            kb_out(:,:,:,g), wmu, weta, wxi, flkx(:,:,:,g),            &
+            flky(:,:,:,g), flkz(:,:,:,g), t_xs(:,:,:,g), fmin(g),      &
+            fmax(g) )
+
+        END IF
+
+      END DO iop_loop
+!_______________________________________________________________________
+!
+!   Use the mini-kba swp_typ=1 sweeper that self-contains iop loop.
+!_______________________________________________________________________
 
     ELSE
 
-      CALL mkba_sweep ( ich, id, d1, d2, d3, d4, jd, kd, oct, g, iop,  &
-        t, nthrd_used, reqs, szreq, psii(:,:,:,g), psij(:,:,:,g),      &
-        psik(:,:,:,g), qtot(:,:,:,:,ich,g), ec(:,:,oct), vdelt(g),     &
-        ptr_in(:,:,:,:,i1,i2), ptr_out(:,:,:,:,i1,i2),                 &
-        dinv(:,:,:,:,ich,g), flux0(:,:,:,g), fluxm(:,:,:,:,g),         &
+      CALL mkba_sweep ( d1, d2, d3, d4, d5, jd, kd, g, t, reqs, szreq, &
+        psii(:,:,:,g), psij(:,:,:,g), psik(:,:,:,g), qtot(:,:,:,:,:,g),&
+        ec, vdelt(g), ptr_in(:,:,:,:,:,d6), ptr_out(:,:,:,:,:,d6),     &
+        dinv(:,:,:,:,:,g), flux0(:,:,:,g), fluxm(:,:,:,:,g),           &
         jb_in(:,:,:,g), jb_out(:,:,:,g), kb_in(:,:,:,g),               &
         kb_out(:,:,:,g), wmu, weta, wxi, flkx(:,:,:,g), flky(:,:,:,g), &
         flkz(:,:,:,g), t_xs(:,:,:,g), fmin(g), fmax(g) )

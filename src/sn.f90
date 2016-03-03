@@ -122,7 +122,7 @@ MODULE sn_module
   END SUBROUTINE sn_deallocate
 
 
-  SUBROUTINE expcoeff ( ndimen )
+  SUBROUTINE sn_expcoeff ( ndimen )
 
 !-----------------------------------------------------------------------
 !
@@ -221,7 +221,7 @@ MODULE sn_module
 !_______________________________________________________________________
 !_______________________________________________________________________
 
-  END SUBROUTINE expcoeff
+  END SUBROUTINE sn_expcoeff
 
 
 END MODULE sn_module
