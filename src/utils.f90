@@ -44,6 +44,7 @@ MODULE utils_module
     CHARACTER(LEN=64) :: arg
 
     INTEGER(i_knd) :: narg, n
+
 !_______________________________________________________________________
 !
 !   Return if not root. Loop over the first two command line arguments
@@ -57,7 +58,7 @@ MODULE utils_module
 
     narg = COMMAND_ARGUMENT_COUNT ( )
 
-    IF ( narg /= 2 ) THEN
+    IF ( COMMAND_ARGUMENT_COUNT() < 2 ) THEN
       ierr = 1
       error = '***ERROR: CMDARG: Missing command line entry'
       RETURN
