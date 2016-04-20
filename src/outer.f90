@@ -21,7 +21,7 @@ MODULE outer_module
 
   USE solvar_module, ONLY: q2grp0, q2grpm, flux0, fluxm, flux0po
 
-  USE control_module, ONLY: iitm, inrdone, tolr, dfmxo, epsi, otrdone
+  USE control_module, ONLY: inrdone, tolr, dfmxo, epsi, otrdone
 
   USE inner_module, ONLY: inner
 
@@ -44,7 +44,7 @@ MODULE outer_module
 
 
   SUBROUTINE outer ( iits, otno, t, do_grp, ng_per_thrd, nnstd_used,   &
-    grp_act )
+    grp_act, iitm_i )
 
 !-----------------------------------------------------------------------
 !
@@ -53,7 +53,7 @@ MODULE outer_module
 !
 !-----------------------------------------------------------------------
 
-    INTEGER(i_knd), INTENT(IN) :: otno, t
+    INTEGER(i_knd), INTENT(IN) :: otno, t, iitm_i
 
     INTEGER(i_knd), INTENT(INOUT) :: ng_per_thrd, nnstd_used
 
@@ -124,7 +124,7 @@ MODULE outer_module
 
   !$OMP BARRIER
 
-    inner_loop: DO inno = 1, iitm
+    inner_loop: DO inno = 1, iitm_i
 
       CALL inner ( inno, iits, t, do_grp, ng_per_thrd, nnstd_used,     &
         grp_act )

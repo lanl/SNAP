@@ -21,7 +21,7 @@ SUBROUTINE translv
     qim
 
   USE control_module, ONLY: nsteps, timedep, dt, oitm, otrdone, dfmxo, &
-    it_det, popout, swp_typ, angcpy, update_ptr
+    it_det, popout, swp_typ, angcpy, update_ptr, iitm
 
   USE utils_module, ONLY: print_error, stop_run
 
@@ -238,7 +238,7 @@ SUBROUTINE translv
 !_______________________________________________________________________
 
       CALL outer ( iits, otno, t, do_grp, ng_per_thrd, nnstd_used, &
-        grp_act )
+        grp_act, iitm )
   !$OMP BARRIER
 
   !$OMP MASTER
@@ -285,7 +285,7 @@ SUBROUTINE translv
   !$OMP BARRIER
 
       CALL outer ( iits, otno, t, do_grp, ng_per_thrd, nnstd_used,     &
-        grp_act )
+        grp_act, 1 )
   !$OMP BARRIER
 
   !$OMP MASTER

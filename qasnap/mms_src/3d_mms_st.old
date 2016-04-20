@@ -1,7 +1,7 @@
  SNAP: SN (Discrete Ordinates) Application Proxy
  Version Number..  1.07 
  Version Date..  03-03-2016
- Ran on  3- 3-2016 at time 10:31:11
+ Ran on  4-19-2016 at time 18:27:31
 
 ********************************************************************************
 
@@ -305,20 +305,20 @@
 
   Code Section                          Time (seconds)
  **************                        ****************
-    Parallel Setup                       1.5872E-03
-    Input                                2.1729E-02
-    Setup                                6.4970E-02
-    Solve                                2.3939E-02
-       Parameter Setup                   1.0612E-03
-       Outer Source                      7.9513E-04
-       Inner Iterations                  2.1294E-02
-          Inner Source                   3.7003E-04
-          Transport Sweeps               1.7221E-02
-          Inner Misc Ops                 3.7029E-03
-       Solution Misc Ops                 7.8893E-04
-    Output                               4.6383E-01
-  Total Execution time                   6.6126E-01
+    Parallel Setup                       1.4110E-03
+    Input                                8.4805E-04
+    Setup                                1.4649E-02
+    Solve                                1.9941E-02
+       Parameter Setup                   5.8198E-04
+       Outer Source                      7.6008E-04
+       Inner Iterations                  1.8367E-02
+          Inner Source                   2.9778E-04
+          Transport Sweeps               1.7206E-02
+          Inner Misc Ops                 8.6308E-04
+       Solution Misc Ops                 2.3222E-04
+    Output                               5.3966E-02
+  Total Execution time                   9.3054E-02
 
-  Grind Time (nanoseconds)         4.7285E+00
+  Grind Time (nanoseconds)         3.9389E+00
 
 ********************************************************************************
