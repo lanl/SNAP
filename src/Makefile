@@ -73,7 +73,7 @@ ifeq ($(TARGET),isnap)
 endif
 
 ifeq ($(TARGET),ksnap)
-  FFLAGS = -O3 $(OMPFLAG) -xmic-avx512 -ip -align array64byte -qopt-streaming-stores always -qopt-streaming-cache-evict=0 -qno-opt-dynamic-align -fp-model fast -fp-speculation fast -fno-alias -fno-fnalias
+  FFLAGS = -O3 $(OMPFLAG) -xmic-avx512 -ip -align array64byte -qopt-streaming-cache-evict=0 -qno-opt-dynamic-align -fp-model fast -fp-speculation fast -fno-alias -fno-fnalias
   FFLAG2 =
   PP = fpp
   ifeq ($(OPT),no)
