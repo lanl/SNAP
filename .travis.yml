@@ -1,15 +1,38 @@
 language: c
 
-env:
-  - OPT=yes COMPILER=gfortran #OPT=no broken on gfortran
+sudo: false
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - ccache
+      - gcc-5
+      - g++-5
+      - gfortran-5
 
 before_install:
- - sudo apt-get update 
- - sudo apt-get install gfortran libopenmpi-dev openmpi-bin
+ - export FC=gfortran-${GVER} CC=gcc-${GVER} CXX=g++-${GVER}
+ - wget -qO- --no-check-certificate https://www.open-mpi.org/software/ompi/v1.10/downloads/openmpi-${OMPI}.tar.bz2 | tar -xj && 
+   cd openmpi-${OMPI} && mkdir build && cd build && ../configure CFLAGS="-w" --prefix=${HOME}/open-mpi 
+   --without-verbs --without-fca --without-mxm --without-ucx --without-portals4 --without-psm --without-psm2 --without-libfabric --without-usnic --without-udreg --without-ugni --without-xpmem --without-alps --without-munge --without-sge --without-loadleveler --without-tm
+   --without-lsf --without-slurm --without-pvfs2 --without-plfs --without-cuda --disable-oshmem --enable-mpi-fortran --disable-oshmem-fortran --disable-libompitrace --disable-mpi-io  --disable-io-romio --disable-static &&
+   make -j4 && make install && cd ../../
+ - export PATH="$HOME/open-mpi/bin:$PATH"
 
-script: 
- - make -C src -j2 OPT="${OPT}" COMPILER="${COMPILER}" && make -C src count
+env:
+  global:
+    - CCACHE_CPP2=yes
+    - GVER=5
+    - OMPI=1.10.2
+
+script:
+ - make -C src -j2 && make -C src count
  - make -C ports/snap-c -j2 CC=mpicc CFLAGS="-O3 -std=c99 -fopenmp" LIBS="-lm"
+
+cache:
+  - ccache
 
 compiler:
   - gcc
