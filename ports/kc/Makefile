@@ -1,6 +1,6 @@
 #KOKKOS_PATH = /home/${USER}/kg-cuda-uvm-gnu
 #KOKKOS_PATH = /home/${USER}/kg-cuda-7.5-gnu-4.9.3
-KOKKOS_PATH = /home/${USER}/kg-cuda-8.0-gnu-5.3.0
+KOKKOS_PATH = /home/${USER}/kg-cuda-uvm-gnu_5.3.0-release
 #KOKKOS_PATH = /home/${USER}/kg-cuda-uvm-intel
 #KOKKOS_PATH = /home/${USER}/kg-serial-intel
 #KOKKOS_PATH = /home/${USER}/kg-openmp-intel

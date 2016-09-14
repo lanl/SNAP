@@ -277,9 +277,9 @@ template< typename policy_type,
           typename view_5d_t, typename view_6d_t, typename view_7d_t >
 struct dim3_sweep2 {
   typedef typename view_1d_t::execution_space device_t;
-  typedef View<double*,Kokkos::LayoutLeft,typename device_t::scratch_memory_space, Kokkos::MemoryTraits<Kokkos::Unmanaged> > view_1d_scratch_t;
-  typedef View<double**,Kokkos::LayoutLeft,typename device_t::scratch_memory_space, Kokkos::MemoryTraits<Kokkos::Unmanaged> > view_2d_scratch_t;
-  typedef View<double***,Kokkos::LayoutLeft,typename device_t::scratch_memory_space, Kokkos::MemoryTraits<Kokkos::Unmanaged> > view_3d_scratch_t;
+//   typedef View<double*,Kokkos::LayoutLeft,typename device_t::scratch_memory_space, Kokkos::MemoryTraits<Kokkos::Unmanaged> > view_1d_scratch_t;
+//   typedef View<double**,Kokkos::LayoutLeft,typename device_t::scratch_memory_space, Kokkos::MemoryTraits<Kokkos::Unmanaged> > view_2d_scratch_t;
+//   typedef View<double***,Kokkos::LayoutLeft,typename device_t::scratch_memory_space, Kokkos::MemoryTraits<Kokkos::Unmanaged> > view_3d_scratch_t;
 
 
   typedef policy_type local_policy_t;
@@ -391,28 +391,28 @@ struct dim3_sweep2 {
                 hv(hv_), fxhv(fxhv_), dinv(dinv_),
                 den(den_), t_xs(t_xs_){}
   
-  size_t team_shmem_size( int team_size ) const {
-    return sizeof(double)*(L*M*12 + 7*L);
-  }
+//   size_t team_shmem_size( int team_size ) const {
+//     return sizeof(double)*(L*M*12 + 7*L);
+//   }
 
   KOKKOS_INLINE_FUNCTION
   void operator() ( const team_member_t& team_member) const {
 
-    view_2d_scratch_t psi(team_member.team_shmem(),L,M);
-    view_2d_scratch_t ec(team_member.team_shmem(),L,M);
-    view_2d_scratch_t pc(team_member.team_shmem(),L,M);
-    view_2d_scratch_t den(team_member.team_shmem(),L,M);
-
-    view_1d_scratch_t mu(team_member.team_shmem(),L);
-    view_1d_scratch_t hj(team_member.team_shmem(),L);
-    view_1d_scratch_t hk(team_member.team_shmem(),L);
-    view_1d_scratch_t w(team_member.team_shmem(),L);
-    view_1d_scratch_t wmu(team_member.team_shmem(),L);
-    view_1d_scratch_t weta(team_member.team_shmem(),L);
-    view_1d_scratch_t wxi(team_member.team_shmem(),L);
-
-    view_3d_scratch_t fxhv(team_member.team_shmem(),L,4,M);
-    view_3d_scratch_t hv(team_member.team_shmem(),L,4,M);
+//     view_2d_scratch_t psi(team_member.team_shmem(),L,M);
+//     view_2d_scratch_t ec(team_member.team_shmem(),L,M);
+//     view_2d_scratch_t pc(team_member.team_shmem(),L,M);
+//     view_2d_scratch_t den(team_member.team_shmem(),L,M);
+// 
+//     view_1d_scratch_t mu(team_member.team_shmem(),L);
+//     view_1d_scratch_t hj(team_member.team_shmem(),L);
+//     view_1d_scratch_t hk(team_member.team_shmem(),L);
+//     view_1d_scratch_t w(team_member.team_shmem(),L);
+//     view_1d_scratch_t wmu(team_member.team_shmem(),L);
+//     view_1d_scratch_t weta(team_member.team_shmem(),L);
+//     view_1d_scratch_t wxi(team_member.team_shmem(),L);
+// 
+//     view_3d_scratch_t fxhv(team_member.team_shmem(),L,4,M);
+//     view_3d_scratch_t hv(team_member.team_shmem(),L,4,M);
 
     //LxMx12 + 7*L
 
@@ -515,7 +515,8 @@ struct dim3_sweep2 {
 //        int k = diag[mm].cell_id[dd].k;
         int k = diag_k( ic_idx );
         if ( kst < 0 ) k = nz - k + 1;
-  //    cout << " C " << endl; 
+ 
+//   printf("C\n");
         
 //         cout << "i " << i << " j " << j << " k " << k << endl;
 
@@ -536,7 +537,7 @@ struct dim3_sweep2 {
 //           END SELECT
 //         END IF
 }
-        parallel_for( Kokkos::ThreadVectorRange( team_member, L ), KOKKOS_LAMBDA( const int& ll ) {
+        parallel_for( Kokkos::ThreadVectorRange( team_member, L ), [&]( const int& ll ) {
           if ( ( i == nx ) && ( ist == -1 ) ) {
             psii(ll,j,k,g) = c0;
           } else if ( ( i == 1 ) && ( ist == 1 ) ) {
@@ -551,7 +552,7 @@ struct dim3_sweep2 {
           }
         }); // ThreadVectorRange D
 
-//   cout << " D " << endl;
+//   printf("D\n");
 //////////////////////////////////////////////////////////////////////////////////////////
 // E - top/bottom boundary condtions. Vacuum at global boundaries, but
 // set to some incoming flux from neighboring proc
@@ -573,7 +574,7 @@ struct dim3_sweep2 {
 //           END IF
 //         END IF
 }
-        parallel_for( Kokkos::ThreadVectorRange( team_member, L ), KOKKOS_LAMBDA( const int& ll ) {
+        parallel_for( Kokkos::ThreadVectorRange( team_member, L ), [&]( const int& ll ) {
           if ( j == jlo ) {
             if ( ( jd == 1 ) && ( lasty ) ) {
               psij(ll,ic,k,g) = c0;
@@ -592,7 +593,7 @@ struct dim3_sweep2 {
           } // end if ( j == jlo )
         }); // ThreadVectorRange E
 
-//   cout << " E " << endl;
+//   printf("E\n");
 //////////////////////////////////////////////////////////////////////////////////////////
 // F - front/back boundary condtions. Vacuum at global boundaries, but
 // set to some incoming flux from neighboring proc
@@ -614,7 +615,7 @@ struct dim3_sweep2 {
 //           END IF
 //         END IF
 }
-        parallel_for( Kokkos::ThreadVectorRange( team_member, L ), KOKKOS_LAMBDA( const int& ll ) {
+        parallel_for( Kokkos::ThreadVectorRange( team_member, L ), [&]( const int& ll ) {
           if ( k == klo ) {
             if ( ( ( kd == 1 ) && ( lastz ) ) || ( ndimen < 3 ) ) {
               psik(ll,ic,j,g) = c0;
@@ -633,7 +634,7 @@ struct dim3_sweep2 {
           } // end if ( k == klo )
         }); // ThreadVectorRange F
 
-//   cout << " F " << endl;
+//   printf("F\n");
 //////////////////////////////////////////////////////////////////////////////////////////
 // G - compute the angular source
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -645,9 +646,16 @@ struct dim3_sweep2 {
 //           psi = psi + ec(:,l)*qtot(l,i,j,k)
 //         END DO
 }
-c
+        parallel_for( Kokkos::ThreadVectorRange( team_member, L ), [&]( const int& ll ) {
+          psi(ll,mm) = qtot(0,i,j,k,g);
+          if ( src_opt == 3 ) psi(ll,mm) = psi(ll,mm) + qim(ll,i,j,k,oct,g);
 
-//   cout << " G " << endl;
+          for (int l = 1; l < cmom; l++) {
+            psi(ll,mm) = psi(ll,mm) + ec(ll,l)*qtot(l,i,j,k,g);
+          }
+        }); // ThreadVectorRange G
+
+//   printf("G\n");
 //////////////////////////////////////////////////////////////////////////////////////////
 // H - compute the numerator for the update formula
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -655,14 +663,14 @@ c
 //         pc = psi + psii(:,j,k)*mu*hi + psij(:,ic,k)*hj + psik(:,ic,j)*hk // pc(nang)
 //         IF ( vdelt /= zero ) pc = pc + vdelt*ptr_in(:,i,j,k)
 }
-        parallel_for( Kokkos::ThreadVectorRange( team_member, L ), KOKKOS_LAMBDA( const int& ll ) {
+        parallel_for( Kokkos::ThreadVectorRange( team_member, L ), [&]( const int& ll ) {
           pc(ll,mm) = psi(ll,mm) + psii(ll,j,k,g)*mu(ll)*hi + psij(ll,ic,k,g)*hj(ll) + psik(ll,ic,j,g)*hk(ll);
           if ( vdelt(g) != c0 ) { // fp not equal is bad practice always, should be checking for a tolerance
             pc(ll,mm) = pc(ll,mm) + vdelt(g) * ptr_in(ll,i,j,k,oct,g);
           }
         }); // ThreadVectorRange H
         
-//   cout << " H " << endl;        
+//   printf("H\n");
 //////////////////////////////////////////////////////////////////////////////////////////
 // I - compute the solution of the center. Use DD for edges. Use fixup if requested.
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -682,7 +690,7 @@ c
 //             ptr_out(:,i,j,k) = two*psi - ptr_in(:,i,j,k)
 //
 }
-          parallel_for( Kokkos::ThreadVectorRange( team_member, L ), KOKKOS_LAMBDA( const int& ll ) {
+          parallel_for( Kokkos::ThreadVectorRange( team_member, L ), [&]( const int& ll ) {
             psi(ll,mm) = pc(ll,mm) * dinv(ll,i,j,k,g);
             psii(ll,j,k,g) = c2 * psi(ll,mm) - psii(ll,j,k,g);
             psij(ll,ic,k,g) = c2 * psi(ll,mm) - psij(ll,ic,k,g);
@@ -693,7 +701,7 @@ c
 {
 //         ELSE
 }
-//   cout << " I " << endl;
+//   printf("I\n");
         } else {
 //////////////////////////////////////////////////////////////////////////////////////////
 // J - multi-pass set to zero + rebalance fixup, determine angles that will need fixup first
@@ -712,23 +720,23 @@ c
 // 
 //             WHERE ( fxhv < zero ) hv = zero
 }
-          parallel_for( Kokkos::ThreadVectorRange( team_member, L ), KOKKOS_LAMBDA( const int& ll ) {
+          parallel_for( Kokkos::ThreadVectorRange( team_member, L ), [&]( const int& ll ) {
             hv(ll,0,mm) = c0;
             hv(ll,1,mm) = c0;
             hv(ll,2,mm) = c0;
             hv(ll,3,mm) = c0;
           });      
-          parallel_reduce( Kokkos::ThreadVectorRange( team_member, L ), KOKKOS_LAMBDA( const int& ll, double& v_sum_hv ) {
+          parallel_reduce( Kokkos::ThreadVectorRange( team_member, L ), [&]( const int& ll, double& v_sum_hv ) {
             v_sum_hv += ( hv(ll,0,mm) + hv(ll,1,mm) + hv(ll,2,mm) + hv(ll,3,mm) );
           }, sum_hv);
-          parallel_for( Kokkos::ThreadVectorRange( team_member, L ), KOKKOS_LAMBDA( const int& ll ) {
+          parallel_for( Kokkos::ThreadVectorRange( team_member, L ), [&]( const int& ll ) {
             pc(ll,mm) = pc(ll,mm) * dinv(ll,i,j,k,g);
           });
           
           bool fixup_condition = true;
           while ( fixup_condition == true ) {
             
-            parallel_for( Kokkos::ThreadVectorRange( team_member, L ), KOKKOS_LAMBDA( const int& ll ) {
+            parallel_for( Kokkos::ThreadVectorRange( team_member, L ), [&]( const int& ll ) {
             
               fxhv(ll,0,mm) = c2 * pc(ll,mm) - psii(ll,j,k,g);
               fxhv(ll,1,mm) = c2 * pc(ll,mm) - psij(ll,ic,k,g);
@@ -742,7 +750,7 @@ c
               
             });
             
-//   cout << " J " << endl;
+//   printf("J\n");
 //////////////////////////////////////////////////////////////////////////////////////////
 // K - exit loop when all angles are fixed up
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -750,13 +758,13 @@ c
 //             IF ( sum_hv == SUM( hv ) ) EXIT fixup_loop
 //             sum_hv = SUM( hv )
 }
-              parallel_reduce( Kokkos::ThreadVectorRange( team_member, L ), KOKKOS_LAMBDA( const int& ll, double& v_temp_sum_hv ) {
+              parallel_reduce( Kokkos::ThreadVectorRange( team_member, L ), [&]( const int& ll, double& v_temp_sum_hv ) {
                 v_temp_sum_hv += ( hv(ll,0,mm) + hv(ll,1,mm) + hv(ll,2,mm) + hv(ll,3,mm) );
               }, temp_sum_hv);
               if (sum_hv == temp_sum_hv) break;
               sum_hv = temp_sum_hv;
               
-//   cout << " K " << endl;
+//   printf("K\n");
 //////////////////////////////////////////////////////////////////////////////////////////
 // L - recompute balance equation numerator and denominator and get new cell average flux
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -774,7 +782,7 @@ c
 //               pc = zero
 //             END WHERE
 }
-              parallel_for( Kokkos::ThreadVectorRange( team_member, L ), KOKKOS_LAMBDA( const int& ll ) {
+              parallel_for( Kokkos::ThreadVectorRange( team_member, L ), [&]( const int& ll ) {
                 
                 pc(ll,mm) = psii(ll,j,k,g)*mu(ll)*hi*(c1+hv(ll,0,mm)) + psij(ll,ic,k,g)*hj(ll)*(c1+hv(ll,1,mm)) + psik(ll,ic,j,g)*hk(ll)*(c1+hv(ll,2,mm));
                 if ( vdelt(g) != c0 ) pc(ll,mm) = pc(ll,mm) + vdelt(g)*ptr_in(ll,i,j,k,oct,g)*(c1+hv(ll,3,mm));
@@ -789,7 +797,7 @@ c
 //           END DO fixup_loop
 }
           }
-//   cout << " L " << endl;
+//   printf("L\n");
 //////////////////////////////////////////////////////////////////////////////////////////
 // M - fixup done, compute edges
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -802,7 +810,7 @@ c
 //           IF ( vdelt /= zero ) ptr_out(:,i,j,k) = fxhv(:,4) * hv(:,4)
 //
 }
-          parallel_for( Kokkos::ThreadVectorRange( team_member, L ), KOKKOS_LAMBDA( const int& ll ) {
+          parallel_for( Kokkos::ThreadVectorRange( team_member, L ), [&]( const int& ll ) {
             psi(ll,mm) = pc(ll,mm);
             psii(ll,j,k,g) = fxhv(ll,0,mm) * hv(ll,0,mm);
             psij(ll,ic,k,g) = fxhv(ll,1,mm) * hv(ll,1,mm);
@@ -813,7 +821,7 @@ c
 {
 //         END IF
 }
-//   cout << " M " << endl;
+//   printf("M\n");
         } // end if ( fixup == 0 )
 //////////////////////////////////////////////////////////////////////////////////////////
 // N - clear the flux arrays
@@ -831,7 +839,7 @@ c
           } 
         }
 
-//   cout << " N " << endl;    
+//   printf("N\n");
 //////////////////////////////////////////////////////////////////////////////////////////
 // O - compute the flux moments
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -841,18 +849,18 @@ c
 //           fluxm(l,i,j,k) = fluxm(l,i,j,k) + SUM( ec(:,l+1)*w*psi )
 //         END DO
 }
-        parallel_reduce( Kokkos::ThreadVectorRange( team_member, L ), KOKKOS_LAMBDA( const int& ll, double& v_sum_w_psi ) {
+        parallel_reduce( Kokkos::ThreadVectorRange( team_member, L ), [&]( const int& ll, double& v_sum_w_psi ) {
           v_sum_w_psi += w(ll) * psi(ll,mm);
         }, sum_w_psi);
         flux(i,j,k,g) = flux(i,j,k,g) + sum_w_psi;
         for (int l = 0; l < cmom-1; l++) {
-          parallel_reduce( Kokkos::ThreadVectorRange( team_member, L ), KOKKOS_LAMBDA( const int& ll, double& v_sum_ec_w_psi ) {
+          parallel_reduce( Kokkos::ThreadVectorRange( team_member, L ), [&]( const int& ll, double& v_sum_ec_w_psi ) {
             v_sum_ec_w_psi += ec(ll,l+1) * w(ll) * psi(ll,mm);
           }, sum_ec_w_psi);
           fluxm(l,i,j,k,g) = fluxm(l,i,j,k,g) + sum_ec_w_psi;
         }
 
-//   cout << " O " << endl;
+//   printf("O\n");
 //////////////////////////////////////////////////////////////////////////////////////////
 // P - calculate min and max scalar fluxes (not used elsewhere currently)
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -869,7 +877,7 @@ c
           fmax = ( fmax > flux(i,j,k,g) ) ? fmax : flux(i,j,k,g);
         }
         
-//   cout << " P " << endl; 
+//   printf("P\n");
 //////////////////////////////////////////////////////////////////////////////////////////
 // Q - save edge fluxes (dummy if checks for unused non-vacuum BCs)
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -884,7 +892,7 @@ c
 //           END IF
 //         END IF
 }
-        parallel_for( Kokkos::ThreadVectorRange( team_member, L ), KOKKOS_LAMBDA( const int& ll ) {
+        parallel_for( Kokkos::ThreadVectorRange( team_member, L ), [&]( const int& ll ) {
         
           if ( j == jhi ) {
             if ( ( jd == 2 ) && ( lasty ) ) {
@@ -916,7 +924,7 @@ c
           }
         }); // end parallel_for Q
         
-//   cout << " Q " << endl;   
+//   printf("Q\n");
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // R - compute leakages (not used elsewhere currently)
@@ -939,27 +947,27 @@ c
 //         END IF
 }
         if ( ( ( i + id - 1 ) == 1 ) || ( ( i + id - 1 ) == ( nx + 1 ) ) ) {
-          parallel_reduce( Kokkos::ThreadVectorRange( team_member, L ), KOKKOS_LAMBDA( const int& ll, double& v_sum_wmu_psii_j_k ) {
+          parallel_reduce( Kokkos::ThreadVectorRange( team_member, L ), [&]( const int& ll, double& v_sum_wmu_psii_j_k ) {
             v_sum_wmu_psii_j_k += wmu(ll) * psii(ll,j,k,g);
           }, sum_wmu_psii_j_k);
           flkx(i+id-1,j,k,g) = flkx(i+id-1,j,k,g) + ist * sum_wmu_psii_j_k;
         }
       
         if ( ( ( jd == 1 ) && ( firsty ) ) || ( ( jd == 2 ) && ( lasty ) ) ) {
-          parallel_reduce( Kokkos::ThreadVectorRange( team_member, L ), KOKKOS_LAMBDA( const int& ll, double& v_sum_weta_psij_ic_k ) {
+          parallel_reduce( Kokkos::ThreadVectorRange( team_member, L ), [&]( const int& ll, double& v_sum_weta_psij_ic_k ) {
             v_sum_weta_psij_ic_k += weta(ll) * psij(ll,ic,k,g);
           }, sum_weta_psij_ic_k);
           flky(i,j+jd-1,k,g) = flky(i,j+jd-1,k,g) + jst * sum_weta_psij_ic_k;
         }
       
         if ( ( ( ( kd == 1 ) && ( firstz ) ) || ( ( kd == 2 ) && ( lastz ) ) ) && ( ndimen == 3 ) ) {
-          parallel_reduce( Kokkos::ThreadVectorRange( team_member, L ), KOKKOS_LAMBDA( const int& ll, double& v_sum_wxi_psik_ic_j ) {
+          parallel_reduce( Kokkos::ThreadVectorRange( team_member, L ), [&]( const int& ll, double& v_sum_wxi_psik_ic_j ) {
             v_sum_wxi_psik_ic_j += wxi(ll) * psik(ll,ic,j,g);
           }, sum_wxi_psik_ic_j);
           flkz(i,j,k+kd-1,g) = flkz(i,j,k+kd-1,g) + kst * sum_wxi_psik_ic_j;
         }
 
-//   cout << " R " << endl;  
+//   printf("R\n");
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // S - finish the loops
