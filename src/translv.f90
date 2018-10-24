@@ -10,7 +10,7 @@ SUBROUTINE translv
   USE global_module, ONLY: i_knd, r_knd, ounit, zero, half, one, two
 
   USE plib_module, ONLY: glmax, comm_snap, iproc, root, ichunk,        &
-    nthreads, thread_num, use_lock, plock_omp
+    nthreads, thread_num
 
   USE geom_module, ONLY: geom_allocate, dinv, geom_param_calc, nx,     &
     ny_gl, nz_gl
@@ -114,8 +114,6 @@ SUBROUTINE translv
   !$OMP& DEFAULT(SHARED) PRIVATE(t,g,otno)
 
     t = thread_num() + 1
-
-    IF ( use_lock .AND. t>1 ) CALL plock_omp ( 'set', t )
 !_______________________________________________________________________
 !
 !   A single thread does initial setup.
@@ -336,8 +334,6 @@ SUBROUTINE translv
     tot_iits = tot_iits + cy_iits
 
   !$OMP END MASTER
-
-    IF ( use_lock .AND. t>1 ) CALL plock_omp ( 'unset', t )
 
   !$OMP END PARALLEL
 

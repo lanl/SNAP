@@ -1,3 +1,5 @@
+#!/bin/tcsh
+
 mv -f nout01 out01
 mv -f nout02 out02
 mv -f nout03 out03

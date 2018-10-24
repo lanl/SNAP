@@ -29,7 +29,7 @@ MODULE control_module
 ! nsteps   - number of time steps to cover the ts -> tf range
 !
 ! swp_typ  - 0/1=standard order/mini-KBA sweep
-! cor_swp  - 0/1=no/yes concurrent octant mesh sweeps (corner starts)
+! multiswp - 0/1=no/yes concurrent octant mesh sweeps (corner starts)
 !
 ! angcpy   - 1/2 copies of the time-edge angular flux
 !
@@ -44,7 +44,7 @@ MODULE control_module
 !_______________________________________________________________________
 
   INTEGER(i_knd) :: iitm=5, oitm=100, timedep=0, nsteps=1, swp_typ=0,  &
-    cor_swp=0, angcpy=1, it_det=0, soloutp=0, kplane=0, popout=0,      &
+    multiswp=1, angcpy=1, it_det=0, soloutp=0, kplane=0, popout=0,     &
     fluxp=0, fixup=1
 
   REAL(r_knd) :: epsi=1.0E-4_r_knd, tf=zero
@@ -64,18 +64,19 @@ MODULE control_module
 ! update_ptr   - true/false update the ptr_out array
 !
 ! ncor             - number of corners from which sweeps begin
+! nops             - number of chunks a process performs per sweep
 ! last_oct         - last octant to be swept
 ! corner_sch(2,4)  - corner scheduling control array
-! yzstg(ncor)      - KBA stage in yz plane per starting corner
+! yzstg(4)         - KBA stage in yz plane per starting corner
+! corner_loop_order(4) - multisweep corner loop priortized order
 !_______________________________________________________________________
 
   LOGICAL(l_knd) :: otrdone, update_ptr
 
   LOGICAL(l_knd), ALLOCATABLE, DIMENSION(:) :: inrdone
 
-  INTEGER(i_knd) :: ncor, last_oct, corner_sch(2,4)
-
-  INTEGER(i_knd), ALLOCATABLE, DIMENSION(:) :: yzstg
+  INTEGER(i_knd) :: ncor, nops, last_oct, corner_sch(2,4), yzstg(4),   &
+    corner_loop_order(4)
 
   REAL(r_knd) :: dt, dfmxo
 
@@ -101,10 +102,8 @@ MODULE control_module
 !_______________________________________________________________________
 
     ierr = 0
-    ALLOCATE( yzstg(ncor), dfmxi(ng), inrdone(ng), STAT=ierr )
+    ALLOCATE( dfmxi(ng), inrdone(ng), STAT=ierr )
     IF ( ierr /= 0 ) RETURN
-
-    yzstg = 0
 
     dfmxi = -one
     inrdone = .FALSE.
@@ -126,7 +125,7 @@ MODULE control_module
 !-----------------------------------------------------------------------
 !_______________________________________________________________________
 
-    DEALLOCATE( yzstg, dfmxi, inrdone )
+    DEALLOCATE( dfmxi, inrdone )
 !_______________________________________________________________________
 !_______________________________________________________________________
 

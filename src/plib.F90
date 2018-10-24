@@ -56,6 +56,10 @@ MODULE plib_module
     MODULE PROCEDURE precv_d_2d, precv_d_3d
   END INTERFACE precv
 
+  INTERFACE irecv
+    MODULE PROCEDURE irecv_d_3d
+  END INTERFACE irecv
+
   SAVE
 !_______________________________________________________________________
 !
@@ -830,6 +834,40 @@ MODULE plib_module
   END SUBROUTINE precv_d_3d
 
 
+  SUBROUTINE irecv_d_3d ( proc, myproc, d1, d2, d3, value, comm, mtag, &
+    req )
+
+!-----------------------------------------------------------------------
+!
+! Send a rank-3 double precision array.
+!
+!-----------------------------------------------------------------------
+
+    INTEGER(i_knd), INTENT(IN) :: proc, myproc, d1, d2, d3, comm, mtag
+
+    INTEGER(i_knd), INTENT(INOUT) :: req
+
+    REAL(r_knd), DIMENSION(d1,d2,d3), INTENT(INOUT) :: value
+!_______________________________________________________________________
+!
+!   Local variables
+!_______________________________________________________________________
+
+    INTEGER(i_knd) :: dlen, ierr
+!_______________________________________________________________________
+
+    IF ( proc==myproc .OR. comm==MPI_COMM_NULL ) RETURN
+
+    dlen = d1*d2*d3
+
+    CALL MPI_IRECV ( value, dlen, MPI_DOUBLE_PRECISION, proc, mtag,    &
+      comm, req, ierr )
+!_______________________________________________________________________
+!_______________________________________________________________________
+
+  END SUBROUTINE irecv_d_3d
+
+
   SUBROUTINE cartrank ( coord, rank, comm )
 
 !-----------------------------------------------------------------------
@@ -881,6 +919,33 @@ MODULE plib_module
   END SUBROUTINE waitinit
 
 
+  SUBROUTINE waits ( req )
+
+!-----------------------------------------------------------------------
+!
+! Wait for all asynchronous communications encapsulated in the req array
+! to finish.
+!
+!-----------------------------------------------------------------------
+
+    INTEGER(i_knd), INTENT(INOUT) :: req
+!_______________________________________________________________________
+!
+!   Local variables.
+!_______________________________________________________________________
+
+    INTEGER(i_knd) :: info
+
+    INTEGER(i_knd), DIMENSION(MPI_STATUS_SIZE) :: stat
+!_______________________________________________________________________
+
+    CALL MPI_WAIT ( req, stat, info )
+!_______________________________________________________________________
+!_______________________________________________________________________
+
+  END SUBROUTINE waits
+
+
   SUBROUTINE waitall ( req, d1 )
 
 !-----------------------------------------------------------------------
@@ -908,6 +973,99 @@ MODULE plib_module
 !_______________________________________________________________________
 
   END SUBROUTINE waitall
+
+
+  SUBROUTINE waitsome ( req, indx, d1, outcount )
+
+!-----------------------------------------------------------------------
+!
+! Wait for some asynchronous communications encapsulated in the req
+! array to finish.
+!
+!-----------------------------------------------------------------------
+
+    INTEGER(i_knd), INTENT(IN) :: d1
+
+    INTEGER(i_knd), INTENT(OUT) :: outcount
+
+    INTEGER(i_knd), DIMENSION(d1), INTENT(INOUT) :: req, indx
+!_______________________________________________________________________
+!
+!   Local variables
+!_______________________________________________________________________
+
+    INTEGER(i_knd) :: info
+
+    INTEGER(i_knd), DIMENSION(MPI_STATUS_SIZE,d1) :: stat
+!_______________________________________________________________________
+!_______________________________________________________________________
+
+    CALL MPI_WAITSOME ( d1, req, outcount, indx, stat, info )
+!_______________________________________________________________________
+!_______________________________________________________________________
+
+  END SUBROUTINE waitsome
+
+
+  SUBROUTINE tests ( req )
+
+!-----------------------------------------------------------------------
+!
+! Test if the asynchronous communications encapsulated in the req handle
+! has finished.
+!
+!-----------------------------------------------------------------------
+
+    INTEGER(i_knd), INTENT(INOUT) :: req
+!_______________________________________________________________________
+!
+!   Local variables.
+!_______________________________________________________________________
+
+    INTEGER(i_knd) :: info
+
+    INTEGER(i_knd), DIMENSION(MPI_STATUS_SIZE) :: stat
+
+    LOGICAL(l_knd) :: flag
+!_______________________________________________________________________
+
+    CALL MPI_TEST ( req, flag, stat, info )
+!_______________________________________________________________________
+!_______________________________________________________________________
+
+  END SUBROUTINE tests
+
+
+  SUBROUTINE testsome ( req, indx, d1, outcount )
+
+!-----------------------------------------------------------------------
+!
+! Test if some asynchronous communications encapsulated in the req array
+! finished.
+!
+!-----------------------------------------------------------------------
+
+    INTEGER(i_knd), INTENT(IN) :: d1
+
+    INTEGER(i_knd), INTENT(OUT) :: outcount
+
+    INTEGER(i_knd), DIMENSION(d1), INTENT(INOUT) :: req, indx
+!_______________________________________________________________________
+!
+!   Local variables
+!_______________________________________________________________________
+
+    INTEGER(i_knd) :: info
+
+    INTEGER(i_knd), DIMENSION(MPI_STATUS_SIZE,d1) :: stat
+!_______________________________________________________________________
+!_______________________________________________________________________
+
+    CALL MPI_TESTSOME ( d1, req, outcount, indx, stat, info )
+!_______________________________________________________________________
+!_______________________________________________________________________
+
+  END SUBROUTINE testsome
 
 #else
 
@@ -1050,6 +1208,14 @@ MODULE plib_module
   END SUBROUTINE precv_d_3d
 
 
+  SUBROUTINE irecv_d_3d ( proc, myproc, d1, d2, d3, value, comm, mtag, &
+    req )
+    INTEGER(i_knd), INTENT(IN) :: proc, myproc, d1, d2, d3, comm, mtag
+    INTEGER(i_knd), INTENT(IN) :: req
+    REAL(r_knd), DIMENSION(d1,d2,d3), INTENT(IN) :: value
+  END SUBROUTINE irecv_d_3d
+
+
   SUBROUTINE cartrank ( coord, rank, comm )
     INTEGER(i_knd), INTENT(OUT) :: rank
     INTEGER(i_knd), INTENT(IN) :: comm
@@ -1064,10 +1230,34 @@ MODULE plib_module
   END SUBROUTINE waitinit
 
 
+  SUBROUTINE waits ( req )
+    INTEGER(i_knd), INTENT(IN) :: req
+  END SUBROUTINE waits
+
+
   SUBROUTINE waitall ( req, d1 )
     INTEGER(i_knd), INTENT(IN) :: d1
     INTEGER(i_knd), DIMENSION(d1), INTENT(IN) :: req
   END SUBROUTINE waitall
+
+
+  SUBROUTINE waitsome ( req, indx, d1, outcount )
+    INTEGER(i_knd), INTENT(IN) :: d1, outcount
+    INTEGER(i_knd), DIMENSION(d1), INTENT(IN) :: req, indx
+  END SUBROUTINE waitsome
+
+
+  SUBROUTINE tests ( req, flag )
+    INTEGER(i_knd), INTENT(IN) :: req
+    LOGICAL(l_knd), INTENT(OUT) :: flag
+    flag = .FALSE.
+  END SUBROUTINE tests
+
+
+  SUBROUTINE testsome ( req, indx, d1, outcount )
+    INTEGER(i_knd), INTENT(IN) :: d1, outcount
+    INTEGER(i_knd), DIMENSION(d1), INTENT(IN) :: req, indx
+  END SUBROUTINE testsome
 
 #endif
 

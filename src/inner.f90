@@ -119,6 +119,7 @@ MODULE inner_module
   !$OMP BARRIER
 
     CALL sweep ( t, do_grp, ng_per_thrd, nnstd_used, grp_act )
+
   !$OMP BARRIER
 
   !$OMP MASTER

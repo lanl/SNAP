@@ -21,7 +21,7 @@ MODULE input_module
   USE data_module, ONLY: ng, mat_opt, src_opt, scatp
 
   USE control_module, ONLY: epsi, iitm, oitm, timedep, tf, nsteps,     &
-    swp_typ, cor_swp, angcpy, it_det, fluxp, fixup, soloutp, kplane,   &
+    swp_typ, multiswp, angcpy, it_det, fluxp, fixup, soloutp, kplane,  &
     popout
 
   USE utils_module, ONLY: print_error, stop_run
@@ -58,8 +58,8 @@ MODULE input_module
 
     NAMELIST / invar / npey, npez, ichunk, nthreads, ndimen, nx, ny,   &
       nz, lx, ly, lz, nmom, nang, ng, epsi, iitm, oitm, timedep, tf,   &
-      nsteps, mat_opt, src_opt, scatp, swp_typ, cor_swp, it_det, fluxp,&
-      fixup, nnested, soloutp, kplane, popout, angcpy
+      nsteps, mat_opt, src_opt, scatp, swp_typ, multiswp, it_det,      &
+      fluxp, fixup, nnested, soloutp, kplane, popout, angcpy
 !_______________________________________________________________________
 !
 !   Read the input file. Echo to output file. Call for an input variable
@@ -131,7 +131,7 @@ MODULE input_module
     WRITE( ounit, 127 ) nmom, nang
     WRITE( ounit, 128 ) ng, mat_opt, src_opt, scatp
     WRITE( ounit, 129 ) epsi, iitm, oitm, timedep, tf, nsteps, swp_typ,&
-      cor_swp, angcpy, it_det, soloutp, kplane, popout, fluxp, fixup
+      multiswp, angcpy, it_det, soloutp, kplane, popout, fluxp, fixup
     WRITE( ounit, 121 ) ( star, i = 1, 80 )
 !_______________________________________________________________________
 
@@ -172,7 +172,7 @@ MODULE input_module
                 5X, 'tf= ', ES11.4, /,                                 &
                 5X, 'nsteps= ', I5, /,                                 &
                 5X, 'swp_typ= ', I2, /,                                &
-                5X, 'cor_swp= ', I2, /,                                &
+                5X, 'multiswp= ', I2, /,                               &
                 5X, 'angcpy= ', I2, /                                  &
                 5X, 'it_det= ', I2, /,                                 &
                 5X, 'soloutp= ', I2, /,                                &
@@ -293,23 +293,23 @@ MODULE input_module
       CALL print_error ( ounit, error )
     END IF
 
-    IF ( nx < 4 ) THEN
-      ierr = ierr + 1
-      error = '***ERROR: INPUT_CHECK: NX must be at least 4'
-      CALL print_error ( ounit, error )
-    END IF
+!    IF ( nx < 4 ) THEN
+!      ierr = ierr + 1
+!      error = '***ERROR: INPUT_CHECK: NX must be at least 4'
+!      CALL print_error ( ounit, error )
+!    END IF
 
-    IF ( ny<4 .AND. ndimen>1 ) THEN
-      ierr = ierr + 1
-      error = '***ERROR: INPUT_CHECK: NY must be at least 4'
-      CALL print_error ( ounit, error )
-    END IF
+!    IF ( ny<4 .AND. ndimen>1 ) THEN
+!      ierr = ierr + 1
+!      error = '***ERROR: INPUT_CHECK: NY must be at least 4'
+!      CALL print_error ( ounit, error )
+!    END IF
 
-    IF ( nz<4 .AND. ndimen>2 ) THEN
-      ierr = ierr + 1
-      error = '***ERROR: INPUT_CHECK: NZ must be at least 4'
-      CALL print_error ( ounit, error )
-    END IF
+!    IF ( nz<4 .AND. ndimen>2 ) THEN
+!      ierr = ierr + 1
+!      error = '***ERROR: INPUT_CHECK: NZ must be at least 4'
+!      CALL print_error ( ounit, error )
+!    END IF
 
     IF ( lx <= zero ) THEN
       ierr = ierr + 1
@@ -477,17 +477,24 @@ MODULE input_module
 !      CALL print_error ( ounit, error )
 !    END IF
 
-    IF ( cor_swp/=0 .AND. cor_swp/=1 ) THEN
-      cor_swp = 0
-      error = '*WARNING: INPUT_CHECK: COR_SWP must equal 0/1; ' //     &
+    IF ( multiswp/=0 .AND. multiswp/=1 ) THEN
+      multiswp = 0
+      error = '*WARNING: INPUT_CHECK: MULTISWP must equal 0/1; ' //    &
               'reset to 0'
       CALL print_error ( ounit, error )
     END IF
 
-    IF ( ndimen==1 .AND. cor_swp==1 ) THEN
-      cor_swp = 0
-      error = '*WARNING: INPUT_CHECK: COR_SWP must equal 0 in 1D; ' // &
+    IF ( ndimen==1 .AND. multiswp==1 ) THEN
+      multiswp = 0
+      error = '*WARNING: INPUT_CHECK: MULTISWP must equal 0 in 1D;' // &
               ' reset to 0'
+      CALL print_error ( ounit, error )
+    END IF
+
+    IF ( multiswp==1 .AND. swp_typ==1 ) THEN
+      ierr = ierr + 1
+      error = '***ERROR: INPUT_CHECK: MULTISWP must equal 0 if ' //    &
+              'SWP_TYP is 1'
       CALL print_error ( ounit, error )
     END IF
 
@@ -591,7 +598,7 @@ MODULE input_module
       ipak(17) = src_opt
       ipak(18) = scatp
       ipak(19) = swp_typ
-      ipak(20) = cor_swp
+      ipak(20) = multiswp
       ipak(21) = angcpy
       ipak(22) = it_det
       ipak(23) = fluxp
@@ -643,7 +650,7 @@ MODULE input_module
       src_opt   = ipak(17)
       scatp     = ipak(18)
       swp_typ   = ipak(19)
-      cor_swp   = ipak(20)
+      multiswp  = ipak(20)
       angcpy    = ipak(21)
       it_det    = ipak(22)
       fluxp     = ipak(23)

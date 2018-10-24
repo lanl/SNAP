@@ -19,7 +19,7 @@ MODULE mkba_sweep_module
 
   USE data_module, ONLY: src_opt, qim
 
-  USE control_module, ONLY: fixup, tolr, last_oct, update_ptr, angcpy
+  USE control_module, ONLY: fixup, tolr, update_ptr, angcpy
 
   USE thrd_comm_module, ONLY: sweep_recv_bdry, sweep_send_bdry
 
@@ -31,10 +31,10 @@ MODULE mkba_sweep_module
   CONTAINS
 
 
-  SUBROUTINE mkba_sweep ( d1, d2, d3, d4, d5, jd, kd, g, t, reqs,      &
-    szreq, psii, psij, psik, qtot, ec, vdelt, ptr_in, ptr_out, dinv,   &
-    flux0, fluxm, jb_in, jb_out, kb_in, kb_out, wmu, weta, wxi, flkx,  &
-    flky, flkz, t_xs, fmin, fmax )
+  SUBROUTINE mkba_sweep ( d1, d2, d3, d4, d5, jd, kd, g, t, nnstd_used,&
+    reqs, szreq, psii, psij, psik, qtot, ec, vdelt, ptr_in, ptr_out,   &
+    dinv, flux0, fluxm, jb_in, jb_out, kb_in, kb_out, wmu, weta, wxi,  &
+    flkx, flky, flkz, t_xs )
 
 !-----------------------------------------------------------------------
 !
@@ -43,13 +43,11 @@ MODULE mkba_sweep_module
 !-----------------------------------------------------------------------
 
     INTEGER(i_knd), INTENT(IN) :: d1, d2, d3, d4, d5, jd, kd, g, t,    &
-      szreq
+      nnstd_used, szreq
 
     INTEGER(i_knd), DIMENSION(szreq), INTENT(INOUT) :: reqs
 
     REAL(r_knd), INTENT(IN) :: vdelt
-
-    REAL(r_knd), INTENT(INOUT) :: fmin, fmax
 
     REAL(r_knd), DIMENSION(nang), INTENT(IN) :: wmu, weta, wxi
 
@@ -90,7 +88,7 @@ MODULE mkba_sweep_module
     INTEGER(i_knd) :: nedg, ist, jst, jlo, jhi, kst, klo, khi, d, n,   &
       ic, i, j, k, l, iop, ich, id, oct, ibl, ibr, ibb, ibt, ibf, ibk
 
-    REAL(r_knd) :: sum_hv, sum_hv_n, fmint, fmaxt
+    REAL(r_knd) :: sum_hv, sum_hv_n
 
     REAL(r_knd), DIMENSION(nang) :: psi, pc, den
 
@@ -104,13 +102,6 @@ MODULE mkba_sweep_module
     IF ( ndimen == 3 ) nedg = 3
     IF ( vdelt /= zero ) nedg = nedg + 1
     fxhv = zero
-!_______________________________________________________________________
-!
-!   Initialize fmint and fmaxt.
-!_______________________________________________________________________
-
-    fmint = HUGE( one )
-    fmaxt = -HUGE( one )
 !_______________________________________________________________________
 !
 !   Set up the y-dir and z-dir sweep order given octant info.
@@ -157,11 +148,8 @@ MODULE mkba_sweep_module
 !     level threads.
 !_______________________________________________________________________
 
-  !$OMP MASTER
       CALL sweep_recv_bdry ( g, jd, kd, iop, t, reqs, szreq, nc, nang, &
         ichunk, ny, nz, jb_in, kb_in )
-  !$OMP END MASTER
-  !$OMP BARRIER
 !_______________________________________________________________________
 !
 !     Loop over cells along the diagonals. Nested threads break up each
@@ -170,7 +158,9 @@ MODULE mkba_sweep_module
 
       diagonal_loop: DO d = 1, ndiag
 
-  !$OMP DO SCHEDULE(STATIC,1)
+  !$OMP PARALLEL DO NUM_THREADS(nnstd_used) IF(nnstd_used>1)           &
+  !$OMP& SCHEDULE(STATIC,1) PROC_BIND(CLOSE)  DEFAULT(SHARED)          &
+  !$OMP& PRIVATE(n,ic,i,j,k,l,psi,pc,hv,sum_hv,fxhv,sum_hv_n,den)
         line_loop: DO n = 1, diag(d)%len
 !_______________________________________________________________________
 !
@@ -443,66 +433,33 @@ MODULE mkba_sweep_module
 
           psi = w*psi
 
-          IF ( oct == 1 ) THEN
-            flux0(i,j,k) = SUM( psi )
-            DO l = 1, cmom-1
-              fluxm(l,i,j,k) = SUM( ec(:,l+1,oct)*psi )
-            END DO
-          ELSE
-            flux0(i,j,k) = flux0(i,j,k) + SUM( psi )
-            DO l = 1, cmom-1
-              fluxm(l,i,j,k) = fluxm(l,i,j,k) + SUM( ec(:,l+1,oct)*psi )
-            END DO
-          END IF
-!_______________________________________________________________________
-!
-!         Calculate dummy min and max scalar fluxes (not used elsewhere
-!         currently)
-!_______________________________________________________________________
-
-          IF ( oct == last_oct ) THEN
-            fmint = MIN( fmint, flux0(i,j,k) )
-            fmaxt = MAX( fmaxt, flux0(i,j,k) )
-          END IF
+          flux0(i,j,k) = flux0(i,j,k) + SUM( psi )
+          DO l = 1, cmom-1
+            fluxm(l,i,j,k) = fluxm(l,i,j,k) + SUM( ec(:,l+1,oct)*psi )
+          END DO
 !_______________________________________________________________________
 !
 !         Finish the loops
 !_______________________________________________________________________
 
         END DO line_loop
-  !$OMP END DO
+  !$OMP END PARALLEL DO
 
       END DO diagonal_loop
-  !$OMP BARRIER
 !_______________________________________________________________________
 !
 !     Send data to downstream neighbors. Master of threaded region means
 !     all main level threads do call for send.
 !_______________________________________________________________________
 
-  !$OMP MASTER
       CALL sweep_send_bdry ( g, jd, kd, iop, t, reqs, szreq, nc, nang, &
         ichunk, ny, nz, jb_out, kb_out )
-  !$OMP END MASTER
-  !$OMP BARRIER
 !_______________________________________________________________________
 !
 !   Close the chunks loop
 !_______________________________________________________________________
 
     END DO iop_loop
-!_______________________________________________________________________
-!
-!   Reduce the temporary fmint and fmaxt across nested threads
-!_______________________________________________________________________
-
-  !$OMP CRITICAL
-    IF ( oct == last_oct ) THEN
-      fmin = MIN( fmin, fmint )
-      fmax = MAX( fmax, fmaxt )
-    END IF
-  !$OMP END CRITICAL
-  !$OMP BARRIER
 !_______________________________________________________________________
 !_______________________________________________________________________
 

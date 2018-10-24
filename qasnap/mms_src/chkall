@@ -1,67 +1,69 @@
+#!/bin/tcsh
+
 # 1-D cases
 # No Fixup
-mpirun -cpus-per-proc 2 -np 1 $1 1d_mms_st.inp 1d_mms_st.new
+mpirun --map-by socket:PE=2 -n 1 $1 1d_mms_st.inp 1d_mms_st.new
 mv -f flux 1d_mms_st.flux.new
 mv -f slgg 1d_mms_st.slgg.new
 
-mpirun -cpus-per-proc 4 -np 1 $1 1d_mms_t1.inp 1d_mms_t1.new
+mpirun --map-by socket:PE=4 -n 1 $1 1d_mms_t1.inp 1d_mms_t1.new
 
-mpirun -cpus-per-proc 10 -np 1 $1 1d_mms_t2.inp 1d_mms_t2.new
+mpirun --map-by socket:PE=10 -n 1 $1 1d_mms_t2.inp 1d_mms_t2.new
 
 # Fixup
-mpirun -cpus-per-proc 2 -np 1 $1 1d_fixup_st.inp 1d_fixup_st.new
+mpirun --map-by socket:PE=2 -n 1 $1 1d_fixup_st.inp 1d_fixup_st.new
 mv -f flux 1d_fixup_st.flux.new
 mv -f slgg 1d_fixup_st.slgg.new
 
-mpirun -cpus-per-proc 4 -np 1 $1 1d_fixup_t1.inp 1d_fixup_t1.new
+mpirun --map-by socket:PE=4 -n 1 $1 1d_fixup_t1.inp 1d_fixup_t1.new
 
-mpirun -cpus-per-proc 10 -np 1 $1 1d_fixup_t2.inp 1d_fixup_t2.new
+mpirun --map-by socket:PE=10 -n 1 $1 1d_fixup_t2.inp 1d_fixup_t2.new
 
 
 # 2-D cases
 # No Fixup
-mpirun -cpus-per-proc 4 -np 4 $1 2d_mms_st.inp 2d_mms_st.new
+mpirun --map-by socket:PE=4 -n 4 $1 2d_mms_st.inp 2d_mms_st.new
 mv -f flux 2d_mms_st.flux.new
 mv -f slgg 2d_mms_st.slgg.new
 
-mpirun -cpus-per-proc 4 -np 4 $1 2d_mms_t1.inp 2d_mms_t1.new
+mpirun --map-by socket:PE=4 -n 4 $1 2d_mms_t1.inp 2d_mms_t1.new
 
-mpirun -cpus-per-proc 4 -np 4 $1 2d_mms_t2.inp 2d_mms_t2.new
+mpirun --map-by socket:PE=4 -n 4 $1 2d_mms_t2.inp 2d_mms_t2.new
 
 # Fixup
-mpirun -cpus-per-proc 4 -np 4 $1 2d_fixup_st.inp 2d_fixup_st.new
+mpirun --map-by socket:PE=4 -n 4 $1 2d_fixup_st.inp 2d_fixup_st.new
 mv -f flux 2d_fixup_st.flux.new
 mv -f slgg 2d_fixup_st.slgg.new
 
-mpirun -cpus-per-proc 4 -np 4 $1 2d_fixup_t1.inp 2d_fixup_t1.new
+mpirun --map-by socket:PE=4 -n 4 $1 2d_fixup_t1.inp 2d_fixup_t1.new
 
-mpirun -cpus-per-proc 4 -np 4 $1 2d_fixup_t2.inp 2d_fixup_t2.new
+mpirun --map-by socket:PE=4 -n 4 $1 2d_fixup_t2.inp 2d_fixup_t2.new
 
 
 # 3-D cases
 # No Fixup
-mpirun -cpus-per-proc 4 -np 4 $1 3d_mms_st.inp 3d_mms_st.new
+mpirun --map-by socket:PE=4 -n 4 $1 3d_mms_st.inp 3d_mms_st.new
 mv -f flux 3d_mms_st.flux.new
 mv -f slgg 3d_mms_st.slgg.new
 
-mpirun -cpus-per-proc 2 -np 8 $1 3d_mms_t1.inp 3d_mms_t1.new
+mpirun --map-by socket:PE=2 -n 8 $1 3d_mms_t1.inp 3d_mms_t1.new
 
-mpirun -cpus-per-proc 2 -np 8 $1 3d_mms_t2.inp 3d_mms_t2.new
+mpirun --map-by socket:PE=2 -n 8 $1 3d_mms_t2.inp 3d_mms_t2.new
 
-mpirun -cpus-per-proc 2 -np 8 $1 3d_model.inp 3d_model.new
+mpirun --map-by socket:PE=2 -n 8 $1 3d_model.inp 3d_model.new
 
-mpirun -cpus-per-proc 4 -np 4 $1 3d_model_n.inp 3d_model_n.new
+mpirun --map-by socket:PE=4 -n 4 $1 3d_model_n.inp 3d_model_n.new
 
 # Fixup
-mpirun -cpus-per-proc 4 -np 4 $1 3d_fixup_st.inp 3d_fixup_st.new
+mpirun --map-by socket:PE=4 -n 4 $1 3d_fixup_st.inp 3d_fixup_st.new
 mv -f flux 3d_fixup_st.flux.new
 mv -f slgg 3d_fixup_st.slgg.new
 
-mpirun -cpus-per-proc 2 -np 8 $1 3d_fixup_t1.inp 3d_fixup_t1.new
+mpirun --map-by socket:PE=2 -n 8 $1 3d_fixup_t1.inp 3d_fixup_t1.new
 
-mpirun -cpus-per-proc 2 -np 8 $1 3d_fixup_t2.inp 3d_fixup_t2.new
+mpirun --map-by socket:PE=2 -n 8 $1 3d_fixup_t2.inp 3d_fixup_t2.new
 
-mpirun -cpus-per-proc 2 -np 8 $1 3d_mod_fixup.inp 3d_mod_fixup.new
+mpirun --map-by socket:PE=2 -n 8 $1 3d_mod_fixup.inp 3d_mod_fixup.new
 
-mpirun -cpus-per-proc 4 -np 4 $1 3d_mod_fix_n.inp 3d_mod_fix_n.new
+mpirun --map-by socket:PE=4 -n 4 $1 3d_mod_fix_n.inp 3d_mod_fix_n.new
 

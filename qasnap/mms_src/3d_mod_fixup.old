@@ -1,7 +1,7 @@
  SNAP: SN (Discrete Ordinates) Application Proxy
- Version Number..  1.07 
- Version Date..  03-03-2016
- Ran on  4-19-2016 at time 18:28:14
+ Version Number..  1.08 
+ Version Date..  10-24-2018
+ Ran on 10-24-2018 at time 14:25:25
 
 ********************************************************************************
 
@@ -34,7 +34,7 @@
      tf=  1.0000E-01
      nsteps=    10
      swp_typ=  0
-     cor_swp=  0
+     multiswp=  0
      angcpy=  2
      it_det=  0
      soloutp=  1
@@ -272,6 +272,8 @@
     oitm =  100
     timedep = 1
     swp_typ = 0
+    multiswp = 0
+    angcpy = 2
     it_det = 0
     soloutp = 1
     kplane =    0
@@ -290,7 +292,7 @@
            1 - MPI_THREAD_FUNNELED
            2 - MPI_THREAD_SERIALIZED
            3 - MPI_THREAD_MULTIPLE
-    thread_level =  0
+    thread_level =  2
 
     .FALSE. nested threading
       nnested =    1
@@ -3275,20 +3277,20 @@
 
   Code Section                          Time (seconds)
  **************                        ****************
-    Parallel Setup                       1.3230E-03
-    Input                                4.7820E-03
-    Setup                                4.5338E+00
-    Solve                                1.5334E+01
-       Parameter Setup                   2.5516E-01
-       Outer Source                      4.4758E-01
-       Inner Iterations                  1.4624E+01
-          Inner Source                   8.6665E-02
-          Transport Sweeps               1.4275E+01
-          Inner Misc Ops                 2.6273E-01
-       Solution Misc Ops                 6.7589E-03
-    Output                               8.8260E-03
-  Total Execution time                   1.9904E+01
+    Parallel Setup                       1.8197E-03
+    Input                                1.0290E-03
+    Setup                                4.7802E+00
+    Solve                                1.2187E+01
+       Parameter Setup                   3.3458E-01
+       Outer Source                      3.9751E-01
+       Inner Iterations                  1.1448E+01
+          Inner Source                   5.4097E-02
+          Transport Sweeps               1.1205E+01
+          Inner Misc Ops                 1.8842E-01
+       Solution Misc Ops                 7.1201E-03
+    Output                               8.9271E-03
+  Total Execution time                   1.6983E+01
 
-  Grind Time (nanoseconds)         1.8041E+00
+  Grind Time (nanoseconds)         1.4339E+00
 
 ********************************************************************************

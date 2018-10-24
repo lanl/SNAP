@@ -1,7 +1,7 @@
  SNAP: SN (Discrete Ordinates) Application Proxy
- Version Number..  1.07 
- Version Date..  03-03-2016
- Ran on  4-19-2016 at time 18:13:35
+ Version Number..  1.08 
+ Version Date..  10-24-2018
+ Ran on 10-24-2018 at time 14:15:51
 
 ********************************************************************************
 
@@ -34,7 +34,7 @@
      tf=  1.0000E-02
      nsteps=    10
      swp_typ=  0
-     cor_swp=  0
+     multiswp=  0
      angcpy=  1
      it_det=  0
      soloutp=  1
@@ -275,6 +275,8 @@
     oitm =  100
     timedep = 1
     swp_typ = 0
+    multiswp = 0
+    angcpy = 1
     it_det = 0
     soloutp = 1
     kplane =    0
@@ -293,7 +295,7 @@
            1 - MPI_THREAD_FUNNELED
            2 - MPI_THREAD_SERIALIZED
            3 - MPI_THREAD_MULTIPLE
-    thread_level =  0
+    thread_level =  2
 
     .FALSE. nested threading
       nnested =    1
@@ -398,7 +400,7 @@
     2    Dfmxo= 2.1451E+02    No. Inners=   91
     3    Dfmxo= 5.2260E-01    No. Inners=   61
     4    Dfmxo= 5.7901E-04    No. Inners=   33
-    5    Dfmxo= 9.0595E-07    No. Inners=   30
+    5    Dfmxo= 9.0594E-07    No. Inners=   30
   Particle spectrum, cycle (time)   3 (  2.5000E-03 )
            1 1.698991E-10
            2 1.759280E-10
@@ -441,7 +443,7 @@
     2    Dfmxo= 6.5639E+01    No. Inners=   89
     3    Dfmxo= 2.3379E-01    No. Inners=   61
     4    Dfmxo= 3.2581E-04    No. Inners=   34
-    5    Dfmxo= 5.1683E-07    No. Inners=   30
+    5    Dfmxo= 5.1682E-07    No. Inners=   30
   Particle spectrum, cycle (time)   4 (  3.5000E-03 )
            1 1.921494E-10
            2 1.979759E-10
@@ -570,7 +572,7 @@
     2    Dfmxo= 9.3477E+01    No. Inners=   84
     3    Dfmxo= 1.2415E-01    No. Inners=   61
     4    Dfmxo= 2.3838E-04    No. Inners=   31
-    5    Dfmxo= 3.7396E-07    No. Inners=   30
+    5    Dfmxo= 3.7397E-07    No. Inners=   30
   Particle spectrum, cycle (time)   7 (  6.5000E-03 )
            1 1.873981E-10
            2 1.938568E-10
@@ -656,7 +658,7 @@
     2    Dfmxo= 7.1246E+01    No. Inners=   84
     3    Dfmxo= 1.0388E-01    No. Inners=   60
     4    Dfmxo= 1.9700E-04    No. Inners=   32
-    5    Dfmxo= 3.1012E-07    No. Inners=   30
+    5    Dfmxo= 3.1011E-07    No. Inners=   30
   Particle spectrum, cycle (time)   9 (  8.5000E-03 )
            1 1.875880E-10
            2 1.937971E-10
@@ -3597,20 +3599,20 @@
 
   Code Section                          Time (seconds)
  **************                        ****************
-    Parallel Setup                       1.3490E-03
-    Input                                3.3402E-04
-    Setup                                8.8310E-04
-    Solve                                1.2416E+01
-       Parameter Setup                   1.2953E-01
-       Outer Source                      7.1749E-01
-       Inner Iterations                  1.1558E+01
-          Inner Source                   1.0346E-01
-          Transport Sweeps               1.1347E+01
-          Inner Misc Ops                 1.0758E-01
-       Solution Misc Ops                 1.1009E-02
-    Output                               8.4691E-03
-  Total Execution time                   1.2443E+01
+    Parallel Setup                       1.4967E-03
+    Input                                6.8654E-04
+    Setup                                1.2029E-03
+    Solve                                9.6193E+00
+       Parameter Setup                   1.0113E-01
+       Outer Source                      6.2995E-01
+       Inner Iterations                  8.8777E+00
+          Inner Source                   5.7920E-02
+          Transport Sweeps               8.7501E+00
+          Inner Misc Ops                 6.9743E-02
+       Solution Misc Ops                 1.0544E-02
+    Output                               8.6402E-03
+  Total Execution time                   9.6351E+00
 
-  Grind Time (nanoseconds)         1.2455E+00
+  Grind Time (nanoseconds)         9.6496E-01
 
 ********************************************************************************

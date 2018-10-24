@@ -1,0 +1,61 @@
+SNAP Version 1.08
+10/24/2018
+
+SNAP Version 1.08 includes major revisions to the previous version of SNAP
+released to GitHub. The new version has been rewritten to incorporate
+similar changes mad to the code for which it is a proxy, PARTISN.
+
+Summary:
+SNAP 1.08 includes two major modifications. The major revisions are (1) the
+implementation of a new thread-locking scheme when thread_multiple is not
+available that is conformal with OpenMP standard in that any lock is set and
+unset by the same thread before being used by any other thread; and (2) the
+implementation of an asynchronous communication scheme that allows for
+simultaneous mesh sweeps in multiple octant directions.
+
+The thread-locking scheme required the relocation of the nested parallel OpenMP
+region into the mkba_sweep subroutine. This means more fork/join operations and
+will diminish performance. In the absence of nested threading, the new scheme
+can lead to some small performance decrease as thread barriers are put in place
+to protect against race conditions. The use of mkba_sweep is preserved for
+research interest, so its performance has not been optimized.
+
+The simultaneous octant sweeps algorithm improves parallel efficiency by
+starting sweeps from multiple corners of fully known boundary conditions (two
+in 2-D and four in 3-D; this restriction is meant to mimic the production code
+which permits more restrictive boundary conditions, not just vacuum). The
+algorithm works with threads for thread_serialized and thread_multiple
+environments, but only a single lock is used with the former, because the
+order does not matter. This algorithm offers improved scaling, increasingly
+noticeable at increasing node-count. It represents the future direction for the
+production code and as such has been made the default. It does not work with
+swp_typ=1.
+
+Please note some of the variable names and keywords previously used as
+placeholders for the simultaneous octant sweeps algorithm have been changed
+or removed. Most notably, cor_swp has been moved to multiswp as the input
+keyword.
+
+Minor changes were made to the Makefile for better GFORTRAN compile options and
+remove some options for Intel KNL (ksnap) builds.
+
+Please direct questions to the SNAP developers for finer details of the code
+changes.
+
+
+Modified files:
+Makefile
+control.f90
+dim1_sweep.f90
+dim3_sweep.f90
+inner.f90
+input.f90
+mkba_sweep.f90
+octsweep.f90
+plib.F90
+setup.f90
+solvar.f90
+sweep.f90
+thrd_comm.f90
+translv.f90
+version.f

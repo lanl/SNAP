@@ -16,7 +16,7 @@ MODULE dim1_sweep_module
 
   USE data_module, ONLY: src_opt, qim
 
-  USE control_module, ONLY: fixup, tolr, last_oct, update_ptr
+  USE control_module, ONLY: fixup, tolr, update_ptr
 
   USE plib_module, ONLY: ichunk
 
@@ -29,8 +29,7 @@ MODULE dim1_sweep_module
 
 
   SUBROUTINE dim1_sweep ( id, d1, d2, d3, d4, oct, g, psii, qtot, ec,  &
-    vdelt, ptr_in, ptr_out, dinv, flux0, fluxm, wmu, flkx, t_xs, fmin, &
-    fmax )
+    vdelt, ptr_in, ptr_out, dinv, flux0, fluxm, wmu, flkx, t_xs )
 
 !-----------------------------------------------------------------------
 !
@@ -41,8 +40,6 @@ MODULE dim1_sweep_module
     INTEGER(i_knd), INTENT(IN) :: id, d1, d2, d3, d4, oct, g
 
     REAL(r_knd), INTENT(IN) :: vdelt
-
-    REAL(r_knd), INTENT(INOUT) :: fmin, fmax
 
     REAL(r_knd), DIMENSION(nang), INTENT(IN) :: wmu
 
@@ -206,26 +203,10 @@ MODULE dim1_sweep_module
 
       psi = w*psi
 
-      IF ( id == 1 ) THEN
-        flux0(i) = SUM( psi )
-        DO l = 1, cmom-1
-          fluxm(l,i) = SUM( ec(:,l+1)*psi )
-        END DO
-      ELSE
-        flux0(i) = flux0(i) + SUM( psi )
-        DO l = 1, cmom-1
-          fluxm(l,i) = fluxm(l,i) + SUM( ec(:,l+1)*psi )
-        END DO
-      END IF
-!_______________________________________________________________________
-!
-!     Calculate min and max scalar fluxes (not used elsewhere currently)
-!_______________________________________________________________________
-
-      IF ( oct == last_oct ) THEN
-        fmin = MIN( fmin, flux0(i) )
-        fmax = MAX( fmax, flux0(i) )
-      END IF
+      flux0(i) = flux0(i) + SUM( psi )
+      DO l = 1, cmom-1
+        fluxm(l,i) = fluxm(l,i) + SUM( ec(:,l+1)*psi )
+      END DO
 !_______________________________________________________________________
 !
 !     Compute dummy leakages (not used elsewhere currently)

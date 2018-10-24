@@ -18,7 +18,7 @@ MODULE dim3_sweep_module
 
   USE data_module, ONLY: src_opt, qim
 
-  USE control_module, ONLY: fixup, tolr, last_oct, update_ptr
+  USE control_module, ONLY: fixup, tolr, update_ptr, multiswp
 
   USE thrd_comm_module, ONLY: sweep_recv_bdry, sweep_send_bdry
 
@@ -33,7 +33,7 @@ MODULE dim3_sweep_module
   SUBROUTINE dim3_sweep ( ich, id, d1, d2, d3, d4, jd, kd, oct, g, t,  &
     iop, reqs, szreq, psii, psij, psik, qtot, ec, vdelt, ptr_in,       &
     ptr_out, dinv, flux0, fluxm, jb_in, jb_out, kb_in, kb_out, wmu,    &
-    weta, wxi, flkx, flky, flkz, t_xs, fmin, fmax )
+    weta, wxi, flkx, flky, flkz, t_xs )
 
 !-----------------------------------------------------------------------
 !
@@ -47,8 +47,6 @@ MODULE dim3_sweep_module
     INTEGER(i_knd), DIMENSION(szreq), INTENT(INOUT) :: reqs
 
     REAL(r_knd), INTENT(IN) :: vdelt
-
-    REAL(r_knd), INTENT(INOUT) :: fmin, fmax
 
     REAL(r_knd), DIMENSION(nang), INTENT(IN) :: wmu, weta, wxi
 
@@ -103,7 +101,7 @@ MODULE dim3_sweep_module
 !   overlap communication and computation.
 !_______________________________________________________________________
 
-    receive = .TRUE.
+    receive = multiswp /= 1
 !_______________________________________________________________________
 !
 !   Set up the sweep order given octant info.
@@ -387,27 +385,10 @@ MODULE dim3_sweep_module
 
       psi = w*psi
 
-      IF ( oct == 1 ) THEN
-        flux0(i,j,k) = SUM( psi )
-        DO l = 1, cmom-1
-          fluxm(l,i,j,k) = SUM( ec(:,l+1)*psi )
-        END DO
-      ELSE
-        flux0(i,j,k) = flux0(i,j,k) + SUM( psi )
-        DO l = 1, cmom-1
-          fluxm(l,i,j,k) = fluxm(l,i,j,k) + SUM( ec(:,l+1)*psi )
-        END DO
-      END IF
-!_______________________________________________________________________
-!
-!     Calculate dummy min and max scalar fluxes (not used elsewhere
-!     currently)
-!_______________________________________________________________________
-
-      IF ( oct == last_oct ) THEN
-        fmin = MIN( fmin, flux0(i,j,k) )
-        fmax = MAX( fmax, flux0(i,j,k) )
-      END IF
+      flux0(i,j,k) = flux0(i,j,k) + SUM( psi )
+      DO l = 1, cmom-1
+        fluxm(l,i,j,k) = fluxm(l,i,j,k) + SUM( ec(:,l+1)*psi )
+      END DO
 !_______________________________________________________________________
 !
 !   Finish the loops
@@ -421,8 +402,8 @@ MODULE dim3_sweep_module
 !   Send data to downstream neighbors
 !_______________________________________________________________________
 
-    CALL sweep_send_bdry ( g, jd, kd, iop, t, reqs, szreq, nc, nang,   &
-      ichunk, ny, nz, jb_out, kb_out )
+    IF ( multiswp == 0 ) CALL sweep_send_bdry ( g, jd, kd, iop, t,     &
+      reqs, szreq, nc, nang, ichunk, ny, nz, jb_out, kb_out )
 !_______________________________________________________________________
 !_______________________________________________________________________
 

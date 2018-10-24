@@ -20,7 +20,7 @@ MODULE solvar_module
 
   USE data_module, ONLY: ng
 
-  USE control_module, ONLY: timedep, angcpy
+  USE control_module, ONLY: timedep, angcpy, ncor, multiswp
 
   IMPLICIT NONE
 
@@ -48,14 +48,14 @@ MODULE solvar_module
 ! a_xs(nx,ny,nz,ng)       - Absorption cross section on mesh
 ! s_xs(nx,ny,nz,nmom,ng)  - In-group scattering cross section on mesh
 !
-! psii(nang,ny,nz,ng)     - Working psi_x array
-! psij(nang,ichunk,nz,ng) - Working psi_y array
-! psik(nang,ichunk,ny,ng) - Working psi_z array
+! psii(nang,ny,nz,ncor,ng)  - Working psi_x array
+! psij(nang,ichunk,nz,ng)   - Working psi_y array
+! psik(nang,ichunk,ny,ng)   - Working psi_z array
 !
-! jb_in(nang,ichunk,nz,ng)  - y-dir boundary flux in from comm
-! jb_out(nang,ichunk,nz,ng) - y-dir boundary flux out to comm
-! kb_in(nang,ichunk,ny,ng)  - z-dir boundary flux in from comm
-! kb_out(nang,ichunk,ny,ng) - z-dir boundary flux out to comm
+! jb_in(nang,ichunk,nz,ncor,ng)  - y-dir boundary flux in from comm
+! jb_out(nang,ichunk,nz,ncor,ng) - y-dir boundary flux out to comm
+! kb_in(nang,ichunk,ny,ncor,ng)  - z-dir boundary flux in from comm
+! kb_out(nang,ichunk,ny,ncor,ng) - z-dir boundary flux out to comm
 !
 ! flkx(nx+1,ny,nz,ng)     - x-dir leakage array
 ! flky(nx,ny+1,nz,ng)     - y-dir leakage array
@@ -71,10 +71,10 @@ MODULE solvar_module
   REAL(r_knd), ALLOCATABLE, DIMENSION(:) :: fmin, fmax, pop
 
   REAL(r_knd), ALLOCATABLE, DIMENSION(:,:,:,:) :: flux0, flux0po,      &
-    flux0pi, q2grp0, t_xs, a_xs, psii, psij, psik, jb_in, jb_out,      &
-    kb_in, kb_out, flkx, flky, flkz
+    flux0pi, q2grp0, t_xs, a_xs, psij, psik, flkx, flky, flkz
 
-  REAL(r_knd), ALLOCATABLE, DIMENSION(:,:,:,:,:) :: q2grpm, fluxm, s_xs
+  REAL(r_knd), ALLOCATABLE, DIMENSION(:,:,:,:,:) :: q2grpm, fluxm,     &
+    s_xs, psii, jb_in, jb_out, kb_in, kb_out
 
   REAL(r_knd), ALLOCATABLE, DIMENSION(:,:,:,:,:,:) :: qtot
 
@@ -93,6 +93,12 @@ MODULE solvar_module
 !-----------------------------------------------------------------------
 
     INTEGER(i_knd), INTENT(OUT) :: ierr
+!_______________________________________________________________________
+!
+!   Local variables
+!_______________________________________________________________________
+
+    INTEGER(i_knd) :: szcor
 !_______________________________________________________________________
 !
 !   Allocate ptr_in/out if needed. If angcpy=1, only allocate for one
@@ -188,7 +194,13 @@ MODULE solvar_module
 !   Working arrays
 !_______________________________________________________________________
 
-    ALLOCATE( psii(nang,ny,nz,ng), psij(nang,ichunk,nz,ng),            &
+    IF ( multiswp == 0 ) THEN
+      szcor = 1
+    ELSE
+      szcor = ncor
+    END IF
+
+    ALLOCATE( psii(nang,ny,nz,szcor,ng), psij(nang,ichunk,nz,ng),      &
       psik(nang,ichunk,ny,ng), STAT=ierr )
     IF ( ierr /= 0 ) RETURN
 
@@ -200,8 +212,9 @@ MODULE solvar_module
 !   PE boundary flux arrays
 !_______________________________________________________________________
 
-    ALLOCATE( jb_in(nang,ichunk,nz,ng), jb_out(nang,ichunk,nz,ng),     &
-      kb_in(nang,ichunk,ny,ng), kb_out(nang,ichunk,ny,ng), STAT=ierr )
+    ALLOCATE( jb_in(nang,ichunk,nz,szcor,ng),                          &
+      jb_out(nang,ichunk,nz,szcor,ng), kb_in(nang,ichunk,ny,szcor,ng), &
+      kb_out(nang,ichunk,ny,szcor,ng), STAT=ierr )
     IF ( ierr /= 0 ) RETURN
 
     jb_in  = zero

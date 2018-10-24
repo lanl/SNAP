@@ -46,7 +46,7 @@ endif
 PPFLAGS = $(foreach def,$(DEFS),-D$(def))
 
 ifeq ($(TARGET),gsnap)
-  FFLAGS = -O3 $(OMPFLAG)
+  FFLAGS = -Ofast -funroll-loops -march=native $(OMPFLAG)
   FFLAG2 =
   PP = cpp
   ifeq ($(OPT),no)
@@ -73,7 +73,7 @@ ifeq ($(TARGET),isnap)
 endif
 
 ifeq ($(TARGET),ksnap)
-  FFLAGS = -O3 $(OMPFLAG) -xmic-avx512 -ip -align array64byte -qopt-streaming-cache-evict=0 -qno-opt-dynamic-align -fp-model fast -fp-speculation fast -fno-alias -fno-fnalias
+  FFLAGS = -O3 $(OMPFLAG) -xmic-avx512 -ip -align array64byte -qno-opt-dynamic-align -fp-model fast -fp-speculation fast -fno-alias -fno-fnalias
   FFLAG2 =
   PP = fpp
   ifeq ($(OPT),no)
@@ -87,14 +87,14 @@ endif
 
 OBJS = global.o snap_main.o utils.o version.o plib.o geom.o sn.o \
        data.o control.o input.o setup.o dealloc.o translv.o solvar.o \
-       outer.o expxs.o inner.o sweep.o octsweep.o dim1_sweep.o dim3_sweep.o \
-       output.o time.o mms.o analyze.o thrd_comm.o mkba_sweep.o
+       outer.o expxs.o inner.o sweep.o octsweep.o dim1_sweep.o \
+       dim3_sweep.o output.o time.o mms.o analyze.o thrd_comm.o mkba_sweep.o
 
 SRCS = global.f90 snap_main.f90 utils.f90 version.f90 plib.F90 geom.f90 \
        sn.f90 data.f90 control.f90 input.f90 setup.f90 dealloc.f90 \
        translv.f90 solvar.f90 outer.f90 expxs.f90 inner.f90 sweep.f90 \
-       octsweep.f90 dim1_sweep.f90 dim3_sweep.f90 output.f90 time.F90 mms.f90 \
-       analyze.f90 thrd_comm.f90 mkba_sweep.f90
+       octsweep.f90 dim1_sweep.f90 dim3_sweep.f90 output.f90 \
+       time.F90 mms.f90 analyze.f90 thrd_comm.f90 mkba_sweep.f90
 
 $(TARGET) :	$(OBJS)
 		$(FORTRAN) $(FFLAGS) $(FFLAG2) -o $@ $(OBJS)
@@ -125,8 +125,8 @@ dim3_sweep.o :	global.o plib.o geom.o sn.o data.o control.o thrd_comm.o
 mkba_sweep.o :	global.o plib.o geom.o sn.o data.o control.o thrd_comm.o
 octsweep.o :	global.o geom.o sn.o data.o control.o solvar.o \
 		thrd_comm.o dim1_sweep.o dim3_sweep.o mkba_sweep.o
-sweep.o :	global.o data.o geom.o control.o octsweep.o solvar.o plib.o \
-		thrd_comm.o
+sweep.o :	global.o data.o geom.o sn.o control.o octsweep.o solvar.o \
+		plib.o thrd_comm.o
 inner.o :	global.o geom.o sn.o data.o control.o solvar.o sweep.o \
 		time.o plib.o thrd_comm.o
 outer.o :	global.o geom.o sn.o data.o solvar.o control.o inner.o \

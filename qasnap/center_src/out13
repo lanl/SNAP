@@ -1,7 +1,7 @@
  SNAP: SN (Discrete Ordinates) Application Proxy
- Version Number..  1.07 
- Version Date..  03-03-2016
- Ran on  4-19-2016 at time 18:14: 6
+ Version Number..  1.08 
+ Version Date..  10-24-2018
+ Ran on 10-24-2018 at time 14:16:21
 
 ********************************************************************************
 
@@ -34,7 +34,7 @@
      tf=  1.0000E-02
      nsteps=    10
      swp_typ=  1
-     cor_swp=  0
+     multiswp=  0
      angcpy=  1
      it_det=  0
      soloutp=  1
@@ -275,6 +275,8 @@
     oitm =  100
     timedep = 1
     swp_typ = 1
+    multiswp = 0
+    angcpy = 1
     it_det = 0
     soloutp = 1
     kplane =    0
@@ -293,7 +295,7 @@
            1 - MPI_THREAD_FUNNELED
            2 - MPI_THREAD_SERIALIZED
            3 - MPI_THREAD_MULTIPLE
-    thread_level =  0
+    thread_level =  2
 
     .TRUE. nested threading
       nnested =    2
@@ -334,7 +336,7 @@
     2    Dfmxo= 2.1451E+02    No. Inners=   91
     3    Dfmxo= 5.2260E-01    No. Inners=   61
     4    Dfmxo= 5.7901E-04    No. Inners=   33
-    5    Dfmxo= 9.0595E-07    No. Inners=   30
+    5    Dfmxo= 9.0594E-07    No. Inners=   30
 
   Cycle=   3    Time= 2.5000E-03    No. Outers=   5    No. Inners=  330
 
@@ -345,7 +347,7 @@
     2    Dfmxo= 6.5639E+01    No. Inners=   89
     3    Dfmxo= 2.3379E-01    No. Inners=   61
     4    Dfmxo= 3.2581E-04    No. Inners=   34
-    5    Dfmxo= 5.1683E-07    No. Inners=   30
+    5    Dfmxo= 5.1682E-07    No. Inners=   30
 
   Cycle=   4    Time= 3.5000E-03    No. Outers=   5    No. Inners=  328
 
@@ -378,7 +380,7 @@
     2    Dfmxo= 9.3477E+01    No. Inners=   84
     3    Dfmxo= 1.2415E-01    No. Inners=   61
     4    Dfmxo= 2.3838E-04    No. Inners=   31
-    5    Dfmxo= 3.7396E-07    No. Inners=   30
+    5    Dfmxo= 3.7397E-07    No. Inners=   30
 
   Cycle=   7    Time= 6.5000E-03    No. Outers=   5    No. Inners=  318
 
@@ -3277,20 +3279,20 @@
 
   Code Section                          Time (seconds)
  **************                        ****************
-    Parallel Setup                       1.4219E-03
-    Input                                3.4785E-04
-    Setup                                8.5521E-04
-    Solve                                1.9574E+01
-       Parameter Setup                   1.3538E-01
-       Outer Source                      7.6043E-01
-       Inner Iterations                  1.8661E+01
-          Inner Source                   1.1745E-01
-          Transport Sweeps               1.8317E+01
-          Inner Misc Ops                 2.2665E-01
-       Solution Misc Ops                 1.6698E-02
-    Output                               8.5461E-03
-  Total Execution time                   1.9602E+01
+    Parallel Setup                       1.4840E-03
+    Input                                7.4597E-04
+    Setup                                1.2027E-03
+    Solve                                9.4624E+01
+       Parameter Setup                   1.0839E-01
+       Outer Source                      6.8836E-01
+       Inner Iterations                  9.3241E+01
+          Inner Source                   4.1481E-01
+          Transport Sweeps               9.1579E+01
+          Inner Misc Ops                 1.2471E+00
+       Solution Misc Ops                 5.8658E-01
+    Output                               1.9145E-02
+  Total Execution time                   9.4652E+01
 
-  Grind Time (nanoseconds)         1.9635E+00
+  Grind Time (nanoseconds)         9.4922E+00
 
 ********************************************************************************

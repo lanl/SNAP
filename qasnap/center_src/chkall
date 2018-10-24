@@ -1,32 +1,33 @@
+#!/bin/tcsh
 
 # No Fixup
-mpirun -cpus-per-proc 3 -np 4 $1 in01 nout01 
-mpirun -cpus-per-proc 2 -np 6 $1 in02 nout02
-mpirun -cpus-per-proc 2 -np 6 $1 in03 nout03
-mpirun -cpus-per-proc 2 -np 4 $1 in04 nout04
-mpirun -cpus-per-proc 4 -np 4 $1 in05 nout05
-mpirun -cpus-per-proc 4 -np 4 $1 in06 nout06
-mpirun -cpus-per-proc 2 -np 8 $1 in07 nout07
-mpirun -cpus-per-proc 2 -np 8 $1 in08 nout08
-mpirun -cpus-per-proc 4 -np 4 $1 in09 nout09
-mpirun -cpus-per-proc 4 -np 4 $1 in10 nout10
-mpirun -cpus-per-proc 4 -np 4 $1 in11 nout11
-mpirun -cpus-per-proc 4 -np 4 $1 in12 nout12
-mpirun -cpus-per-proc 4 -np 4 $1 in13 nout13
-mpirun -cpus-per-proc 8 -np 1 $1 in14 nout14
+mpirun --map-by socket:PE=3 -n 4 $1 in01 nout01 
+mpirun --map-by socket:PE=2 -n 6 $1 in02 nout02
+mpirun --map-by socket:PE=2 -n 6 $1 in03 nout03
+mpirun --map-by socket:PE=2 -n 4 $1 in04 nout04
+mpirun --map-by socket:PE=4 -n 4 $1 in05 nout05
+mpirun --map-by socket:PE=4 -n 4 $1 in06 nout06
+mpirun --map-by socket:PE=2 -n 8 $1 in07 nout07
+mpirun --map-by socket:PE=2 -n 8 $1 in08 nout08
+mpirun --map-by socket:PE=4 -n 4 $1 in09 nout09
+mpirun --map-by socket:PE=4 -n 4 $1 in10 nout10
+mpirun --map-by socket:PE=4 -n 4 $1 in11 nout11
+mpirun --map-by socket:PE=4 -n 4 $1 in12 nout12
+mpirun --map-by socket:PE=4 -n 4 $1 in13 nout13
+mpirun --map-by socket:PE=8 -n 1 $1 in14 nout14
 
 # Fixup
-mpirun -cpus-per-proc 3 -np 4 $1 fin01 nfout01 
-mpirun -cpus-per-proc 2 -np 6 $1 fin02 nfout02
-mpirun -cpus-per-proc 2 -np 6 $1 fin03 nfout03
-mpirun -cpus-per-proc 2 -np 4 $1 fin04 nfout04
-mpirun -cpus-per-proc 4 -np 4 $1 fin05 nfout05
-mpirun -cpus-per-proc 4 -np 4 $1 fin06 nfout06
-mpirun -cpus-per-proc 2 -np 8 $1 fin07 nfout07
-mpirun -cpus-per-proc 2 -np 8 $1 fin08 nfout08
-mpirun -cpus-per-proc 4 -np 4 $1 fin09 nfout09
-mpirun -cpus-per-proc 4 -np 4 $1 fin10 nfout10
-mpirun -cpus-per-proc 4 -np 4 $1 fin11 nfout11
-mpirun -cpus-per-proc 4 -np 4 $1 fin12 nfout12
-mpirun -cpus-per-proc 4 -np 4 $1 fin13 nfout13
-mpirun -cpus-per-proc 8 -np 1 $1 fin14 nfout14
+mpirun --map-by socket:PE=3 -n 4 $1 fin01 nfout01 
+mpirun --map-by socket:PE=2 -n 6 $1 fin02 nfout02
+mpirun --map-by socket:PE=2 -n 6 $1 fin03 nfout03
+mpirun --map-by socket:PE=2 -n 4 $1 fin04 nfout04
+mpirun --map-by socket:PE=4 -n 4 $1 fin05 nfout05
+mpirun --map-by socket:PE=4 -n 4 $1 fin06 nfout06
+mpirun --map-by socket:PE=2 -n 8 $1 fin07 nfout07
+mpirun --map-by socket:PE=2 -n 8 $1 fin08 nfout08
+mpirun --map-by socket:PE=4 -n 4 $1 fin09 nfout09
+mpirun --map-by socket:PE=4 -n 4 $1 fin10 nfout10
+mpirun --map-by socket:PE=4 -n 4 $1 fin11 nfout11
+mpirun --map-by socket:PE=4 -n 4 $1 fin12 nfout12
+mpirun --map-by socket:PE=4 -n 4 $1 fin13 nfout13
+mpirun --map-by socket:PE=8 -n 1 $1 fin14 nfout14

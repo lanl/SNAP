@@ -22,8 +22,9 @@ MODULE setup_module
     sigt, siga, sigs, slgg, data_allocate
 
   USE control_module, ONLY: epsi, iitm, oitm, timedep, tf, nsteps, dt, &
-    swp_typ, it_det, fluxp, fixup, soloutp, kplane, popout, ncor,      &
-    last_oct, corner_sch, cor_swp, yzstg, control_allocate
+    swp_typ, it_det, fluxp, fixup, soloutp, kplane, popout, ncor, nops,&
+    last_oct, corner_sch, multiswp, yzstg, corner_loop_order, angcpy,  &
+    control_allocate
 
   USE mms_module, ONLY: mms_setup
 
@@ -85,6 +86,10 @@ MODULE setup_module
     kub = (zproc+1) * nz
 
     nc = nx/ichunk
+
+    jdim = MIN( ndimen, 2 )
+    kdim = MAX( ndimen-1, 1 )
+    ncor = jdim*kdim
 !_______________________________________________________________________
 !
 !   Allocate needed arrays
@@ -101,14 +106,10 @@ MODULE setup_module
 !   minimizes the number of stages based on npey and npez.
 !_______________________________________________________________________
 
-    jdim = MIN( ndimen, 2 )
-    kdim = MAX( ndimen-1, 1 )
-    ncor = jdim*kdim
-
     corner_sch = 0
     IF ( ndimen == 3 ) THEN
       IF ( npey <= npez ) THEN
-        last_oct = 8
+        last_oct = 6
         corner_sch(:,1) = (/ 1, 1 /)
         corner_sch(:,2) = (/ 2, 1 /)
         corner_sch(:,3) = (/ 2, 2 /)
@@ -127,24 +128,56 @@ MODULE setup_module
     END IF
 !_______________________________________________________________________
 !
-!   Set up the concurrent octant mesh sweeps control information.
-!   Compute an array that determines each KBA stage's relative position
-!   in the full sweep, yzstg.
+!   Set up the concurrent octant mesh sweeps control information. Force
+!   normal sweeper swp_typ=0 for now. Set nops. Compute an array that
+!   determines each KBA stage's relative position in the full sweep,
+!   yzstg, and the number of stages per octant pair. Set up the corner
+!   loop priority to avoid wasted request comparisons on messages not
+!   likely to be received.
 !_______________________________________________________________________
 
-    IF ( cor_swp == 1 ) THEN
-      DO i = 1, ncor
-        IF ( i==1 .OR. i==3 ) THEN
-          yzstg(i) = npey - yproc
-        ELSE
-          yzstg(i) = yproc + 1
-        END IF
-        IF ( i <= 2 ) THEN
-          yzstg(i) = yzstg(i) + npez - zproc - 1
-        ELSE
-          yzstg(i) = yzstg(i) + zproc
-        END IF
-      END DO
+    yzstg = 0
+    corner_loop_order = 0
+
+    IF ( multiswp == 1 ) THEN
+
+      nops = ng*ncor*2*nc
+      swp_typ=0
+
+      yzstg(1) = npey - (yproc + 1) + npez - (zproc + 1)
+      yzstg(2) = yproc + npez - (zproc + 1)
+      yzstg(3) = npey - (yproc + 1) + zproc
+      yzstg(4) = yproc + zproc
+
+      IF ( ndimen == 1 ) THEN
+        i = 1
+      ELSE IF ( ndimen == 2 ) THEN
+        i = MINLOC( yzstg(1:2), 1 )
+      ELSE
+        i = MINLOC( yzstg, 1 )
+      END IF
+
+      SELECT CASE ( i )
+        CASE ( 1 )
+          IF ( ndimen == 1 ) THEN
+            corner_loop_order = (/ 1, 0, 0, 0 /)
+          ELSE IF ( ndimen == 2 ) THEN
+            corner_loop_order = (/ 1, 2, 0, 0 /)
+          ELSE          
+            corner_loop_order = (/ 1, 2, 3, 4 /)
+          END IF
+        CASE ( 2 )
+          IF ( ndimen == 2 ) THEN
+            corner_loop_order = (/ 2, 1, 0, 0 /)
+          ELSE
+            corner_loop_order = (/ 2, 1, 4, 3 /)
+          END IF
+        CASE ( 3 )
+          corner_loop_order = (/ 3, 4, 1, 2 /)
+        CASE ( 4 )
+          corner_loop_order = (/ 4, 3, 2, 1 /)
+      END SELECT
+
     END IF
 !_______________________________________________________________________
 !
@@ -153,7 +186,7 @@ MODULE setup_module
 !   compared to a single corner start.
 !_______________________________________________________________________
 
-    IF ( cor_swp == 0 ) THEN
+    IF ( multiswp == 0 ) THEN
       IF ( npey <= npez ) THEN
         idle = 3*(npey-1) + 2*(npez-1)
       ELSE
@@ -162,7 +195,7 @@ MODULE setup_module
     ELSE
       hnpy = CEILING( REAL( npey, r_knd ) / two )
       hnpz = CEILING( REAL( npez, r_knd ) / two )
-      idle = (ncor/2) * (2*(hnpy-1) + hnpz-1)
+      idle = 2 * ( hnpy + hnpz - 2 )
     END IF
 
     mgpt = CEILING( REAL( ng, r_knd ) / REAL( nthreads, r_knd ) )
@@ -763,8 +796,8 @@ MODULE setup_module
     END IF
 
     WRITE( ounit, 157 )
-    WRITE( ounit, 158 ) epsi, iitm, oitm, timedep, swp_typ, it_det,    &
-      soloutp, kplane, popout, fluxp, fixup
+    WRITE( ounit, 158 ) epsi, iitm, oitm, timedep, swp_typ, multiswp,  &
+      angcpy, it_det, soloutp, kplane, popout, fluxp, fixup
 
     WRITE( ounit, 181 )
     WRITE( ounit, 182 ) npey, npez, nthreads
@@ -831,7 +864,8 @@ MODULE setup_module
     157 FORMAT( /, 2X, 'Solution Control Parameters' )
     158 FORMAT( 4X, 'epsi = ', ES11.4, /, 4X, 'iitm = ', I3, /,        &
                 4X, 'oitm = ', I4, /, 4X, 'timedep = ', I1, /,         &
-                4X, 'swp_typ = ', I1, / 4X, 'it_det = ', I1, /,        &
+                4X, 'swp_typ = ', I1, /, 4X, 'multiswp = ', I1, /,     &
+                4X, 'angcpy = ', I1, /,  4X, 'it_det = ', I1, /,       &
                 4X, 'soloutp = ', I1, /, 4X, 'kplane = ', I4, /,       &
                 4X, 'popout = ', I1, /, 4X, 'fluxp = ', I1, /,         &
                 4X, 'fixup = ', I1, / )
