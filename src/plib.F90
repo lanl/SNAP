@@ -1247,10 +1247,8 @@ MODULE plib_module
   END SUBROUTINE waitsome
 
 
-  SUBROUTINE tests ( req, flag )
+  SUBROUTINE tests ( req )
     INTEGER(i_knd), INTENT(IN) :: req
-    LOGICAL(l_knd), INTENT(OUT) :: flag
-    flag = .FALSE.
   END SUBROUTINE tests
 
 
