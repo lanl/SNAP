@@ -1,0 +1,37 @@
+SNAP Version 1.09
+04/18/2019
+
+SNAP Version 1.09 includes minor revisions to the previous version of SNAP
+released to GitHub.
+
+Summary:
+SNAP 1.09 includes one feature request addition. SNAP now reports the number
+of words allocated, which when multiplied by the number of bytes per word
+(i.e., 8 for double precision), allows the user to quickly assess how much
+memory SNAP is using. It does not include the size of stack memory. This
+information can be found at the bottom of a SNAP output file or by searching
+for the phrase "Allocated words".
+
+The Makefile has also been lightly modified to use less aggressive optimizations
+for the GFORTRAN configuration. As always, users may modify the makefile
+options that suit their own needs. This change effectively reverts changes
+made for v1.08.
+
+The copyright statment has been previously updated to reflect the change in
+management of Los Alamos National Laboratory to Triad National Security, LLC.
+
+Please direct questions to the SNAP developers for finer details of the code
+changes.
+
+
+Modified files:
+Makefile
+control.f90
+data.f90
+geom.f90
+setup.f90
+sn.f90
+snap_main.f90
+solvar.f90
+translv.f90
+version.f

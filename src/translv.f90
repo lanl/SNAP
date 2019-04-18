@@ -1,4 +1,4 @@
-SUBROUTINE translv
+SUBROUTINE translv ( ndpwds )
 
 !-----------------------------------------------------------------------
 !
@@ -39,6 +39,14 @@ SUBROUTINE translv
   USE analyze_module, ONLY: analyze_pop_calc
 
   IMPLICIT NONE
+
+!-----------------------------------------------------------------------
+!
+! Dummy arguments
+!
+!-----------------------------------------------------------------------
+
+  INTEGER, INTENT(INOUT) :: ndpwds
 !_______________________________________________________________________
 !
 ! Local variables
@@ -69,7 +77,7 @@ SUBROUTINE translv
   ierr = 0
   error = ' '
 
-  CALL geom_allocate ( nang, ng, swp_typ, ichunk, ierr )
+  CALL geom_allocate ( nang, ng, swp_typ, ichunk, ndpwds, ierr )
   CALL glmax ( ierr, comm_snap )
   IF ( ierr /= 0 ) THEN
     error = '***ERROR: GEOM_ALLOC: Allocation error of sweep parameters'
@@ -77,7 +85,7 @@ SUBROUTINE translv
     CALL stop_run ( 1, 4, 0, 0 )
   END IF
 
-  CALL solvar_allocate ( ierr )
+  CALL solvar_allocate ( ndpwds, ierr )
   CALL glmax ( ierr, comm_snap )
   IF ( ierr /= 0 ) THEN
     error = '***ERROR: SOLVAR_ALLOC: Allocation error of solution ' // &

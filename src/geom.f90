@@ -98,7 +98,7 @@ MODULE geom_module
   CONTAINS
 
 
-  SUBROUTINE geom_allocate ( nang, ng, swp_typ, ichunk, ierr )
+  SUBROUTINE geom_allocate ( nang, ng, swp_typ, ichunk, ndpwds, ierr )
 
 !-----------------------------------------------------------------------
 !
@@ -108,6 +108,8 @@ MODULE geom_module
 !-----------------------------------------------------------------------
 
     INTEGER(i_knd), INTENT(IN) :: nang, ng, swp_typ, ichunk
+
+    INTEGER(i_knd), INTENT(INOUT) :: ndpwds
 
     INTEGER(i_knd), INTENT(OUT) :: ierr
 !_______________________________________________________________________
@@ -129,6 +131,8 @@ MODULE geom_module
     hj = zero
     hk = zero
     dinv = zero
+
+    ndpwds = ndpwds + SIZE( dinv )
 !_______________________________________________________________________
 !
 !   If mini-KBA on spatial chunks is selected, set up the diagonal
@@ -168,6 +172,7 @@ MODULE geom_module
         ing = diag(nn)%len
         ALLOCATE( diag(nn)%cell_id(ing), STAT=ierr )
         IF ( ierr /= 0 ) RETURN
+        ndpwds = ndpwds + SIZE( diag(nn)%cell_id )
       END DO
 !_______________________________________________________________________
 !

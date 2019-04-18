@@ -47,13 +47,15 @@ MODULE setup_module
   CONTAINS
 
 
-  SUBROUTINE setup
+  SUBROUTINE setup ( ndpwds )
 
 !-----------------------------------------------------------------------
 !
 ! Control the setup process.
 !
 !-----------------------------------------------------------------------
+
+    INTEGER(i_knd), INTENT(INOUT) :: ndpwds
 !_______________________________________________________________________
 !
 !   Local variables
@@ -95,7 +97,7 @@ MODULE setup_module
 !   Allocate needed arrays
 !_______________________________________________________________________
 
-    CALL setup_alloc ( flg, ierr, error )
+    CALL setup_alloc ( ndpwds, flg, ierr, error )
     IF ( ierr /= 0 ) THEN
       CALL print_error ( ounit, error )
       CALL stop_run ( 1, flg, 0, 0 )
@@ -254,7 +256,7 @@ MODULE setup_module
   END SUBROUTINE setup
 
 
-  SUBROUTINE setup_alloc ( flg, ierr, error )
+  SUBROUTINE setup_alloc ( ndpwds, flg, ierr, error )
 
 !-----------------------------------------------------------------------
 !
@@ -264,6 +266,8 @@ MODULE setup_module
 
     CHARACTER(LEN=64), INTENT(OUT) :: error
 
+    INTEGER(i_knd), INTENT(INOUT) :: ndpwds
+
     INTEGER(i_knd), INTENT(OUT) :: flg, ierr
 !_______________________________________________________________________
 
@@ -271,14 +275,15 @@ MODULE setup_module
     ierr = 0
     error = ' '
 
-    CALL sn_allocate ( ndimen, ierr )
+    CALL sn_allocate ( ndimen, ndpwds, ierr )
     CALL glmax ( ierr, comm_snap )
     IF ( ierr /= 0 ) THEN
       error = '***ERROR: SETUP_ALLOC: Allocation error in SN_ALLOCATE'
       RETURN
     END IF
 
-    CALL data_allocate ( nx, ny, nz, nmom, nang, noct, timedep, ierr )
+    CALL data_allocate ( nx, ny, nz, nmom, nang, noct, timedep,        &
+                         ndpwds, ierr )
     CALL glmax ( ierr, comm_snap )
     IF ( ierr /= 0 ) THEN
       flg = 1
@@ -286,7 +291,7 @@ MODULE setup_module
       RETURN
     END IF
 
-    CALL control_allocate ( ng, ierr )
+    CALL control_allocate ( ng, ndpwds, ierr )
     CALL glmax ( ierr, comm_snap )
     IF ( ierr /= 0 ) THEN
       flg = 2

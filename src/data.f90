@@ -65,7 +65,7 @@ MODULE data_module
 
 
   SUBROUTINE data_allocate ( nx, ny, nz, nmom, nang, noct, timedep,    &
-    istat )
+    ndpwds, istat )
 
 !-----------------------------------------------------------------------
 !
@@ -75,7 +75,7 @@ MODULE data_module
 
     INTEGER(i_knd), INTENT(IN) :: nx, ny, nz, nmom, nang, noct, timedep
 
-    INTEGER(i_knd), INTENT(INOUT) :: istat
+    INTEGER(i_knd), INTENT(INOUT) :: ndpwds, istat
 !_______________________________________________________________________
 !
 !   Establish number of materials according to mat_opt
@@ -148,6 +148,14 @@ MODULE data_module
     IF ( istat /= 0 ) RETURN
 
     vdelt = zero
+!_______________________________________________________________________
+!
+!   Add up words allocated
+!_______________________________________________________________________
+
+    ndpwds = ndpwds + SIZE( v ) + SIZE( mat ) + SIZE( qi ) +           &
+      SIZE( qim ) + SIZE( sigt ) + SIZE( siga ) + SIZE( sigs ) +       &
+      SIZE( slgg ) + SIZE( vdelt )
 !_______________________________________________________________________
 !_______________________________________________________________________
 

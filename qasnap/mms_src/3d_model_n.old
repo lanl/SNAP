@@ -1,7 +1,7 @@
  SNAP: SN (Discrete Ordinates) Application Proxy
- Version Number..  1.08 
- Version Date..  10-24-2018
- Ran on 10-24-2018 at time 14:23:51
+ Version Number..  1.09 
+ Version Date..  04-18-2019
+ Ran on  4-17-2019 at time 22:54:11
 
 ********************************************************************************
 
@@ -3277,20 +3277,24 @@
 
   Code Section                          Time (seconds)
  **************                        ****************
-    Parallel Setup                       1.4018E-03
-    Input                                6.1300E-03
-    Setup                                4.9026E+00
-    Solve                                8.3764E+01
-       Parameter Setup                   2.4567E-01
-       Outer Source                      4.4771E-01
-       Inner Iterations                  8.2550E+01
-          Inner Source                   2.6229E-01
-          Transport Sweeps               8.1600E+01
-          Inner Misc Ops                 6.8771E-01
-       Solution Misc Ops                 5.2099E-01
-    Output                               8.7974E-02
-  Total Execution time                   8.8767E+01
+    Parallel Setup                       1.6541E-03
+    Input                                2.0638E-04
+    Setup                                4.8135E+00
+    Solve                                5.5805E+01
+       Parameter Setup                   2.4039E-01
+       Outer Source                      5.2179E-01
+       Inner Iterations                  5.4559E+01
+          Inner Source                   1.2187E-01
+          Transport Sweeps               5.3654E+01
+          Inner Misc Ops                 7.8368E-01
+       Solution Misc Ops                 4.8404E-01
+    Output                               1.9731E-02
+  Total Execution time                   6.0645E+01
 
-  Grind Time (nanoseconds)         1.5079E+01
+  Grind Time (nanoseconds)         1.0046E+01
+
+********************************************************************************
+
+Allocated words (double precision) per rank                        43830394
 
 ********************************************************************************

@@ -1,7 +1,7 @@
  SNAP: SN (Discrete Ordinates) Application Proxy
- Version Number..  1.08 
- Version Date..  10-24-2018
- Ran on 10-24-2018 at time 13:54:54
+ Version Number..  1.09 
+ Version Date..  04-18-2019
+ Ran on  4-17-2019 at time 22:42:38
 
 ********************************************************************************
 
@@ -214,20 +214,24 @@
 
   Code Section                          Time (seconds)
  **************                        ****************
-    Parallel Setup                       1.9018E-03
-    Input                                2.1322E-04
-    Setup                                2.5268E-04
-    Solve                                1.1573E-02
-       Parameter Setup                   3.1072E-04
-       Outer Source                      7.5986E-05
-       Inner Iterations                  1.0735E-02
-          Inner Source                   4.4977E-05
-          Transport Sweeps               1.0243E-02
-          Inner Misc Ops                 4.4719E-04
-       Solution Misc Ops                 4.5124E-04
-    Output                               2.7915E-04
-  Total Execution time                   1.7213E-02
+    Parallel Setup                       2.7789E-03
+    Input                                2.5660E-04
+    Setup                                2.5415E-04
+    Solve                                1.1924E-02
+       Parameter Setup                   2.5709E-04
+       Outer Source                      2.2419E-05
+       Inner Iterations                  1.1229E-02
+          Inner Source                   5.2449E-05
+          Transport Sweeps               1.0489E-02
+          Inner Misc Ops                 6.8703E-04
+       Solution Misc Ops                 4.1527E-04
+    Output                               2.3376E-04
+  Total Execution time                   1.7688E-02
 
-  Grind Time (nanoseconds)         1.5222E+01
+  Grind Time (nanoseconds)         1.5682E+01
+
+********************************************************************************
+
+Allocated words (double precision) per rank                           11381
 
 ********************************************************************************

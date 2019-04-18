@@ -46,7 +46,8 @@ endif
 PPFLAGS = $(foreach def,$(DEFS),-D$(def))
 
 ifeq ($(TARGET),gsnap)
-  FFLAGS = -Ofast -funroll-loops -march=native $(OMPFLAG)
+#  FFLAGS = -Ofast -funroll-loops -march=native $(OMPFLAG)
+  FFLAGS = -O3 $(OMPFLAG)
   FFLAG2 =
   PP = cpp
   ifeq ($(OPT),no)

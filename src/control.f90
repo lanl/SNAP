@@ -88,7 +88,7 @@ MODULE control_module
   CONTAINS
 
 
-  SUBROUTINE control_allocate ( ng, ierr )
+  SUBROUTINE control_allocate ( ng, ndpwds, ierr )
 
 !-----------------------------------------------------------------------
 !
@@ -97,6 +97,8 @@ MODULE control_module
 !-----------------------------------------------------------------------
 
     INTEGER(i_knd), INTENT(IN) :: ng
+
+    INTEGER(i_knd), INTENT(INOUT) :: ndpwds
 
     INTEGER(i_knd), INTENT(OUT) :: ierr
 !_______________________________________________________________________
@@ -110,6 +112,8 @@ MODULE control_module
     dfmxo = -one
     otrdone = .FALSE.
     update_ptr = .FALSE.
+
+    ndpwds = ndpwds + SIZE( dfmxi ) + SIZE( inrdone )
 !_______________________________________________________________________
 !_______________________________________________________________________
 

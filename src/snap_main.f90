@@ -109,7 +109,7 @@ PROGRAM snap_main
 
   CHARACTER(LEN=64) :: error
 
-  INTEGER(i_knd) :: ierr, i
+  INTEGER(i_knd) :: ierr, i, ndpwds
 
   REAL(r_knd) :: t1, t2, t3, t4, t5
 !_______________________________________________________________________
@@ -119,6 +119,7 @@ PROGRAM snap_main
 !_______________________________________________________________________
 
   ierr = 0
+  ndpwds = 0
   error = ' '
 
   CALL pinit ( t1 )
@@ -190,13 +191,13 @@ PROGRAM snap_main
 ! Setup problem
 !_______________________________________________________________________
 
-  CALL setup
+  CALL setup ( ndpwds )
 !_______________________________________________________________________
 !
 ! Call for the problem solution
 !_______________________________________________________________________
 
-  CALL translv
+  CALL translv ( ndpwds )
 !_______________________________________________________________________
 !
 ! Output the results. Print the timing summary.
@@ -218,6 +219,7 @@ PROGRAM snap_main
   IF ( iproc == root ) THEN
     WRITE( ounit, 501 ) tsnap
     WRITE( ounit, 502 ) tgrind, ( star, i = 1, 80 )
+    WRITE( ounit, 503 ) ndpwds, ( star, i = 1, 80 )
   END IF
 
   CALL close_file ( ounit, ierr, error )
@@ -236,6 +238,8 @@ PROGRAM snap_main
 
   501 FORMAT( 2X, 'Total Execution time', T41, ES11.4, / )
   502 FORMAT( 2X, 'Grind Time (nanoseconds)', 8X, ES11.4, /, /, 80A )
+  503 FORMAT( /, 'Allocated words (double precision) per rank',   &
+                T61, I15, /, /, 80A )
 !_______________________________________________________________________
 !_______________________________________________________________________
 

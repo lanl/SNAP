@@ -84,13 +84,15 @@ MODULE solvar_module
   CONTAINS
 
 
-  SUBROUTINE solvar_allocate ( ierr )
+  SUBROUTINE solvar_allocate ( ndpwds, ierr )
 
 !-----------------------------------------------------------------------
 !
 ! Allocate solution arrays.
 !
 !-----------------------------------------------------------------------
+
+    INTEGER(i_knd), INTENT(INOUT) :: ndpwds
 
     INTEGER(i_knd), INTENT(OUT) :: ierr
 !_______________________________________________________________________
@@ -244,6 +246,20 @@ MODULE solvar_module
     fmin = zero
     fmax = zero
     pop = zero
+!_______________________________________________________________________
+!
+!   Add up allocated words
+!_______________________________________________________________________
+
+    ndpwds = ndpwds + SIZE( ptr_in ) + SIZE( flux0 ) +                 &
+      SIZE( flux0po ) + SIZE( flux0pi ) + SIZE( fluxm ) +              &
+      SIZE( q2grp0 ) + SIZE( q2grpm ) + SIZE( qtot ) + SIZE( t_xs ) +  &
+      SIZE( a_xs ) + SIZE( s_xs ) + SIZE( psii ) + SIZE( psij ) +      &
+      SIZE( psik ) + SIZE( jb_in ) + SIZE( jb_out ) + SIZE( kb_in ) +  &
+      SIZE( kb_out ) + SIZE( flkx ) + SIZE( flky ) + SIZE( flkz ) +    &
+      SIZE( fmin ) + SIZE( fmax ) + SIZE( pop )
+
+    IF ( angcpy==2 .OR. timedep==0 ) ndpwds = ndpwds + SIZE( ptr_out )
 !_______________________________________________________________________
 !_______________________________________________________________________
 

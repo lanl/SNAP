@@ -57,7 +57,7 @@ MODULE sn_module
   CONTAINS
 
 
-  SUBROUTINE sn_allocate ( ndimen, istat )
+  SUBROUTINE sn_allocate ( ndimen, ndpwds, istat )
 
 !-----------------------------------------------------------------------
 !
@@ -67,7 +67,7 @@ MODULE sn_module
 
     INTEGER(i_knd), INTENT(IN) :: ndimen
 
-    INTEGER(i_knd), INTENT(INOUT) :: istat
+    INTEGER(i_knd), INTENT(INOUT) :: ndpwds, istat
 !_______________________________________________________________________
 !
 !   Allocate cosines and weights
@@ -100,6 +100,10 @@ MODULE sn_module
 
     ec = zero
     lma = 0
+
+    ndpwds = ndpwds + SIZE( mu ) + SIZE( w ) + SIZE( wmu ) +          &
+     SIZE( eta ) + SIZE( weta ) + SIZE( xi ) + SIZE( wxi ) +          &
+     SIZE( ec ) + SIZE( lma )
 !_______________________________________________________________________
 !_______________________________________________________________________
 
