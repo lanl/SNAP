@@ -1,0 +1,11 @@
+#!/bin/tcsh
+
+# Run this after running tests and do a comparison with 'old-iterations'.
+
+foreach file (1d*new 2d*new 3d_fixup*new 3d_mms*new 3d_model.new 3d_model_n.new 3d_mod_fix*new);
+  grep "Inners" $file >> new-iterations;
+  grep "Total inners" $file >> new-iterations;
+  grep "Max Diff" $file >> new-iterations;
+  grep "Min Diff" $file >> new-iterations;
+  grep "Avg Diff" $file >> new-iterations;
+end

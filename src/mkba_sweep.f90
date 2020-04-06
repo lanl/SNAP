@@ -19,7 +19,7 @@ MODULE mkba_sweep_module
 
   USE data_module, ONLY: src_opt, qim
 
-  USE control_module, ONLY: fixup, tolr, update_ptr, angcpy
+  USE control_module, ONLY: fixup, tolr, update_ptr, angcpy, it_det
 
   USE thrd_comm_module, ONLY: sweep_recv_bdry, sweep_send_bdry
 
@@ -34,7 +34,7 @@ MODULE mkba_sweep_module
   SUBROUTINE mkba_sweep ( d1, d2, d3, d4, d5, jd, kd, g, t, nnstd_used,&
     reqs, szreq, psii, psij, psik, qtot, ec, vdelt, ptr_in, ptr_out,   &
     dinv, flux0, fluxm, jb_in, jb_out, kb_in, kb_out, wmu, weta, wxi,  &
-    flkx, flky, flkz, t_xs )
+    flkx, flky, flkz, t_xs, fixup_counter )
 
 !-----------------------------------------------------------------------
 !
@@ -50,6 +50,8 @@ MODULE mkba_sweep_module
     REAL(r_knd), INTENT(IN) :: vdelt
 
     REAL(r_knd), DIMENSION(nang), INTENT(IN) :: wmu, weta, wxi
+
+    REAL(r_knd), DIMENSION(4), INTENT(INOUT) :: fixup_counter
 
     REAL(r_knd), DIMENSION(nang,cmom,noct), INTENT(IN) :: ec
 
@@ -374,8 +376,18 @@ MODULE mkba_sweep_module
             END DO fixup_loop
 !_______________________________________________________________________
 !
-!           Fixup done, compute edges with resolved center
+!           Fixup done: update counts and compute edges with resolved
+!           center
 !_______________________________________________________________________
+
+            IF ( it_det == 1 ) THEN
+             fixup_counter(1) = fixup_counter(1) + nang - SUM( HV(:,1) )
+             fixup_counter(2) = fixup_counter(2) + nang - SUM( HV(:,2) )
+             IF ( ndimen == 3 ) fixup_counter(3) =                     &
+                                fixup_counter(3) + nang - SUM( HV(:,3) )
+             IF ( vdelt/=zero ) fixup_counter(4) =                     &
+                                fixup_counter(4) + nang - SUM( HV(:,4) )
+            END IF
 
             psi = pc
 

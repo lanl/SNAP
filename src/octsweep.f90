@@ -21,7 +21,8 @@ MODULE octsweep_module
   USE control_module, ONLY: timedep, swp_typ, multiswp
 
   USE solvar_module, ONLY: psii, qtot, ptr_in, ptr_out, psij, psik,    &
-    flux0, fluxm, jb_in, jb_out, kb_in, kb_out, flkx, flky, flkz, t_xs
+    flux0, fluxm, jb_in, jb_out, kb_in, kb_out, fixup_counter, flkx,   &
+    flky, flkz, t_xs
 
   USE thrd_comm_module, ONLY: no_op_lock_control
 
@@ -134,7 +135,7 @@ MODULE octsweep_module
             psii(:,1,1,cor,g), qtot(:,:,1,1,ich,g), ec(:,:,oct),       &
             vdelt(g), ptr_in(:,:,:,:,d5,d6), ptr_out(:,:,:,:,d5,d6),   &
             dinv(:,:,1,1,ich,g), flux0(:,1,1,g), fluxm(:,:,1,1,g),     &
-            wmu, flkx(:,1,1,g), t_xs(:,1,1,g) )
+            wmu, flkx(:,1,1,g), t_xs(:,1,1,g), fixup_counter(:,cor,g) )
 
         ELSE
 
@@ -145,7 +146,8 @@ MODULE octsweep_module
             dinv(:,:,:,:,ich,g), flux0(:,:,:,g), fluxm(:,:,:,:,g),     &
             jb_in(:,:,:,cor,g), jb_out(:,:,:,cor,g),                   &
             kb_in(:,:,:,cor,g), kb_out(:,:,:,cor,g), wmu, weta, wxi,   &
-            flkx(:,:,:,g), flky(:,:,:,g), flkz(:,:,:,g), t_xs(:,:,:,g) )
+            flkx(:,:,:,g), flky(:,:,:,g), flkz(:,:,:,g), t_xs(:,:,:,g),&
+            fixup_counter(:,cor,g) )
 
         END IF
 
@@ -163,7 +165,8 @@ MODULE octsweep_module
         ptr_out(:,:,:,:,:,d6),  dinv(:,:,:,:,:,g), flux0(:,:,:,g),     &
         fluxm(:,:,:,:,g), jb_in(:,:,:,cor,g), jb_out(:,:,:,cor,g),     &
         kb_in(:,:,:,cor,g), kb_out(:,:,:,cor,g), wmu, weta, wxi,       &
-        flkx(:,:,:,g), flky(:,:,:,g), flkz(:,:,:,g), t_xs(:,:,:,g) )
+        flkx(:,:,:,g), flky(:,:,:,g), flkz(:,:,:,g), t_xs(:,:,:,g),    &
+        fixup_counter(:,cor,g) )
 
     END IF
 !_______________________________________________________________________

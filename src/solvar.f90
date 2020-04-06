@@ -57,6 +57,8 @@ MODULE solvar_module
 ! kb_in(nang,ichunk,ny,ncor,ng)  - z-dir boundary flux in from comm
 ! kb_out(nang,ichunk,ny,ncor,ng) - z-dir boundary flux out to comm
 !
+! fixup_counter(4,ncor,ng) - count spatial and time edge fixups
+!
 ! flkx(nx+1,ny,nz,ng)     - x-dir leakage array
 ! flky(nx,ny+1,nz,ng)     - y-dir leakage array
 ! flkz(nx,ny,nz+1,ng)     - z-dir leakage array
@@ -69,6 +71,8 @@ MODULE solvar_module
 !_______________________________________________________________________
 
   REAL(r_knd), ALLOCATABLE, DIMENSION(:) :: fmin, fmax, pop
+
+  REAL(r_knd), ALLOCATABLE, DIMENSION(:,:,:) :: fixup_counter
 
   REAL(r_knd), ALLOCATABLE, DIMENSION(:,:,:,:) :: flux0, flux0po,      &
     flux0pi, q2grp0, t_xs, a_xs, psij, psik, flkx, flky, flkz
@@ -225,6 +229,15 @@ MODULE solvar_module
     kb_out = zero
 !_______________________________________________________________________
 !
+!   Fixup counter
+!_______________________________________________________________________
+
+    ALLOCATE( fixup_counter(4,szcor,ng), STAT=ierr )
+    IF ( ierr /= 0 ) RETURN
+
+    fixup_counter = zero
+!_______________________________________________________________________
+!
 !   Leakage arrays
 !_______________________________________________________________________
 
@@ -256,8 +269,9 @@ MODULE solvar_module
       SIZE( q2grp0 ) + SIZE( q2grpm ) + SIZE( qtot ) + SIZE( t_xs ) +  &
       SIZE( a_xs ) + SIZE( s_xs ) + SIZE( psii ) + SIZE( psij ) +      &
       SIZE( psik ) + SIZE( jb_in ) + SIZE( jb_out ) + SIZE( kb_in ) +  &
-      SIZE( kb_out ) + SIZE( flkx ) + SIZE( flky ) + SIZE( flkz ) +    &
-      SIZE( fmin ) + SIZE( fmax ) + SIZE( pop )
+      SIZE( kb_out ) + SIZE( fixup_counter ) + SIZE( flkx ) +          &
+      SIZE( flky ) + SIZE( flkz ) + SIZE( fmin ) + SIZE( fmax ) +      &
+      SIZE( pop )
 
     IF ( angcpy==2 .OR. timedep==0 ) ndpwds = ndpwds + SIZE( ptr_out )
 !_______________________________________________________________________
@@ -282,6 +296,7 @@ MODULE solvar_module
     DEALLOCATE( t_xs, a_xs, s_xs )
     DEALLOCATE( psii, psij, psik )
     DEALLOCATE( jb_in, jb_out, kb_in, kb_out )
+    DEALLOCATE( fixup_counter )
     DEALLOCATE( flkx, flky, flkz )
     DEALLOCATE( fmin, fmax, pop )
 !_______________________________________________________________________

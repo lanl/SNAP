@@ -1,7 +1,7 @@
  SNAP: SN (Discrete Ordinates) Application Proxy
  Version Number..  1.09 
  Version Date..  04-18-2019
- Ran on  4-17-2019 at time 23: 0:28
+ Ran on  4- 6-2020 at time 15:19: 4
 
 ********************************************************************************
 
@@ -179,80 +179,80 @@
 ********************************************************************************
  ********************
   Outer   1
-    Group   1     Inner     1     Dfmxi  3.0579E-02
-    Group   2     Inner     1     Dfmxi  3.0574E-02
-    Group   3     Inner     1     Dfmxi  3.0570E-02
-    Group   4     Inner     1     Dfmxi  3.0565E-02
-    Group   5     Inner     1     Dfmxi  3.0560E-02
-    Group   1     Inner     2     Dfmxi  2.1355E-01
-    Group   2     Inner     2     Dfmxi  1.4566E-01
-    Group   3     Inner     2     Dfmxi  1.4699E-01
-    Group   4     Inner     2     Dfmxi  1.4832E-01
-    Group   5     Inner     2     Dfmxi  6.4661E-01
-    Group   1     Inner     3     Dfmxi  4.0384E-03
-    Group   2     Inner     3     Dfmxi  2.2758E-03
-    Group   3     Inner     3     Dfmxi  2.3070E-03
-    Group   4     Inner     3     Dfmxi  2.3384E-03
-    Group   5     Inner     3     Dfmxi  1.8709E-02
-    Group   1     Inner     4     Dfmxi  7.4559E-05
-    Group   2     Inner     4     Dfmxi  3.3757E-05
-    Group   3     Inner     4     Dfmxi  3.4388E-05
-    Group   4     Inner     4     Dfmxi  3.5027E-05
-    Group   5     Inner     4     Dfmxi  6.5415E-04
-    Group   1     Inner     4     Dfmxi  7.4559E-05
-    Group   2     Inner     4     Dfmxi  3.3757E-05
-    Group   3     Inner     4     Dfmxi  3.4388E-05
-    Group   4     Inner     4     Dfmxi  3.5027E-05
-    Group   5     Inner     5     Dfmxi  2.1321E-05
+    Group   1     Inner     1     Dfmxi  3.0579E-02     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   2     Inner     1     Dfmxi  3.0574E-02     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   3     Inner     1     Dfmxi  3.0570E-02     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   4     Inner     1     Dfmxi  3.0565E-02     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   5     Inner     1     Dfmxi  3.0560E-02     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   1     Inner     2     Dfmxi  2.1355E-01     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   2     Inner     2     Dfmxi  1.4566E-01     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   3     Inner     2     Dfmxi  1.4699E-01     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   4     Inner     2     Dfmxi  1.4832E-01     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   5     Inner     2     Dfmxi  6.4661E-01     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   1     Inner     3     Dfmxi  4.0384E-03     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   2     Inner     3     Dfmxi  2.2758E-03     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   3     Inner     3     Dfmxi  2.3070E-03     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   4     Inner     3     Dfmxi  2.3384E-03     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   5     Inner     3     Dfmxi  1.8709E-02     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   1     Inner     4     Dfmxi  7.4559E-05     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   2     Inner     4     Dfmxi  3.3757E-05     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   3     Inner     4     Dfmxi  3.4388E-05     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   4     Inner     4     Dfmxi  3.5027E-05     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   5     Inner     4     Dfmxi  6.5415E-04     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   1     Inner     4     Dfmxi  7.4559E-05     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   2     Inner     4     Dfmxi  3.3757E-05     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   3     Inner     4     Dfmxi  3.4388E-05     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   4     Inner     4     Dfmxi  3.5027E-05     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   5     Inner     5     Dfmxi  2.1321E-05     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
     1    Dfmxo= 3.1474E-02    No. Inners=   21
  ********************
   Outer   2
-    Group   1     Inner     1     Dfmxi  1.2316E-01
-    Group   2     Inner     1     Dfmxi  1.7542E-01
-    Group   3     Inner     1     Dfmxi  2.8669E-01
-    Group   4     Inner     1     Dfmxi  4.8123E-01
-    Group   5     Inner     1     Dfmxi  6.1763E-01
-    Group   1     Inner     2     Dfmxi  1.7092E-03
-    Group   2     Inner     2     Dfmxi  1.3833E-03
-    Group   3     Inner     2     Dfmxi  1.9593E-03
-    Group   4     Inner     2     Dfmxi  2.8137E-03
-    Group   5     Inner     2     Dfmxi  1.4555E-02
-    Group   1     Inner     3     Dfmxi  2.7598E-05
-    Group   2     Inner     3     Dfmxi  1.5993E-05
-    Group   3     Inner     3     Dfmxi  2.1916E-05
-    Group   4     Inner     3     Dfmxi  3.1126E-05
-    Group   5     Inner     3     Dfmxi  4.6471E-04
-    Group   1     Inner     3     Dfmxi  2.7598E-05
-    Group   2     Inner     3     Dfmxi  1.5993E-05
-    Group   3     Inner     3     Dfmxi  2.1916E-05
-    Group   4     Inner     3     Dfmxi  3.1126E-05
-    Group   5     Inner     4     Dfmxi  1.4589E-05
+    Group   1     Inner     1     Dfmxi  1.2316E-01     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   2     Inner     1     Dfmxi  1.7542E-01     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   3     Inner     1     Dfmxi  2.8669E-01     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   4     Inner     1     Dfmxi  4.8123E-01     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   5     Inner     1     Dfmxi  6.1763E-01     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   1     Inner     2     Dfmxi  1.7092E-03     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   2     Inner     2     Dfmxi  1.3833E-03     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   3     Inner     2     Dfmxi  1.9593E-03     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   4     Inner     2     Dfmxi  2.8137E-03     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   5     Inner     2     Dfmxi  1.4555E-02     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   1     Inner     3     Dfmxi  2.7598E-05     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   2     Inner     3     Dfmxi  1.5993E-05     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   3     Inner     3     Dfmxi  2.1916E-05     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   4     Inner     3     Dfmxi  3.1126E-05     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   5     Inner     3     Dfmxi  4.6471E-04     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   1     Inner     3     Dfmxi  2.7598E-05     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   2     Inner     3     Dfmxi  1.5993E-05     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   3     Inner     3     Dfmxi  2.1916E-05     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   4     Inner     3     Dfmxi  3.1126E-05     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   5     Inner     4     Dfmxi  1.4589E-05     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
     2    Dfmxo= 6.4196E-01    No. Inners=   16
  ********************
   Outer   3
-    Group   1     Inner     1     Dfmxi  2.5989E-03
-    Group   2     Inner     1     Dfmxi  2.9549E-03
-    Group   3     Inner     1     Dfmxi  3.6536E-03
-    Group   4     Inner     1     Dfmxi  5.6194E-03
-    Group   5     Inner     1     Dfmxi  9.0635E-03
-    Group   1     Inner     2     Dfmxi  2.7891E-05
-    Group   2     Inner     2     Dfmxi  2.0646E-05
-    Group   3     Inner     2     Dfmxi  2.4626E-05
-    Group   4     Inner     2     Dfmxi  3.6390E-05
-    Group   5     Inner     2     Dfmxi  2.5222E-04
-    Group   1     Inner     2     Dfmxi  2.7891E-05
-    Group   2     Inner     2     Dfmxi  2.0646E-05
-    Group   3     Inner     2     Dfmxi  2.4626E-05
-    Group   4     Inner     2     Dfmxi  3.6390E-05
-    Group   5     Inner     3     Dfmxi  7.2420E-06
+    Group   1     Inner     1     Dfmxi  2.5989E-03     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   2     Inner     1     Dfmxi  2.9549E-03     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   3     Inner     1     Dfmxi  3.6536E-03     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   4     Inner     1     Dfmxi  5.6194E-03     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   5     Inner     1     Dfmxi  9.0635E-03     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   1     Inner     2     Dfmxi  2.7891E-05     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   2     Inner     2     Dfmxi  2.0646E-05     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   3     Inner     2     Dfmxi  2.4626E-05     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   4     Inner     2     Dfmxi  3.6390E-05     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   5     Inner     2     Dfmxi  2.5222E-04     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   1     Inner     2     Dfmxi  2.7891E-05     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   2     Inner     2     Dfmxi  2.0646E-05     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   3     Inner     2     Dfmxi  2.4626E-05     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   4     Inner     2     Dfmxi  3.6390E-05     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   5     Inner     3     Dfmxi  7.2420E-06     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
     3    Dfmxo= 9.3253E-03    No. Inners=   11
  ********************
   Outer   4
-    Group   1     Inner     1     Dfmxi  3.9157E-05
-    Group   2     Inner     1     Dfmxi  4.5698E-05
-    Group   3     Inner     1     Dfmxi  5.7200E-05
-    Group   4     Inner     1     Dfmxi  8.0347E-05
-    Group   5     Inner     1     Dfmxi  1.2008E-04
+    Group   1     Inner     1     Dfmxi  3.9157E-05     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   2     Inner     1     Dfmxi  4.5698E-05     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   3     Inner     1     Dfmxi  5.7200E-05     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   4     Inner     1     Dfmxi  8.0347E-05     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
+    Group   5     Inner     1     Dfmxi  1.2008E-04     Fixup x/y/z/t  0.00E+00  0.00E+00  0.00E+00  0.00E+00
     4    Dfmxo= 1.2008E-04    No. Inners=    5
 
   No. Outers=   4    No. Inners=   53
@@ -741,24 +741,24 @@
 
   Code Section                          Time (seconds)
  **************                        ****************
-    Parallel Setup                       2.2668E-03
-    Input                                3.0639E-04
-    Setup                                5.2157E-04
-    Solve                                6.5238E-02
-       Parameter Setup                   3.3504E-03
-       Outer Source                      7.7621E-04
-       Inner Iterations                  6.0610E-02
-          Inner Source                   5.4218E-04
-          Transport Sweeps               5.7848E-02
-          Inner Misc Ops                 2.2191E-03
-       Solution Misc Ops                 5.0202E-04
-    Output                               1.5406E-03
-  Total Execution time                   7.1833E-02
+    Parallel Setup                       1.9438E-03
+    Input                                1.8632E-02
+    Setup                                4.4817E-04
+    Solve                                6.4778E-02
+       Parameter Setup                   2.9210E-03
+       Outer Source                      8.2943E-04
+       Inner Iterations                  6.0539E-02
+          Inner Source                   5.2939E-04
+          Transport Sweeps               5.7351E-02
+          Inner Misc Ops                 2.6589E-03
+       Solution Misc Ops                 4.8784E-04
+    Output                               1.5299E-03
+  Total Execution time                   9.3367E-02
 
-  Grind Time (nanoseconds)         8.9042E-01
+  Grind Time (nanoseconds)         8.8413E-01
 
 ********************************************************************************
 
-Allocated words (double precision) per rank                          426707
+Allocated words (double precision) per rank                          426787
 
 ********************************************************************************

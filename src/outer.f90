@@ -69,7 +69,7 @@ MODULE outer_module
 
     INTEGER(i_knd) :: inno, g, n
 
-    REAL(r_knd) :: t1, t2, t3, t4
+    REAL(r_knd) :: t1, t2, t3, t4, dft(nthreads)
 !_______________________________________________________________________
 !
 !   Compute the outer source: sum of fixed + out-of-group sources.
@@ -147,10 +147,41 @@ MODULE outer_module
     CALL assign_thrd_set ( do_grp, ng, ng_per_thrd, 0, nnstd_used,     &
       grp_act )
 
+    dfmxo = -HUGE( one )
+
   !$OMP END MASTER
   !$OMP BARRIER
+!_______________________________________________________________________
+!
+!   Thread to speed up computation of df by looping over groups. Rejoin
+!   threads and then determine max error.
+!_______________________________________________________________________
 
-    CALL outer_conv ( otno, ng_per_thrd, nnstd_used, grp_act(:,t) )
+    dft(t) = -one
+
+  !$OMP PARALLEL DO NUM_THREADS(nnstd_used) IF(nnstd_used>1)           &
+  !$OMP& SCHEDULE(STATIC,1) DEFAULT(SHARED) PRIVATE(n,g)               &
+  !$OMP& PROC_BIND(CLOSE)
+    DO n = 1, ng_per_thrd
+      g = grp_act(n,t)
+      IF ( g == 0 ) CYCLE
+      CALL outer_df_calc ( flux0po(:,:,:,g), flux0(:,:,:,g), dft(t) )
+    END DO
+  !$OMP END PARALLEL DO
+
+  !$OMP CRITICAL
+    dfmxo = MAX( dfmxo, dft(t) )
+  !$OMP END CRITICAL
+  !$OMP BARRIER
+
+  !$OMP MASTER
+
+    CALL glmax ( dfmxo, comm_snap )
+
+    IF ( dfmxo<=100.0_r_knd*epsi .AND. ALL( inrdone ) .AND. otno/=1 )  &
+      otrdone = .TRUE.
+
+  !$OMP END MASTER
 !_______________________________________________________________________
 !_______________________________________________________________________
 
@@ -278,7 +309,7 @@ MODULE outer_module
   END SUBROUTINE outer_src_calc
 
 
-  SUBROUTINE outer_conv ( otno, ng_per_thrd, nnstd_used, grp_act )
+  SUBROUTINE outer_df_calc ( flux0po, flux0, dft )
 
 !-----------------------------------------------------------------------
 !
@@ -287,70 +318,39 @@ MODULE outer_module
 !
 !-----------------------------------------------------------------------
 
-    INTEGER(i_knd), INTENT(IN) :: otno, ng_per_thrd, nnstd_used
+    REAL(r_knd), INTENT(INOUT) :: dft
 
-    INTEGER(i_knd), DIMENSION(ng), INTENT(IN) :: grp_act
+    REAL(r_knd), DIMENSION(nx,ny,nz), INTENT(INOUT) :: flux0po
+
+    REAL(r_knd), DIMENSION(nx,ny,nz), INTENT(IN) :: flux0
 !_______________________________________________________________________
 !
 !   Local variables
 !_______________________________________________________________________
 
-    INTEGER(i_knd) :: n, g
+    REAL(r_knd) :: dfg
 
-    REAL(r_knd) :: dft
-
-    REAL(r_knd), DIMENSION(nx,ny,nz,ng_per_thrd) :: df
+    REAL(r_knd), DIMENSION(nx,ny,nz) :: df
 !_______________________________________________________________________
 !
 !   Thread to speed up computation of df by looping over groups. Rejoin
 !   threads and then determine max error.
 !_______________________________________________________________________
 
-  !$OMP PARALLEL DO NUM_THREADS(nnstd_used) IF(nnstd_used>1)           &
-  !$OMP& SCHEDULE(STATIC,1) DEFAULT(SHARED) PRIVATE(n,g)               &
-  !$OMP& PROC_BIND(CLOSE)
-    DO n = 1, ng_per_thrd
+    df = one
+    WHERE( ABS( flux0po ) < tolr )
+      flux0po = one
+      df = zero
+    END WHERE
+    df = ABS( flux0/flux0po - df )
 
-      g = grp_act(n)
-      IF ( g == 0 ) THEN
-        df(:,:,:,n) = -one
-        CYCLE
-      END IF
+    dfg = MAXVAL( df )
 
-      df(:,:,:,n) = one
-      WHERE( ABS( flux0po(:,:,:,g) ) < tolr )
-        flux0po(:,:,:,g) = one
-        df(:,:,:,n) = zero
-      END WHERE
-      df(:,:,:,n) = ABS( flux0(:,:,:,g)/flux0po(:,:,:,g) - df(:,:,:,n) )
-
-    END DO
-  !$OMP END PARALLEL DO
-
-    dft = MAXVAL( df )
-
-  !$OMP MASTER
-    dfmxo = -HUGE( one )
-  !$OMP END MASTER
-  !$OMP BARRIER
-
-  !$OMP CRITICAL
-    dfmxo = MAX( dfmxo, dft )
-  !$OMP END CRITICAL
-  !$OMP BARRIER
-
-  !$OMP MASTER
-
-    CALL glmax ( dfmxo, comm_snap )
-
-    IF ( dfmxo<=100.0_r_knd*epsi .AND. ALL( inrdone ) .AND. otno/=1 )  &
-      otrdone = .TRUE.
-
-  !$OMP END MASTER
+    dft = MAX( dft, dfg )
 !_______________________________________________________________________
 !_______________________________________________________________________
 
-  END SUBROUTINE outer_conv
+  END SUBROUTINE outer_df_calc
 
 
 END MODULE outer_module
