@@ -15,14 +15,14 @@ MODULE inner_module
 
   USE geom_module, ONLY: nx, ny, nz, nc
 
-  USE sn_module, ONLY: nmom, cmom, lma
+  USE sn_module, ONLY: nmom, cmom, lma, nang, noct
 
   USE data_module, ONLY: ng
 
   USE control_module, ONLY: epsi, tolr, dfmxi, inrdone, it_det
 
   USE solvar_module, ONLY: q2grp0, q2grpm, s_xs, flux0, flux0pi, fluxm,&
-    qtot
+    qtot, fixup_counter
 
   USE sweep_module, ONLY: sweep
 
@@ -139,9 +139,48 @@ MODULE inner_module
 
   !$OMP END MASTER
   !$OMP BARRIER
+!_______________________________________________________________________
+!
+!   Thread group loops for computing local difference (df) array.
+!_______________________________________________________________________
 
-    CALL inner_conv ( inno, iits, ng_per_thrd, nnstd_used,             &
-      grp_act(:,t) )
+  !$OMP PARALLEL DO NUM_THREADS(nnstd_used) IF(nnstd_used>1)           &
+  !$OMP& SCHEDULE(STATIC,1) DEFAULT(SHARED) PRIVATE(n,g)               &
+  !$OMP& PROC_BIND(CLOSE)
+    DO n = 1, ng_per_thrd
+      g = grp_act(n,t)
+      IF ( g == 0 ) CYCLE
+      CALL inner_df_calc ( inno, iits(g), flux0pi(:,:,:,g),            &
+                        flux0(:,:,:,g), dfmxi(g) )
+    END DO
+  !$OMP END PARALLEL DO
+!_______________________________________________________________________
+!
+!   All procs then reduce dfmxi for all groups, determine which groups
+!   are converged and print requested info
+!_______________________________________________________________________
+
+  !$OMP BARRIER
+  !$OMP MASTER
+
+    CALL glmax ( dfmxi, ng, comm_snap )
+    WHERE( dfmxi <= epsi ) inrdone = .TRUE.
+
+    IF ( iproc==root .AND. it_det==1 ) THEN
+      DO g = 1, ng
+        fixup_counter(:,1,g) = fixup_counter(:,1,g) /                  &
+          ( REAL(nx,r_knd) * REAL(ny,r_knd) * REAL(nz,r_knd) *         &
+            REAL(nang,r_knd) * REAL(noct,r_knd) )
+        WRITE( ounit, 221 ) g, iits(g), dfmxi(g),                      &
+                            (fixup_counter(n,1,g),n=1,4)
+      END DO
+    END IF
+
+  !$OMP END MASTER
+!_______________________________________________________________________
+
+    221 FORMAT( 4X, 'Group ', I3, 4X, ' Inner ', I5, 4X, ' Dfmxi ',    &
+                ES11.4, '     Fixup x/y/z/t ', 4(ES9.2,1x) )
 !_______________________________________________________________________
 !_______________________________________________________________________
 
@@ -255,7 +294,7 @@ MODULE inner_module
   END SUBROUTINE inner_src_calc
 
 
-  SUBROUTINE inner_conv ( inno, iits, ng_per_thrd, nnstd_used, grp_act )
+  SUBROUTINE inner_df_calc ( inno, iits, flux0pi, flux0, dfmxi )
 
 !-----------------------------------------------------------------------
 !
@@ -263,74 +302,40 @@ MODULE inner_module
 !
 !-----------------------------------------------------------------------
 
-    INTEGER(i_knd), INTENT(IN) :: inno, ng_per_thrd, nnstd_used
+    INTEGER(i_knd), INTENT(IN) :: inno
 
-    INTEGER(i_knd), DIMENSION(ng), INTENT(OUT) :: iits
+    INTEGER(i_knd), INTENT(OUT) :: iits
 
-    INTEGER(i_knd), DIMENSION(ng), INTENT(IN) :: grp_act
+    REAL(r_knd), INTENT(OUT) :: dfmxi
+
+    REAL(r_knd), DIMENSION(nx,ny,nz), INTENT(INOUT) :: flux0pi
+
+    REAL(r_knd), DIMENSION(nx,ny,nz), INTENT(IN) :: flux0
 !_______________________________________________________________________
 !
 !   Local variables
 !_______________________________________________________________________
 
-    INTEGER(i_knd) :: n, g
-
-    REAL(r_knd), DIMENSION(nx,ny,nz,ng_per_thrd) :: df
+    REAL(r_knd), DIMENSION(nx,ny,nz) :: df
 !_______________________________________________________________________
 !
-!   Thread group loops for computing local difference (df) array.
-!   compute max for that group. Need a barrier for the main threads.
+!   Compute max for individual group, all spatial extent.
 !_______________________________________________________________________
 
-  !$OMP PARALLEL DO NUM_THREADS(nnstd_used) IF(nnstd_used>1)           &
-  !$OMP& SCHEDULE(STATIC,1) DEFAULT(SHARED) PRIVATE(n,g)               &
-  !$OMP& PROC_BIND(CLOSE)
-    DO n = 1, ng_per_thrd
+    iits = inno
 
+    df = one
+    WHERE( ABS( flux0pi ) < tolr )
+      flux0pi = one
+      df = zero
+    END WHERE
+    df = ABS( flux0/flux0pi - df )
 
-      g = grp_act(n)
-      IF ( g == 0 ) CYCLE
-
-      iits(g) = inno
-
-      df(:,:,:,n) = one
-      WHERE( ABS( flux0pi(:,:,:,g) ) < tolr )
-        flux0pi(:,:,:,g) = one
-        df(:,:,:,n) = zero
-      END WHERE
-      df(:,:,:,n) = ABS( flux0(:,:,:,g)/flux0pi(:,:,:,g) - df(:,:,:,n) )
-
-      dfmxi(g) = MAXVAL( df(:,:,:,n) )
-
-    END DO
-  !$OMP END PARALLEL DO
-  !$OMP BARRIER
-!_______________________________________________________________________
-!
-!   All procs then reduce dfmxi for all groups, determine which groups
-!   are converged and print requested info
-!_______________________________________________________________________
-
-  !$OMP MASTER
-
-    CALL glmax ( dfmxi, ng, comm_snap )
-    WHERE( dfmxi <= epsi ) inrdone = .TRUE.
-
-    IF ( iproc==root .AND. it_det==1 ) THEN
-      DO g = 1, ng
-        WRITE( ounit, 221 ) g, iits(g), dfmxi(g)
-      END DO
-    END IF
-
-  !$OMP END MASTER
-!_______________________________________________________________________
-
-    221 FORMAT( 4X, 'Group ', I3, 4X, ' Inner ', I5, 4X, ' Dfmxi ',    &
-                ES11.4 )
+    dfmxi = MAXVAL( df )
 !_______________________________________________________________________
 !_______________________________________________________________________
 
-  END SUBROUTINE inner_conv
+  END SUBROUTINE inner_df_calc
 
 
 END MODULE inner_module

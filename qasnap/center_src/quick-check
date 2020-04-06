@@ -1,0 +1,8 @@
+#!/bin/tcsh
+
+# Run this after running tests and do a comparison with 'old-iterations'.
+
+foreach file (nout* nfout*);
+  grep "Inners" $file >> new-iterations;
+  grep "Total inners" $file >> new-iterations;
+end

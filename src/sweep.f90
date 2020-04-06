@@ -23,7 +23,7 @@ MODULE sweep_module
   USE octsweep_module, ONLY: octsweep
 
   USE solvar_module, ONLY: flkx, flky, flkz, fmin, fmax, flux0, fluxm, &
-    jb_in, kb_in, jb_out, kb_out
+    jb_in, kb_in, jb_out, kb_out, fixup_counter
 
   USE plib_module, ONLY: nthreads, waitinit, ichunk, npey, npez
 
@@ -99,6 +99,8 @@ MODULE sweep_module
 
       g = grp_act(n,t)
       IF ( g == 0 ) EXIT clean_loop
+
+      fixup_counter(:,:,g) = zero
 
       fmin(g) = HUGE( one )
       fmax(g) = zero
@@ -284,14 +286,18 @@ MODULE sweep_module
     END IF
 !_______________________________________________________________________
 !
-!   Calculate dummy min and max scalar fluxes (not used elsewhere
-!   currently).
+!   Sum fixup count over corners (if multiswp is on). Calculate dummy
+!   min and max scalar fluxes (not used elsewhere currently).
 !_______________________________________________________________________
 
     edit_loop: DO n = 1, ng_per_thrd
 
       g = grp_act(n,t)
       IF ( g == 0 ) EXIT edit_loop
+
+      IF ( multiswp == 1 ) fixup_counter(:,1,g) =                      &
+                         fixup_counter(:,1,g) + fixup_counter(:,2,g) + &
+                         fixup_counter(:,3,g) + fixup_counter(:,4,g)
 
       fmin(g) = MINVAL( flux0 )
       fmax(g) = MAXVAL( flux0 )

@@ -1,0 +1,57 @@
+SNAP Version 1.10
+04/06/2020
+
+SNAP Version 1.10 includes minor revisions to the previous version of SNAP
+released to GitHub.
+
+Summary:
+SNAP 1.10 includes one feature request addition and one algorithm modification.
+
+A negative flux fixup counter has been added to determine how many edges in
+the spatial and time domains are corrected per group per inner iteration. The
+fixup is reported as a fraction of all unknowns per group per inner iteration.
+It is reported when the input file uses the keyword=value "it_det=1". Negative
+angular fluxes are unphysical consequences of the approximations made, including
+a finite difference closure relationship and finite number of moments to model
+the scattering source.
+
+The inner and outer error checks have been modified to reduce the size of the
+stack array 'df' in each module. The subroutines inner/outer_conv have been
+removed. A smaller df array is computed per group in the new subroutines
+inner/outer_df_calc. Calls to this subroutine are threaded. Additional steps
+to compute the global errors have been moved to the inner and outer
+subroutines. The manual has been updated to describe the changes in the
+subroutine names.
+
+The scripts 'quick-check' have been added to the qasnap directories as well
+as initial runs on the reference outputs in 'old-iterations'. After running the
+tests with 'chkall' one can run 'quick-check' and compare new-iterations and
+old-iterations for a quick confirmation that the tests ran correctly. Further
+confirmation can come from greater comparison of flux outputs.
+
+Please direct questions to the SNAP developers for finer details of the code
+changes.
+
+
+Modified files:
+M src/inner.f90
+M src/outer.f90
+M src/dim1_sweep.f90
+M src/dim3_sweep.f90
+M src/mkba_sweep.f90
+M src/octsweep.f90
+M src/sweep.f90
+M src/solvar.f90
+M src/version.f90
+M qasnap/center_src/fout08
+M qasnap/center_src/out08
+M qasnap/mms_src/1d_fixup_st.old
+M qasnap/mms_src/1d_mms_st.old
+M qasnap/mms_src/2d_fixup_st.old
+M qasnap/mms_src/2d_mms_st.old
+M qasnap/mms_src/3d_fixup_st.old
+M qasnap/mms_src/3d_mms_st.old
+A qasnap/center_src/quick-check
+A qasnap/center_src/old-iterations
+A qasnap/mms_src/quick-check
+A qasnap/mms_src/old-iterations

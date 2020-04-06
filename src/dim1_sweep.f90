@@ -16,7 +16,7 @@ MODULE dim1_sweep_module
 
   USE data_module, ONLY: src_opt, qim
 
-  USE control_module, ONLY: fixup, tolr, update_ptr
+  USE control_module, ONLY: fixup, tolr, update_ptr, it_det
 
   USE plib_module, ONLY: ichunk
 
@@ -29,7 +29,8 @@ MODULE dim1_sweep_module
 
 
   SUBROUTINE dim1_sweep ( id, d1, d2, d3, d4, oct, g, psii, qtot, ec,  &
-    vdelt, ptr_in, ptr_out, dinv, flux0, fluxm, wmu, flkx, t_xs )
+    vdelt, ptr_in, ptr_out, dinv, flux0, fluxm, wmu, flkx, t_xs,       &
+    fixup_counter )
 
 !-----------------------------------------------------------------------
 !
@@ -50,6 +51,8 @@ MODULE dim1_sweep_module
     REAL(r_knd), DIMENSION(nx), INTENT(INOUT) :: flux0
 
     REAL(r_knd), DIMENSION(nx+1), INTENT(INOUT) :: flkx
+
+    REAL(r_knd), DIMENSION(4), INTENT(INOUT) :: fixup_counter
 
     REAL(r_knd), DIMENSION(cmom,ichunk), INTENT(IN) :: qtot
 
@@ -186,8 +189,14 @@ MODULE dim1_sweep_module
         END DO fixup_loop
 !_______________________________________________________________________
 !
-!       Fixup done, compute edges
+!       Fixup done: update counts and compute edges with resolved center
 !_______________________________________________________________________
+
+        IF ( it_det == 1 ) THEN
+          fixup_counter(1) = fixup_counter(1) + nang - SUM( HV(:,1) )
+          IF ( vdelt /= zero )                                         &
+            fixup_counter(4) = fixup_counter(4) + nang - SUM( HV(:,2) )
+        END IF
 
         psi = pc
 
