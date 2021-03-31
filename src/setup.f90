@@ -856,7 +856,7 @@ MODULE setup_module
     148 FORMAT( 2X, 'Pseudo Cross Sections Data' )
     149 FORMAT( 4X, 'ng = ', I3 )
     150 FORMAT( /, 4X, 'Material ', I1 )
-    151 FORMAT( 4X, 'Group         Total         Absorption      '     &
+    151 FORMAT( 4X, 'Group         Total         Absorption      ',    &
                'Scattering' )
     152 FORMAT( 5X, I3, 6X, ES13.6, 3X, ES13.6, 3X, ES13.6 )
 
@@ -941,7 +941,7 @@ MODULE setup_module
     CALL close_file ( fu, ierr, error )
 !_______________________________________________________________________
 
-    161 FORMAT( 'slgg(nmat,nmom,ng,ng) echo', /, 'Column-order loops:' &
+    161 FORMAT( 'slgg(nmat,nmom,ng,ng) echo', /, 'Column-order loops:',&
                 ' Mats (fastest ), Moments, Groups, Groups (slowest)' )
     162 FORMAT( 2X, ES15.8, 2X, ES15.8, 2X, ES15.8, 2X, ES15.8 )
 !_______________________________________________________________________

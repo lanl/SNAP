@@ -360,12 +360,12 @@ MODULE output_module
     END IF
 !_______________________________________________________________________
 
-    321 FORMAT( 1X, 'flux(nx,ny,nz,ng) echo', /, 1X, 'Column-order '   &
-                'loops: x-cells (fastest), y-cells, z-cells, groups '  &
+    321 FORMAT( 1X, 'flux(nx,ny,nz,ng) echo', /, 1X, 'Column-order ',  &
+                'loops: x-cells (fastest), y-cells, z-cells, groups ', &
                 '(slowest)' )
-    322 FORMAT( 1X, 'flux(nx,ny,nz,ng) and fluxm(cmom-1,nx,ny,nz,ng)'  &
+    322 FORMAT( 1X, 'flux(nx,ny,nz,ng) and fluxm(cmom-1,nx,ny,nz,ng)', &
                 ' echo', /, 1X, 'Column-order loops by moment:', /,    &
-                1X, 'x-cells (fastest), y-cells, z-cells, groups, '    &
+                1X, 'x-cells (fastest), y-cells, z-cells, groups, ',   &
                 'moments (slowest)' )
     323 FORMAT( /, 2X, 'Moment = ', I1 )
     324 FORMAT( 4(2X, ES17.10) )
