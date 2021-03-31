@@ -160,9 +160,9 @@ MODULE input_module
     127 FORMAT( 5X, 'nmom= ', I3, /,                                   &
                 5X, 'nang= ', I4 )
 
-    128 FORMAT( 5X, 'ng= ', I4, /                                      &
-                5X, 'mat_opt= ', I2, /                                 &
-                5X, 'src_opt= ', I2, /                                 &
+    128 FORMAT( 5X, 'ng= ', I4, /,                                     &
+                5X, 'mat_opt= ', I2, /,                                &
+                5X, 'src_opt= ', I2, /,                                &
                 5X, 'scatp= ', I2 )
 
     129 FORMAT( 5X, 'epsi= ', ES11.4, /,                               &
@@ -173,7 +173,7 @@ MODULE input_module
                 5X, 'nsteps= ', I5, /,                                 &
                 5X, 'swp_typ= ', I2, /,                                &
                 5X, 'multiswp= ', I2, /,                               &
-                5X, 'angcpy= ', I2, /                                  &
+                5X, 'angcpy= ', I2, /,                                 &
                 5X, 'it_det= ', I2, /,                                 &
                 5X, 'soloutp= ', I2, /,                                &
                 5X, 'kplane= ', I4, /,                                 &

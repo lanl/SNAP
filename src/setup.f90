@@ -879,9 +879,9 @@ MODULE setup_module
     182 FORMAT( 4X, 'npey = ', I5, /, 4X, 'npez = ', I5, /, 4X,        &
                 'nthreads = ', I4, / )
     183 FORMAT( 10X, 'Thread Support Level', /,                        &
-                10X, I2, ' - MPI_THREAD_SINGLE', /                     &
-                10X, I2, ' - MPI_THREAD_FUNNELED', /                   &
-                10X, I2, ' - MPI_THREAD_SERIALIZED', /                 &
+                10X, I2, ' - MPI_THREAD_SINGLE', /,                    &
+                10X, I2, ' - MPI_THREAD_FUNNELED', /,                  &
+                10X, I2, ' - MPI_THREAD_SERIALIZED', /,                &
                 10X, I2, ' - MPI_THREAD_MULTIPLE' )
     184 FORMAT( 4X, 'thread_level = ', I2, / )
     185 FORMAT( 4X, '.TRUE. nested threading', /, 6X, 'nnested = ',    &
