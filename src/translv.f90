@@ -388,7 +388,7 @@ SUBROUTINE translv ( ndpwds )
   209 FORMAT( /, 2X, '*WARNING: Unconverged outer iteration!', /, 2X,  &
               'No. Outers=', I4, 4X, 'No. Inners=', I5, / )
   210 FORMAT( /, 1X, 30A, /, 2X, 'Total inners for all time steps, '   &
-              'outers = ', I6 )
+           // 'outers = ', I6 )
   211 FORMAT( /, 80A, / )
 !_______________________________________________________________________
 !_______________________________________________________________________
