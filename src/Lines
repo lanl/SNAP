@@ -7,7 +7,7 @@ geom.f90 line count is: 113
 sn.f90 line count is: 112
 data.f90 line count is: 63
 control.f90 line count is: 35
-input.f90 line count is: 432
+input.f90 line count is: 437
 setup.f90 line count is: 512
 dealloc.f90 line count is: 24
 translv.f90 line count is: 228
@@ -25,4 +25,4 @@ mms.f90 line count is: 265
 analyze.f90 line count is: 45
 thrd_comm.f90 line count is: 254
 mkba_sweep.f90 line count is: 259
-Total line count is: 4315
+Total line count is: 4320

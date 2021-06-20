@@ -160,9 +160,9 @@ MODULE input_module
     127 FORMAT( 5X, 'nmom= ', I3, /,                                   &
                 5X, 'nang= ', I4 )
 
-    128 FORMAT( 5X, 'ng= ', I4, /                                      &
-                5X, 'mat_opt= ', I2, /                                 &
-                5X, 'src_opt= ', I2, /                                 &
+    128 FORMAT( 5X, 'ng= ', I4, /,                                     &
+                5X, 'mat_opt= ', I2, /,                                &
+                5X, 'src_opt= ', I2, /,                                &
                 5X, 'scatp= ', I2 )
 
     129 FORMAT( 5X, 'epsi= ', ES11.4, /,                               &
@@ -173,7 +173,7 @@ MODULE input_module
                 5X, 'nsteps= ', I5, /,                                 &
                 5X, 'swp_typ= ', I2, /,                                &
                 5X, 'multiswp= ', I2, /,                               &
-                5X, 'angcpy= ', I2, /                                  &
+                5X, 'angcpy= ', I2, /,                                 &
                 5X, 'it_det= ', I2, /,                                 &
                 5X, 'soloutp= ', I2, /,                                &
                 5X, 'kplane= ', I4, /,                                 &
@@ -280,6 +280,12 @@ MODULE input_module
       nnested = 1
       error = '*WARNING: INPUT_CHECK: NNESTED must be positive; ' //   &
               'reset to 1'
+      CALL print_error ( ounit, error )
+    END IF
+
+    IF ( multiswp/=0 .AND. nproc==1 ) THEN
+      multiswp = 0
+      error = '*WARNING: INPUT_CHECK: MULTISWP reset to 0 for serial'
       CALL print_error ( ounit, error )
     END IF
 !_______________________________________________________________________
@@ -521,7 +527,7 @@ MODULE input_module
 
     IF ( fixup/=0 .AND. fixup/=1 ) THEN
       fixup = 0
-      error = '*WARNING: INPUT_CHECK: FIXUP must equal 0/1; '   //     &
+      error = '*WARNING: INPUT_CHECK: FIXUP must equal 0/1; ' //       &
               'reset to 0'
       CALL print_error ( ounit, error )
     END IF

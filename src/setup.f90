@@ -295,7 +295,7 @@ MODULE setup_module
     CALL glmax ( ierr, comm_snap )
     IF ( ierr /= 0 ) THEN
       flg = 2
-      error = '***ERROR: CONTROL_ALLOC: Allocation error of control ' // &
+      error = '***ERROR: CONTROL_ALLOC: Allocation error of control '//&
               'arrays'
       RETURN
     END IF
@@ -856,7 +856,7 @@ MODULE setup_module
     148 FORMAT( 2X, 'Pseudo Cross Sections Data' )
     149 FORMAT( 4X, 'ng = ', I3 )
     150 FORMAT( /, 4X, 'Material ', I1 )
-    151 FORMAT( 4X, 'Group         Total         Absorption      '     &
+    151 FORMAT( 4X, 'Group         Total         Absorption      ',    &
                'Scattering' )
     152 FORMAT( 5X, I3, 6X, ES13.6, 3X, ES13.6, 3X, ES13.6 )
 
@@ -879,9 +879,9 @@ MODULE setup_module
     182 FORMAT( 4X, 'npey = ', I5, /, 4X, 'npez = ', I5, /, 4X,        &
                 'nthreads = ', I4, / )
     183 FORMAT( 10X, 'Thread Support Level', /,                        &
-                10X, I2, ' - MPI_THREAD_SINGLE', /                     &
-                10X, I2, ' - MPI_THREAD_FUNNELED', /                   &
-                10X, I2, ' - MPI_THREAD_SERIALIZED', /                 &
+                10X, I2, ' - MPI_THREAD_SINGLE', /,                    &
+                10X, I2, ' - MPI_THREAD_FUNNELED', /,                  &
+                10X, I2, ' - MPI_THREAD_SERIALIZED', /,                &
                 10X, I2, ' - MPI_THREAD_MULTIPLE' )
     184 FORMAT( 4X, 'thread_level = ', I2, / )
     185 FORMAT( 4X, '.TRUE. nested threading', /, 6X, 'nnested = ',    &
@@ -941,7 +941,7 @@ MODULE setup_module
     CALL close_file ( fu, ierr, error )
 !_______________________________________________________________________
 
-    161 FORMAT( 'slgg(nmat,nmom,ng,ng) echo', /, 'Column-order loops:' &
+    161 FORMAT( 'slgg(nmat,nmom,ng,ng) echo', /, 'Column-order loops:',&
                 ' Mats (fastest ), Moments, Groups, Groups (slowest)' )
     162 FORMAT( 2X, ES15.8, 2X, ES15.8, 2X, ES15.8, 2X, ES15.8 )
 !_______________________________________________________________________
