@@ -1,0 +1,27 @@
+SNAP Version 1.11
+06/19/2021
+
+SNAP Version 1.11 includes minor revisions to the previous version of SNAP
+released to GitHub.
+
+Summary:
+SNAP 1.11 includes some changes for standard adherence and a fix for running
+SNAP when built with the MPI=no Make option.
+
+In several places in the code, a comma was missing between two strings that
+were separted onto two lines. Comma was added for proper compilation.
+
+When running the code built with MPI=no, the multiswp algorithm was hanging.
+Now the code checks for that option whenever nproc=1 (including the MPI=no
+build) and resets it to 0.
+
+Please direct questions to the SNAP developers for finer details of the code
+changes.
+
+
+Modified files:
+src/input.f90
+src/output.f90
+src/setup.f90
+src/translv.f90
+src/version.f90
