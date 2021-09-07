@@ -8,7 +8,10 @@ DEFS =
 PP =
 
 MPI = yes
+#MPI = cray
 OPENMP = yes
+
+MPIFLAGS = 
 
 FORTRAN = mpif90
 #FORTRAN = mpifort
@@ -18,14 +21,29 @@ FORTRAN = mpif90
 TARGET = gsnap
 #TARGET = isnap
 #TARGET = ksnap
+#TARGET = xsnap
 
 #HASWELL = yes
+
+ifeq ($(MPI),cray)
+  MPI = yes
+  MPIFLAGS = -I$(MPICH_DIR)/include -L$(MPICH_DIR)/lib -lmpich
+  ifeq ($(TARGET),gsnap)
+    FORTRAN = gfortran
+  else ifeq ($(TARGET),xsnap)
+    FORTRAN = ifx
+  else
+    FORTRAN = ifort
+  endif
+endif
 
 ifeq ($(MPI),yes)
   DEFS := $(DEFS) MPI
 else
   ifeq ($(TARGET),gsnap)
     FORTRAN = gfortran
+  else ifeq ($(TARGET),xsnap)
+    FORTRAN = ifx
   else
     FORTRAN = ifort
   endif
@@ -35,8 +53,9 @@ ifeq ($(OPENMP),yes)
   DEFS := $(DEFS) OPENMP
   ifeq ($(TARGET),gsnap)
     OMPFLAG = -fopenmp
+  else ifeq ($(TARGET),xsnap)
+    OMPFLAG = -fiopenmp
   else
-    # Assuming Intel 15, if 14, use -openmp
     OMPFLAG = -qopenmp
   endif
 else
@@ -71,6 +90,7 @@ ifeq ($(TARGET),isnap)
     FFLAGS = -O0 $(OMPFLAG) -g -check bounds -traceback -warn unused
     FFLAG2 =
   endif
+  FFLAGS := $(FFLAGS) $(MPIFLAGS)
 endif
 
 ifeq ($(TARGET),ksnap)
@@ -82,6 +102,20 @@ ifeq ($(TARGET),ksnap)
     FFLAGS = -O0 $(OMPFLAG) -g -check bounds -traceback -warn unused
     FFLAG2 =
   endif
+endif
+
+ifeq ($(TARGET),xsnap)
+  FFLAGS = -xcore-avx2 -Ofast -funroll-loops -nostandard-realloc-lhs $(OMPFLAG) -align array32byte
+#  FFLAGS = -O3 $(OMPFLAG) -ip -align array32byte -qno-opt-dynamic-align -fno-fnalias -fp-model fast -fp-speculation fast
+  FFLAGS := $(FFLAGS) -xcore-avx2
+  FFLAG2 =
+  PP = fpp
+  ifeq ($(OPT),no)
+    TARGET = xsnap_db
+    FFLAGS = -O0 $(OMPFLAG) -g -check bounds -traceback -warn unused
+    FFLAG2 =
+  endif
+  FFLAGS := $(FFLAGS) $(MPIFLAGS)
 endif
 
 .SUFFIXES:	.F90 .f90 .o
