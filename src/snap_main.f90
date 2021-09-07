@@ -78,7 +78,7 @@ PROGRAM snap_main
 !
 !-----------------------------------------------------------------------
 
-  USE global_module, ONLY: i_knd, r_knd, ifile, ofile, iunit, ounit
+  USE global_module, ONLY: i_knd, r_knd, ifile, ofile, iunit, ounit, one
 
   USE utils_module
 
@@ -218,7 +218,9 @@ PROGRAM snap_main
 
   IF ( iproc == root ) THEN
     WRITE( ounit, 501 ) tsnap
-    WRITE( ounit, 502 ) tgrind, ( star, i = 1, 80 )
+!    WRITE( ounit, 502 ) tgrind, ( star, i = 1, 80 )
+    WRITE( ounit, 502 ) tgrind
+    WRITE( ounit, 504 ) one/tgrind, ( star, i = 1, 80 )
     WRITE( ounit, 503 ) ndpwds, ( star, i = 1, 80 )
   END IF
 
@@ -237,7 +239,9 @@ PROGRAM snap_main
 !_______________________________________________________________________
 
   501 FORMAT( 2X, 'Total Execution time', T41, ES11.4, / )
-  502 FORMAT( 2X, 'Grind Time (nanoseconds)', 8X, ES11.4, /, /, 80A )
+  502 FORMAT( 2X, 'Grind Time (nanoseconds)', 8X, ES11.4, / )
+  504 FORMAT( 2X, 'Inverse Grind Time FOM (1/ns)', 8X, ES11.4, /, /,   &
+                80A )
   503 FORMAT( /, 'Allocated words (double precision) per rank',   &
                 T61, I15, /, /, 80A )
 !_______________________________________________________________________
