@@ -1,0 +1,41 @@
+SNAP Version 1.12
+09/07/2021
+
+SNAP Version 1.12 includes minor revisions to the previous version of SNAP
+released to GitHub.
+
+Summary:
+SNAP 1.12 replaces the use of omp_set_nested, a deprecated OpenMP feature,
+with omp_max_active_levels for nested threading capability. An additional
+Figure of Merit (FOM) edit has been provided at the end of the timing summary.
+The new FOM is Inverse Grind Time (1/ns), which corresponds to the more
+useful interpretation that an increase in its value is an improvement.
+
+The Makefile has been modified to start accounting for the introduction of
+the oneAPI compiler on LANL Cray PE systems. This is a work in progress. As
+with all Makefile compiler choices, please feel free to ask questions on how
+to modify for individual systems.
+
+A new testing input has been added to qasnap/benchmark for posterity. This
+input is reflective of a typical single node problem and is useful for
+profiling and scaling studies. One other minor testing diff was revealed with
+a new version of the Intel compiler (used to generate the original files) and
+updated. The qasnap/Readme has been updated.
+
+Please direct questions to the SNAP developers for finer details of the code
+changes.
+
+
+Modified files:
+src/Makefile
+src/plib.F90
+src/snap_main.f90
+src/version.f90
+qasnap/Readme
+qasnap/center_src/out10
+qasnap/center_src/old-iterations
+qasnap/sample/out
+
+Added files:
+qasnap/benchmark/inp
+qasnap/benchmark/out
