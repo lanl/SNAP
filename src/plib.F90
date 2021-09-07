@@ -1302,7 +1302,12 @@ MODULE plib_module
 !_______________________________________________________________________
 
     do_nested = nnested > 1
-    CALL OMP_SET_NESTED ( do_nested )
+!    CALL OMP_SET_NESTED ( do_nested )
+    IF ( do_nested ) THEN
+      CALL OMP_SET_MAX_ACTIVE_LEVELS ( 2 )
+    ELSE
+      CALL OMP_SET_MAX_ACTIVE_LEVELS ( 1 )
+    END IF
 !_______________________________________________________________________
 !
 !   Create an array of locks, one for each thread, that will be used
