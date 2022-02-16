@@ -6,6 +6,7 @@ FFLAGS =
 FFLAG2 =
 DEFS =
 PP =
+LIBS =
 
 MPI = yes
 #MPI = cray
@@ -19,6 +20,7 @@ FORTRAN = mpif90
 #FORTRAN = mpiifort
 
 TARGET = gsnap
+#TARGET = fsnap
 #TARGET = isnap
 #TARGET = ksnap
 #TARGET = xsnap
@@ -55,6 +57,8 @@ ifeq ($(OPENMP),yes)
     OMPFLAG = -fopenmp
   else ifeq ($(TARGET),xsnap)
     OMPFLAG = -fiopenmp
+  else ifeq ($(TARGET),fsnap)
+    OMPFLAG = -fopenmp
   else
     OMPFLAG = -qopenmp
   endif
@@ -63,6 +67,22 @@ else
 endif
 
 PPFLAGS = $(foreach def,$(DEFS),-D$(def))
+
+ifeq ($(TARGET),fsnap)
+  LLVM_FLANG_DIR="dir/with/llvm/flang"
+  LLVM_FLANG_BIN=${LLVM_FLANG_DIR}/bin
+  LLVM_FLANG_LIB=${LLVM_FLANG_DIR}/lib
+
+  # Currently, LLVM Flang requires the "pgmath" library for Math routines
+  PGM_DIR="dir/with/pgmath"
+  PGM_FLAGS=-L${PGM_DIR}/lib -Wl,-rpath -Wl,${PGM_DIR}/lib
+  LIBS= -lpgmath
+
+  FORTRAN=${LLVM_FLANG_BIN}/flang-new
+  FFLAGS = $(OMPFLAG)
+  FFLAG2 = -L${LLVM_FLANG_LIB}  -Wl,-rpath -Wl,${LLVM_FLANG_LIB} ${PGM_FLAGS}
+  PP = ${LLVM_FLANG_BIN}/flang-new -E
+endif
 
 ifeq ($(TARGET),gsnap)
 #  FFLAGS = -Ofast -funroll-loops -march=native $(OMPFLAG)
@@ -132,7 +152,7 @@ SRCS = global.f90 snap_main.f90 utils.f90 version.f90 plib.F90 geom.f90 \
        time.F90 mms.f90 analyze.f90 thrd_comm.f90 mkba_sweep.f90
 
 $(TARGET) :	$(OBJS)
-		$(FORTRAN) $(FFLAGS) $(FFLAG2) -o $@ $(OBJS)
+		$(FORTRAN) $(FFLAGS) $(FFLAG2) -o $@ $(OBJS) $(LIBS)
 
 version.o :	global.o
 geom.o :	global.o
