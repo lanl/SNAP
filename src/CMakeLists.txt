@@ -8,12 +8,6 @@
 #
 ################################################################################
 
-#cmake_minimum_required(VERSION 3.18)
-
-#project(snap_test)
-
-#enable_language(Fortran)
-
 ################################################################################
 #
 # Options and Variables
@@ -52,13 +46,6 @@ if(OPENMP)
 	message(STATUS "OpenMP_Fortran_LIBRARIES - ${OpenMP_Fortran_LIBRARIES}")
 	message(STATUS "OpenMP_HOME - ${OpenMP_HOME}")
 endif()
-
-#set(MPI "" CACHE STRING "Configure MPI")
-#set(FFLAGS "" CACHE STRING "Fortran flags")
-#set(FFLAG2 "" CACHE STRING "Fortran flags 2?")
-#set(DEFS "" CACHE STRING "Compiler definitions")
-#set(PPFLAGS "" CACHE STRING "Preprocessor flags?")
-#set(FORTRAN "" CACHE STRING "Fortran compiler")
 
 # Compiler Preprocessor Definitions
 # These should be passed in at the command line as a semi-colon-separated list
@@ -176,39 +163,9 @@ set(SNAP_COMPILER_OPTIONS_IFX
 	"Compiler options when ifx compiler detected"
 )
 
-# Compile Options for Classic Flang
-# TODO: What would the actual flags be for Classic Flang?
-set(SNAP_COMPILER_OPTIONS_CLASSIC_FLANG_OPT
-	"-O3" 
-	CACHE 
-	STRING 
-	"Classic Flang compiler options when OPT=ON"
-)
-set(SNAP_COMPILER_OPTIONS_CLASSIC_FLANG_NOT_OPT
-	"-O0"
-	"-g "
-	"-check bounds"
-	"-traceback"
-	"-warn unused"
-	CACHE 
-	STRING 
-	"Classic Flang compiler options when OPT=OFF"
-)
-set(SNAP_COMPILER_OPTIONS_CLASSIC_FLANG_OPT
-	$<$<BOOL:${OPENMP}>:-fopenmp>
-	$<IF:$<BOOL:${OPT}>,${SNAP_COMPILER_OPTIONS_CLASSIC_FLANG_OPT},${SNAP_COMPILER_OPTIONS_CLASSIC_FLANG_OPT}>
-	CACHE
-	STRING
-	"Compiler options when Classic Flang compiler detected"
-)
-
-# TODO: Next steps are to figure out the preprocessing stuff, and then try to
-# compile! If it works, we'll then create options for classic flang, then we'll
-# go about trying to add the special sauce for LLVM Flang
-
 ################################################################################
 #
-# New Sections
+# Setting up build target
 #
 ################################################################################
 
@@ -272,7 +229,6 @@ target_compile_options(snap
   	$<$<AND:$<Fortran_COMPILER_ID:Intel>,$<NOT:$<BOOL:${KNL}>>>:${SNAP_COMPILER_OPTIONS_IFORT}>
   	$<$<AND:$<Fortran_COMPILER_ID:Intel>,$<BOOL:${KNL}>>:${SNAP_COMPILER_OPTIONS_IFORT_KNL}>
 		$<$<Fortran_COMPILER_ID:IntelLLVM>:${SNAP_COMPILER_OPTIONS_IFX}>
-		$<$<Fortran_COMPILER_ID:Flang>:${SNAP_COMPILER_OPTIONS_CLASSIC_FLANG}>
 )
 target_compile_definitions(snap
 	PRIVATE
@@ -295,12 +251,10 @@ target_link_libraries(snap
 # create line counting functionality
 add_custom_target(
 	count
-	#ALL
 	DEPENDS
 		Lines
 )
-#set(ENV{__SNAP_SRC_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
-#message(STATUS "env var __SNAP_SRC_DIR - $ENV{__SNAP_SRC_DIR}")
+
 add_custom_command(
 	OUTPUT
 		src_list.txt
@@ -348,11 +302,3 @@ add_custom_command(
 		cmake -E remove ${CMAKE_CURRENT_BINARY_DIR}/src_list.txt
 	VERBATIM
 )
-# TODO: create a custom target to do this line counting operation from Makefile
-## Count lines of code
-#count:
-#	rm -f Lines
-#	for file in $(SRCS); do ./LineCount $$file Lines; done
-#	awk -f ./LineReport < Lines >> Lines
-#	cat Lines
-
