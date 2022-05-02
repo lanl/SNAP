@@ -226,8 +226,8 @@ target_sources(snap
 target_compile_options(snap 
 	PRIVATE
 		$<$<Fortran_COMPILER_ID:GNU>:${SNAP_COMPILER_OPTIONS_GNU}>
-  	$<$<AND:$<Fortran_COMPILER_ID:Intel>,$<NOT:$<BOOL:${KNL}>>>:${SNAP_COMPILER_OPTIONS_IFORT}>
-  	$<$<AND:$<Fortran_COMPILER_ID:Intel>,$<BOOL:${KNL}>>:${SNAP_COMPILER_OPTIONS_IFORT_KNL}>
+		$<$<AND:$<Fortran_COMPILER_ID:Intel>,$<NOT:$<BOOL:${KNL}>>>:${SNAP_COMPILER_OPTIONS_IFORT}>
+		$<$<AND:$<Fortran_COMPILER_ID:Intel>,$<BOOL:${KNL}>>:${SNAP_COMPILER_OPTIONS_IFORT_KNL}>
 		$<$<Fortran_COMPILER_ID:IntelLLVM>:${SNAP_COMPILER_OPTIONS_IFX}>
 )
 target_compile_definitions(snap
@@ -288,8 +288,7 @@ add_custom_command(
 	COMMAND
 		cmake -E cat ${CMAKE_CURRENT_BINARY_DIR}/src_list.txt
 	COMMAND
-	#bash -c "while read file; do for word in $file; do ./LineCount $file Lines; done"
-	bash -c "while read line; do \
+		bash -c "while read line; do \
 			for file in $line; do \
 				${CMAKE_CURRENT_BINARY_DIR}/LineCount ${CMAKE_CURRENT_SOURCE_DIR}/$file	${CMAKE_CURRENT_BINARY_DIR}/Lines; \
 			done; \

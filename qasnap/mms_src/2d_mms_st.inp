@@ -1,7 +1,7 @@
 ! Input from namelist
 &invar
   nthreads=4
-  npey=4
+  npey=1
   ndimen=2
   nx=20
   lx=0.2
